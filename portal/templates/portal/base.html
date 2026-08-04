@@ -10,6 +10,19 @@
   {% block head %}{% endblock %}
 </head>
 <body>
+<div class="official-strip">
+  <div class="container official-strip-inner">
+    <div class="official-left">
+      <span>📍 Gbéléban, Kabadougou — Côte d’Ivoire</span>
+      <span>🕘 Lun - Ven : 08h00 - 17h00</span>
+    </div>
+    <div class="official-right">
+      <span>☎ {{ site_settings.phone|default:'+225 XX XX XX XX XX' }}</span>
+      <strong>Unité • Paix • Développement</strong>
+    </div>
+  </div>
+</div>
+
 <header class="header">
   <div class="container navwrap">
     <a class="brand" href="/">
@@ -24,13 +37,14 @@
       </span>
     </a>
 
-    <nav>
-      <a href="/">Accueil</a>
-      {% for p in menu_pages %}<a href="{{ p.get_absolute_url }}">{{ p.title }}</a>{% endfor %}
+    <nav class="main-nav">
+      <a class="active" href="/">Accueil</a>
+      <a href="/pages/la-commune/">La commune</a>
       <a href="/gbeleban-en-carte/">Gbéléban en carte</a>
       <a href="/projets/">Projets</a>
       <a href="/urbanisme/">Urbanisme</a>
       <a href="/actualites/">Actualités</a>
+      <a href="/pages/contact/">Contact</a>
       {% if user.is_authenticated %}<a href="/dashboard/">Dashboard</a>{% endif %}
     </nav>
 
@@ -38,7 +52,7 @@
       {% if site_settings and site_settings.national_arms_src %}
         <img src="{{ site_settings.national_arms_src }}" alt="Armoiries de Côte d'Ivoire">
       {% else %}
-        <span>🇨🇮</span>
+        <span class="flag-fallback"><i></i><i></i><i></i></span>
       {% endif %}
     </div>
   </div>
