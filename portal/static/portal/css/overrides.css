@@ -1,0 +1,6 @@
+.brand-copy b{white-space:nowrap;font-size:clamp(18px,1.8vw,27px)}
+.navwrap{grid-template-columns:minmax(330px,380px) minmax(0,1fr) 100px}
+.mobile-menu a.active{color:#ef7d00;background:#fff7ef;border-left:4px solid #ef7d00}
+@media(max-width:1350px){.navwrap{grid-template-columns:minmax(300px,340px) minmax(0,1fr) 86px}.brand-copy b{font-size:20px}}
+@media(max-width:1100px){.brand-copy b{white-space:nowrap}}
+@media(max-width:420px){.brand-copy b{font-size:15px}}
