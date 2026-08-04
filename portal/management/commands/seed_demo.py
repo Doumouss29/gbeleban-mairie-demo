@@ -1,5 +1,6 @@
 from datetime import date
 from decimal import Decimal
+from django.contrib.auth.models import Group
 from django.core.management.base import BaseCommand
 from portal.models import SiteSettings, Page, QuickLink, News, Project, Taxpayer, Tax, Payment, MapLayer, MapFeature, Parcel
 
@@ -8,6 +9,10 @@ class Command(BaseCommand):
     help = "Ajoute les contenus de démonstration sans écraser les contenus existants."
 
     def handle(self, *args, **options):
+        # Groupes fonctionnels utilisés pour piloter les accès applicatifs.
+        Group.objects.get_or_create(name="Accès Urbanisme")
+        Group.objects.get_or_create(name="Accès Dashboard")
+
         SiteSettings.objects.get_or_create(id=1, defaults={
             "municipality_name": "Commune de Gbéléban",
             "hero_title": "Bienvenue à Gbéléban",
@@ -25,7 +30,6 @@ class Command(BaseCommand):
 
         for title, desc, icon, url, order in [
             ("Mes démarches", "État civil, demandes et informations utiles", "📄", "/pages/demarches/", 10),
-            ("Plan cadastral", "Accéder à l’espace urbanisme", "🗺️", "/urbanisme/", 20),
             ("Nos projets", "Réalisés, en cours et à venir", "🏗️", "/projets/", 30),
             ("Gbéléban en carte", "Équipements et points d’intérêt", "📍", "/gbeleban-en-carte/", 40),
         ]:
