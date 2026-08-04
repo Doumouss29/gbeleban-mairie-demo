@@ -1,4 +1,52 @@
+import base64
 from django import forms
+from .models import SiteSettings
+
+
+class SiteSettingsAdminForm(forms.ModelForm):
+    municipality_logo_upload = forms.ImageField(label="Importer le logo / armoirie de la commune", required=False)
+    national_arms_upload = forms.ImageField(label="Importer les armoiries de Côte d'Ivoire", required=False)
+    hero_image_upload = forms.ImageField(label="Importer une image de couverture", required=False)
+    mayor_image_upload = forms.ImageField(label="Importer la photo du maire", required=False)
+
+    class Meta:
+        model = SiteSettings
+        fields = "__all__"
+        widgets = {
+            "municipality_logo_src": forms.TextInput(attrs={"placeholder": "URL ou laisser vide si vous importez un fichier"}),
+            "national_arms_src": forms.TextInput(attrs={"placeholder": "URL ou laisser vide si vous importez un fichier"}),
+            "hero_image_url": forms.TextInput(attrs={"placeholder": "URL ou laisser vide si vous importez un fichier"}),
+            "mayor_image_url": forms.TextInput(attrs={"placeholder": "URL ou laisser vide si vous importez un fichier"}),
+        }
+
+    @staticmethod
+    def _as_data_uri(uploaded):
+        if not uploaded:
+            return None
+        if uploaded.size > 3 * 1024 * 1024:
+            raise forms.ValidationError("L'image doit faire moins de 3 Mo pour cette version de démonstration.")
+        mime = uploaded.content_type or "image/jpeg"
+        if not mime.startswith("image/"):
+            raise forms.ValidationError("Le fichier sélectionné n'est pas une image.")
+        encoded = base64.b64encode(uploaded.read()).decode("ascii")
+        return f"data:{mime};base64,{encoded}"
+
+    def save(self, commit=True):
+        obj = super().save(commit=False)
+        mapping = {
+            "municipality_logo_upload": "municipality_logo_src",
+            "national_arms_upload": "national_arms_src",
+            "hero_image_upload": "hero_image_url",
+            "mayor_image_upload": "mayor_image_url",
+        }
+        for upload_field, model_field in mapping.items():
+            uploaded = self.cleaned_data.get(upload_field)
+            if uploaded:
+                setattr(obj, model_field, self._as_data_uri(uploaded))
+        if commit:
+            obj.save()
+        return obj
+
 
 class GeoJSONImportForm(forms.Form):
     layer_name = forms.CharField(label="Nom de la couche", max_length=160)
@@ -6,6 +54,7 @@ class GeoJSONImportForm(forms.Form):
     color = forms.CharField(label="Couleur", initial="#ef7d00", max_length=20)
     is_public = forms.BooleanField(label="Visible sur la carte publique", initial=True, required=False)
     geojson_file = forms.FileField(label="Fichier GeoJSON")
+
 
 class CadastreImportForm(forms.Form):
     geojson_file = forms.FileField(label="Plan cadastral GeoJSON")
