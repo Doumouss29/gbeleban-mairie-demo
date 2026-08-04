@@ -29,14 +29,36 @@
   </div>
 </section>
 
-<section class="quick-section">
-  <div class="container quickgrid">
-    {% for q in quick_links %}
-    <a class="quickcard" href="{{ q.url }}">
-      <span class="quick-icon">{{ q.icon }}</span>
-      <div><b>{{ q.title }}</b><small>{{ q.description }}</small></div>
-    </a>
-    {% endfor %}
+<section class="quick-section home-services-news">
+  <div class="container home-top-grid">
+    <div class="quickgrid home-quickgrid">
+      {% for q in quick_links %}
+      <a class="quickcard home-quickcard" href="{{ q.url }}">
+        <span class="quick-icon">{{ q.icon }}</span>
+        <div><b>{{ q.title }}</b><small>{{ q.description }}</small></div>
+      </a>
+      {% endfor %}
+    </div>
+
+    <aside class="home-news-panel">
+      <div class="home-news-head">
+        <div>
+          <span class="eyebrow green">ACTUALITÉS</span>
+          <h2>À la une</h2>
+        </div>
+        <a href="/actualites/">Tout voir →</a>
+      </div>
+      {% for n in news_items|slice:":1" %}
+      <a class="home-news-card" href="/actualites/">
+        <small>{{ n.published_at }}</small>
+        <h3>{{ n.title }}</h3>
+        <p>{{ n.excerpt|truncatechars:150 }}</p>
+        <span>Lire l’actualité →</span>
+      </a>
+      {% empty %}
+      <div class="home-news-empty">Aucune actualité publiée pour le moment.</div>
+      {% endfor %}
+    </aside>
   </div>
 </section>
 
@@ -72,20 +94,6 @@
         <p>{{ p.description }}</p>
         {% if p.status == 'ongoing' %}<div class="progress"><i style="width:{{ p.progress }}%"></i></div><small>{{ p.progress }} % d'avancement</small>{% endif %}
       </article>
-      {% endfor %}
-    </div>
-  </div>
-</section>
-
-<section class="section pale">
-  <div class="container">
-    <div class="section-title">
-      <div><span class="eyebrow green">INFORMATIONS</span><h2>Actualités de Gbéléban</h2></div>
-      <a href="/actualites/">Toutes les actualités →</a>
-    </div>
-    <div class="cards">
-      {% for n in news_items %}
-      <article class="card"><small>{{ n.published_at }}</small><h3>{{ n.title }}</h3><p>{{ n.excerpt }}</p></article>
       {% endfor %}
     </div>
   </div>
