@@ -15,10 +15,10 @@
 
     <aside class="mayor-hero-card">
       <div class="mayor-hero-photo">
-        {% if site_settings and site_settings.mayor_image_url %}
-          <img src="{{ site_settings.mayor_image_url }}" alt="Madame le Maire">
+        {% if site_settings and site_settings.mayor_hero_image_url %}
+          <img src="{{ site_settings.mayor_hero_image_url }}" alt="Madame le Maire">
         {% else %}
-          <div class="photo-placeholder">Photo du maire<br><small>À importer depuis l’administration</small></div>
+          <div class="photo-placeholder">Photo du maire - accueil<br><small>À renseigner depuis l’administration</small></div>
         {% endif %}
       </div>
       <div class="mayor-hero-text">
@@ -43,10 +43,10 @@
 <section class="section pale">
   <div class="container mayor">
     <div class="mayor-photo">
-      {% if site_settings and site_settings.mayor_image_url %}
-        <img src="{{ site_settings.mayor_image_url }}" alt="Madame le Maire">
+      {% if site_settings and site_settings.mayor_section_image_url %}
+        <img src="{{ site_settings.mayor_section_image_url }}" alt="Madame le Maire">
       {% else %}
-        <div class="photo-placeholder">Photo du maire</div>
+        <div class="photo-placeholder">Photo du maire - section</div>
       {% endif %}
     </div>
     <div>
