@@ -12,12 +12,11 @@ class SiteSettings(models.Model):
     email = models.EmailField("E-mail", blank=True)
     address = models.CharField("Adresse", max_length=255, blank=True)
 
-    # En démo, les images peuvent être soit des URL, soit des data-URI générées
-    # depuis l'admin. Cela évite de dépendre d'un stockage média persistant Render.
     municipality_logo_src = models.TextField("Logo / armoirie de la commune", blank=True)
     national_arms_src = models.TextField("Armoiries de Côte d'Ivoire", blank=True)
     hero_image_url = models.TextField("Image de couverture (URL ou image importée)", blank=True)
-    mayor_image_url = models.TextField("Photo du maire (URL ou image importée)", blank=True)
+    mayor_hero_image_url = models.TextField("Photo du maire - bloc d'accueil", blank=True)
+    mayor_section_image_url = models.TextField("Photo du maire - section Le mot du Maire", blank=True)
 
     updated_at = models.DateTimeField(auto_now=True)
 
