@@ -10,6 +10,13 @@ from .forms import GeoJSONImportForm, CadastreImportForm
 from .models import SiteSettings, Page, QuickLink, News, Project, MapLayer, Parcel, Taxpayer, Tax, Payment
 from .services import import_layer, import_cadastre
 
+URBANISM_GROUP = "Accès Urbanisme"
+DASHBOARD_GROUP = "Accès Dashboard"
+
+
+def _has_group_access(user, group_name):
+    return user.is_authenticated and (user.is_superuser or user.groups.filter(name=group_name).exists())
+
 
 def home(request):
     return render(request, "portal/home.html", {
@@ -18,19 +25,24 @@ def home(request):
         "news_items": News.objects.filter(is_published=True)[:3],
     })
 
+
 def projects(request):
     return render(request, "portal/projects.html", {"projects": Project.objects.filter(is_published=True)})
 
+
 def news(request):
     return render(request, "portal/news.html", {"news_items": News.objects.filter(is_published=True)})
+
 
 def page_detail(request, slug):
     page = get_object_or_404(Page, slug=slug, is_published=True)
     return render(request, "portal/page_detail.html", {"page": page})
 
+
 def map_public(request):
     layers = MapLayer.objects.filter(is_public=True)
     return render(request, "portal/map.html", {"layers": layers})
+
 
 def layer_geojson(request, layer_id):
     layer = get_object_or_404(MapLayer, pk=layer_id)
@@ -39,12 +51,29 @@ def layer_geojson(request, layer_id):
     features = [{"type":"Feature", "geometry":f.geometry, "properties":f.properties} for f in layer.features.all()]
     return JsonResponse({"type":"FeatureCollection", "features":features})
 
+
+@login_required
+def my_space(request):
+    can_urbanism = _has_group_access(request.user, URBANISM_GROUP)
+    can_dashboard = _has_group_access(request.user, DASHBOARD_GROUP)
+    return render(request, "portal/my_space.html", {
+        "can_urbanism": can_urbanism,
+        "can_dashboard": can_dashboard,
+    })
+
+
 @login_required
 def urbanism(request):
+    if not _has_group_access(request.user, URBANISM_GROUP):
+        messages.error(request, "Votre compte n'a pas accès à l'espace Urbanisme.")
+        return redirect("my_space")
     return render(request, "portal/urbanism.html")
+
 
 @login_required
 def parcels_geojson(request):
+    if not _has_group_access(request.user, URBANISM_GROUP):
+        return JsonResponse({"detail": "Accès refusé"}, status=403)
     features = []
     for p in Parcel.objects.all():
         features.append({"type":"Feature", "geometry":p.geometry, "properties":{
@@ -54,16 +83,24 @@ def parcels_geojson(request):
         }})
     return JsonResponse({"type":"FeatureCollection", "features":features})
 
+
 @login_required
 def parcel_search(request):
+    if not _has_group_access(request.user, URBANISM_GROUP):
+        return JsonResponse({"detail": "Accès refusé"}, status=403)
     qs = Parcel.objects.all()
     for field, param in (("section","section"),("ilot","ilot"),("lot","lot"),("parcel_number","parcelle")):
         value = request.GET.get(param, "").strip()
-        if value: qs = qs.filter(**{f"{field}__iexact": value})
+        if value:
+            qs = qs.filter(**{f"{field}__iexact": value})
     return JsonResponse({"results":[{"id":p.id,"reference":p.reference,"section":p.section,"ilot":p.ilot,"lot":p.lot,"parcelle":p.parcel_number} for p in qs[:50]]})
+
 
 @login_required
 def dashboard(request):
+    if not _has_group_access(request.user, DASHBOARD_GROUP):
+        messages.error(request, "Votre compte n'a pas accès au Dashboard.")
+        return redirect("my_space")
     due = Tax.objects.aggregate(total=Sum("amount_due"))["total"] or Decimal("0")
     paid = Payment.objects.aggregate(total=Sum("amount"))["total"] or Decimal("0")
     rate = float(paid / due * 100) if due else 0
@@ -75,9 +112,11 @@ def dashboard(request):
         "status_counts_json":json.dumps(status_counts),
     })
 
+
 @staff_member_required
 def management_home(request):
     return render(request, "portal/management.html", {"layer_count":MapLayer.objects.count(),"parcel_count":Parcel.objects.count(),"project_count":Project.objects.count()})
+
 
 @staff_member_required
 def import_geojson_view(request):
@@ -87,8 +126,10 @@ def import_geojson_view(request):
             layer = import_layer(form.cleaned_data["geojson_file"], form.cleaned_data["layer_name"], form.cleaned_data["category"], form.cleaned_data["color"], form.cleaned_data["is_public"])
             messages.success(request, f"Couche « {layer.name} » importée : {layer.features.count()} objet(s).")
             return redirect("management_home")
-        except Exception as exc: messages.error(request, str(exc))
+        except Exception as exc:
+            messages.error(request, str(exc))
     return render(request, "portal/import_geojson.html", {"form":form})
+
 
 @staff_member_required
 def import_cadastre_view(request):
@@ -98,5 +139,6 @@ def import_cadastre_view(request):
             created, updated = import_cadastre(form.cleaned_data["geojson_file"], form.cleaned_data)
             messages.success(request, f"Cadastre importé : {created} créée(s), {updated} mise(s) à jour.")
             return redirect("management_home")
-        except Exception as exc: messages.error(request, str(exc))
+        except Exception as exc:
+            messages.error(request, str(exc))
     return render(request, "portal/import_cadastre.html", {"form":form})
