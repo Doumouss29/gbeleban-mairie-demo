@@ -64,7 +64,7 @@ STORAGES = {
     "staticfiles": {"BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage"},
 }
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
-LOGIN_URL = "/admin/login/"
+LOGIN_URL = "/connexion/"
 LOGIN_REDIRECT_URL = "/dashboard/"
 LOGOUT_REDIRECT_URL = "/"
 
@@ -77,8 +77,6 @@ if _render_host:
     _csrf.append(f"https://{_render_host}")
 CSRF_TRUSTED_ORIGINS = _csrf
 
-# Journalisation explicite des erreurs HTTP/Django dans les Runtime Logs Render.
-# DEBUG reste à False : on n'expose jamais la traceback au navigateur.
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
