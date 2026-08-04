@@ -7,7 +7,8 @@ class SiteSettingsAdminForm(forms.ModelForm):
     municipality_logo_upload = forms.ImageField(label="Importer le logo / armoirie de la commune", required=False)
     national_arms_upload = forms.ImageField(label="Importer les armoiries de Côte d'Ivoire", required=False)
     hero_image_upload = forms.ImageField(label="Importer une image de couverture", required=False)
-    mayor_image_upload = forms.ImageField(label="Importer la photo du maire", required=False)
+    mayor_hero_image_upload = forms.ImageField(label="Importer la photo du maire - bloc d'accueil", required=False)
+    mayor_section_image_upload = forms.ImageField(label="Importer la photo du maire - section Le mot du Maire", required=False)
 
     class Meta:
         model = SiteSettings
@@ -16,7 +17,8 @@ class SiteSettingsAdminForm(forms.ModelForm):
             "municipality_logo_src": forms.TextInput(attrs={"placeholder": "URL ou laisser vide si vous importez un fichier"}),
             "national_arms_src": forms.TextInput(attrs={"placeholder": "URL ou laisser vide si vous importez un fichier"}),
             "hero_image_url": forms.TextInput(attrs={"placeholder": "URL ou laisser vide si vous importez un fichier"}),
-            "mayor_image_url": forms.TextInput(attrs={"placeholder": "URL ou laisser vide si vous importez un fichier"}),
+            "mayor_hero_image_url": forms.TextInput(attrs={"placeholder": "URL ou laisser vide si vous importez un fichier"}),
+            "mayor_section_image_url": forms.TextInput(attrs={"placeholder": "URL ou laisser vide si vous importez un fichier"}),
         }
 
     @staticmethod
@@ -37,7 +39,8 @@ class SiteSettingsAdminForm(forms.ModelForm):
             "municipality_logo_upload": "municipality_logo_src",
             "national_arms_upload": "national_arms_src",
             "hero_image_upload": "hero_image_url",
-            "mayor_image_upload": "mayor_image_url",
+            "mayor_hero_image_upload": "mayor_hero_image_url",
+            "mayor_section_image_upload": "mayor_section_image_url",
         }
         for upload_field, model_field in mapping.items():
             uploaded = self.cleaned_data.get(upload_field)
