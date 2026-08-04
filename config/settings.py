@@ -76,3 +76,30 @@ _csrf = [x.strip() for x in os.environ.get("CSRF_TRUSTED_ORIGINS", "").split(","
 if _render_host:
     _csrf.append(f"https://{_render_host}")
 CSRF_TRUSTED_ORIGINS = _csrf
+
+# Journalisation explicite des erreurs HTTP/Django dans les Runtime Logs Render.
+# DEBUG reste à False : on n'expose jamais la traceback au navigateur.
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "handlers": {
+        "console": {"class": "logging.StreamHandler"},
+    },
+    "loggers": {
+        "django": {
+            "handlers": ["console"],
+            "level": "INFO",
+            "propagate": False,
+        },
+        "django.request": {
+            "handlers": ["console"],
+            "level": "ERROR",
+            "propagate": False,
+        },
+        "django.db.backends": {
+            "handlers": ["console"],
+            "level": "WARNING",
+            "propagate": False,
+        },
+    },
+}
