@@ -6,6 +6,7 @@ urlpatterns = [
     path("", views.home, name="home"),
     path("connexion/", LoginView.as_view(template_name="portal/login.html"), name="login"),
     path("deconnexion/", LogoutView.as_view(), name="logout"),
+    path("mon-espace/", views.my_space, name="my_space"),
     path("projets/", views.projects, name="projects"),
     path("actualites/", views.news, name="news"),
     path("pages/<slug:slug>/", views.page_detail, name="page_detail"),
