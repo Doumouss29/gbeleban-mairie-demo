@@ -1,0 +1,1 @@
+.brand-copy b{white-space:nowrap}.mobile-menu a.active{color:var(--orange);background:#fff7ef;border-left:4px solid var(--orange)}@media(max-width:1350px){.brand-copy b{font-size:20px}}@media(max-width:700px){.brand-copy b{white-space:nowrap;font-size:17px}}
