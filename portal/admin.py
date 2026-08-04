@@ -16,7 +16,12 @@ class SiteSettingsAdmin(admin.ModelAdmin):
             "fields": ("hero_title", "hero_text", "hero_image_url")
         }),
         ("Le mot du maire", {
-            "fields": ("mayor_name", "mayor_message", "mayor_image_url")
+            "fields": (
+                "mayor_name",
+                "mayor_message",
+                "mayor_hero_image_url",
+                "mayor_section_image_url",
+            )
         }),
         ("Coordonnées", {
             "fields": ("phone", "email", "address")
