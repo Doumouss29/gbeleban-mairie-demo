@@ -1,0 +1,53 @@
+{% extends 'portal/base.html' %}
+{% block title %}Mon espace Gbéléban{% endblock %}
+{% block content %}
+<section class="pagehead secure">
+  <div class="container">
+    <span class="eyebrow">ESPACE SÉCURISÉ</span>
+    <h1>Mon espace Gbéléban</h1>
+    <p>Bienvenue {{ user.get_full_name|default:user.username }}. Les services affichés ci-dessous dépendent des droits attribués à votre compte.</p>
+  </div>
+</section>
+
+<section class="section pale">
+  <div class="container">
+    <div class="access-grid">
+      {% if can_urbanism %}
+      <a class="access-card" href="/urbanisme/">
+        <span class="access-icon">🗺️</span>
+        <div>
+          <h2>Urbanisme</h2>
+          <p>Accéder au plan cadastral, aux parcelles et aux outils de consultation urbanistique.</p>
+        </div>
+        <span class="access-arrow">→</span>
+      </a>
+      {% endif %}
+
+      {% if can_dashboard %}
+      <a class="access-card" href="/dashboard/">
+        <span class="access-icon">📊</span>
+        <div>
+          <h2>Dashboard</h2>
+          <p>Consulter les indicateurs de pilotage, les taxes, paiements et données de synthèse.</p>
+        </div>
+        <span class="access-arrow">→</span>
+      </a>
+      {% endif %}
+    </div>
+
+    {% if not can_urbanism and not can_dashboard %}
+      <div class="no-access-card">
+        <h2>Aucun service attribué</h2>
+        <p>Votre compte est actif, mais aucun accès Urbanisme ou Dashboard ne lui a encore été attribué. Contactez l’administrateur du portail.</p>
+      </div>
+    {% endif %}
+
+    <div class="space-footer-actions">
+      <form method="post" action="/deconnexion/">
+        {% csrf_token %}
+        <button type="submit" class="btn light">Se déconnecter</button>
+      </form>
+    </div>
+  </div>
+</section>
+{% endblock %}
