@@ -1,0 +1,62 @@
+{% load static %}
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Connexion · Mairie de Gbéléban</title>
+  <link rel="stylesheet" href="{% static 'portal/css/site.css' %}">
+  <link rel="stylesheet" href="{% static 'portal/css/overrides.css' %}">
+  <style>
+    body.login-page{min-height:100vh;background:linear-gradient(125deg,#0b4a34 0%,#0b6d42 48%,#e98a16 130%);display:grid;place-items:center;padding:24px}
+    .login-shell{width:min(980px,100%);display:grid;grid-template-columns:1.05fr .95fr;background:#fff;border-radius:28px;overflow:hidden;box-shadow:0 28px 80px rgba(0,0,0,.24)}
+    .login-brand{padding:52px;background:linear-gradient(145deg,#0c3f30,#086b40);color:#fff;position:relative;overflow:hidden}
+    .login-brand:after{content:"";position:absolute;width:260px;height:260px;border-radius:50%;background:rgba(255,255,255,.07);right:-90px;bottom:-90px}
+    .login-brand-head{display:flex;align-items:center;gap:18px;position:relative;z-index:1}
+    .login-brand-logo{width:86px;height:96px;object-fit:contain;background:#fff;border-radius:16px;padding:6px}
+    .login-brand h1{font-size:32px;margin:0 0 8px;line-height:1.1}
+    .login-brand p{margin:0;color:#d9e9e0}
+    .login-copy{position:relative;z-index:1;margin-top:54px}.login-copy span{color:#ffc184;font-weight:800;letter-spacing:.14em;font-size:12px}.login-copy h2{font-size:42px;line-height:1.05;margin:15px 0 18px}.login-copy p{line-height:1.7;color:#d9e9e0;max-width:440px}
+    .login-form-wrap{padding:52px;display:flex;align-items:center}.login-form-box{width:100%;max-width:390px;margin:auto}.login-form-box h2{font-size:30px;color:#0c3f30;margin:0 0 8px}.login-form-box .subtitle{color:#6d7772;margin:0 0 30px;line-height:1.55}.login-form-box label{display:block;font-weight:800;color:#24342d;margin:18px 0 8px;font-size:14px}.login-form-box input{width:100%;height:50px;border:1px solid #d8dedb;border-radius:10px;padding:0 14px;font-size:16px;outline:none}.login-form-box input:focus{border-color:#ef7d00;box-shadow:0 0 0 3px rgba(239,125,0,.12)}.login-submit{width:100%;height:52px;border:0;border-radius:999px;background:#ef7d00;color:#fff;font-size:16px;font-weight:900;cursor:pointer;margin-top:24px}.login-submit:hover{background:#db7000}.login-error{background:#fff0ef;color:#a3261d;border-left:4px solid #c54135;padding:12px 14px;border-radius:8px;margin-bottom:18px;font-size:14px}.login-back{display:inline-block;margin-top:22px;color:#0b6d42;font-weight:800;text-decoration:none}.login-note{margin-top:22px;padding-top:20px;border-top:1px solid #ecefec;color:#7a827e;font-size:13px;line-height:1.55}
+    @media(max-width:760px){body.login-page{padding:0;background:#fff}.login-shell{grid-template-columns:1fr;border-radius:0;min-height:100vh;box-shadow:none}.login-brand{padding:28px}.login-copy{margin-top:28px}.login-copy h2{font-size:34px}.login-form-wrap{padding:32px 24px 42px}.login-brand-logo{width:68px;height:76px}.login-brand h1{font-size:25px}}
+  </style>
+</head>
+<body class="login-page">
+  <main class="login-shell">
+    <section class="login-brand">
+      <div class="login-brand-head">
+        {% if site_settings and site_settings.municipality_logo_src %}
+          <img class="login-brand-logo" src="{{ site_settings.municipality_logo_src }}" alt="Armoiries de la Commune de Gbéléban">
+        {% else %}
+          <div class="login-brand-logo" style="display:grid;place-items:center;color:#0c3f30;font-weight:900;font-size:22px">GB</div>
+        {% endif %}
+        <div><h1>Mairie de Gbéléban</h1><p>Commune du Kabadougou</p></div>
+      </div>
+      <div class="login-copy">
+        <span>ESPACE SÉCURISÉ</span>
+        <h2>Accès Urbanisme & Dashboard</h2>
+        <p>Connectez-vous avec le compte créé par l’administrateur de la mairie pour accéder aux espaces réservés.</p>
+      </div>
+    </section>
+
+    <section class="login-form-wrap">
+      <div class="login-form-box">
+        <h2>Connexion</h2>
+        <p class="subtitle">Saisissez votre identifiant et votre mot de passe.</p>
+        {% if form.errors %}<div class="login-error">Identifiant ou mot de passe incorrect. Vérifiez vos informations puis réessayez.</div>{% endif %}
+        <form method="post">
+          {% csrf_token %}
+          {% if next %}<input type="hidden" name="next" value="{{ next }}">{% endif %}
+          <label for="id_username">Nom d’utilisateur</label>
+          <input type="text" name="username" autofocus autocapitalize="none" autocomplete="username" maxlength="150" required id="id_username">
+          <label for="id_password">Mot de passe</label>
+          <input type="password" name="password" autocomplete="current-password" required id="id_password">
+          <button class="login-submit" type="submit">Se connecter</button>
+        </form>
+        <a class="login-back" href="/">← Retour au site public</a>
+        <div class="login-note">Les accès Urbanisme et Dashboard sont réservés aux utilisateurs autorisés.</div>
+      </div>
+    </section>
+  </main>
+</body>
+</html>
