@@ -1,4 +1,5 @@
 from django.contrib import admin
+from .forms import SiteSettingsAdminForm
 from .models import SiteSettings, Page, QuickLink, News, Project, MapLayer, MapFeature, Parcel, Taxpayer, Tax, Payment
 
 admin.site.site_header = "Administration - Commune de Gbéléban"
@@ -8,19 +9,24 @@ admin.site.index_title = "Pilotage du portail municipal"
 
 @admin.register(SiteSettings)
 class SiteSettingsAdmin(admin.ModelAdmin):
+    form = SiteSettingsAdminForm
     fieldsets = (
         ("Identité de la commune", {
-            "fields": ("municipality_name", "municipality_logo_src", "national_arms_src")
+            "fields": (
+                "municipality_name",
+                "municipality_logo_upload", "municipality_logo_src",
+                "national_arms_upload", "national_arms_src",
+            )
         }),
         ("Bannière d'accueil", {
-            "fields": ("hero_title", "hero_text", "hero_image_url")
+            "fields": ("hero_title", "hero_text", "hero_image_upload", "hero_image_url")
         }),
         ("Le mot du maire", {
             "fields": (
                 "mayor_name",
                 "mayor_message",
-                "mayor_hero_image_url",
-                "mayor_section_image_url",
+                "mayor_hero_image_upload", "mayor_hero_image_url",
+                "mayor_section_image_upload", "mayor_section_image_url",
             )
         }),
         ("Coordonnées", {
