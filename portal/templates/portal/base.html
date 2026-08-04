@@ -1,0 +1,8 @@
+{% load static %}
+<!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>{% block title %}Mairie de Gbéléban{% endblock %}</title><link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"><link rel="stylesheet" href="{% static 'portal/css/site.css' %}">{% block head %}{% endblock %}</head><body>
+<div class="topbar"><div class="container"><span>🇨🇮 République de Côte d’Ivoire</span><span>Commune de Gbéléban</span></div></div>
+<header class="header"><div class="container navwrap"><a class="brand" href="/"><span class="crest">GB</span><span><b>Mairie de Gbéléban</b><small>Portail municipal</small></span></a><nav><a href="/">Accueil</a>{% for p in menu_pages %}<a href="{{ p.get_absolute_url }}">{{ p.title }}</a>{% endfor %}<a href="/gbeleban-en-carte/">Gbéléban en carte</a><a href="/projets/">Projets</a><a href="/urbanisme/">Urbanisme</a><a href="/actualites/">Actualités</a>{% if user.is_authenticated %}<a href="/dashboard/">Dashboard</a>{% endif %}</nav></div></header>
+{% if messages %}<div class="container messages">{% for message in messages %}<div class="message">{{ message }}</div>{% endfor %}</div>{% endif %}
+{% block content %}{% endblock %}
+<footer><div class="container footergrid"><div><b>Mairie de Gbéléban</b><p>Portail numérique municipal — version de démonstration.</p></div><div><a href="/admin/">Administration</a><br><a href="/gestion/">Gestion</a></div><div><b>Couleurs de la Côte d’Ivoire</b><div class="tricolor"><i></i><i></i><i></i></div></div></div></footer>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>{% block scripts %}{% endblock %}</body></html>
