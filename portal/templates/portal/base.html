@@ -38,14 +38,14 @@
     </a>
 
     <nav class="main-nav" id="mainNav">
-      <a class="active" href="/">Accueil</a>
-      <a href="/pages/la-commune/">La commune</a>
-      <a href="/gbeleban-en-carte/">Gbéléban en carte</a>
-      <a href="/projets/">Projets</a>
-      <a href="/urbanisme/">Urbanisme</a>
-      <a href="/actualites/">Actualités</a>
-      <a href="/pages/contact/">Contact</a>
-      {% if user.is_authenticated %}<a href="/dashboard/">Dashboard</a>{% endif %}
+      <a href="/" class="{% if request.path == '/' %}active{% endif %}">Accueil</a>
+      <a href="/pages/la-commune/" class="{% if request.path == '/pages/la-commune/' %}active{% endif %}">La commune</a>
+      <a href="/gbeleban-en-carte/" class="{% if '/gbeleban-en-carte/' in request.path %}active{% endif %}">Gbéléban en carte</a>
+      <a href="/projets/" class="{% if '/projets/' in request.path %}active{% endif %}">Projets</a>
+      <a href="/urbanisme/" class="{% if '/urbanisme/' in request.path %}active{% endif %}">Urbanisme</a>
+      <a href="/actualites/" class="{% if '/actualites/' in request.path %}active{% endif %}">Actualités</a>
+      <a href="/pages/contact/" class="{% if request.path == '/pages/contact/' %}active{% endif %}">Contact</a>
+      {% if user.is_authenticated %}<a href="/dashboard/" class="{% if '/dashboard/' in request.path %}active{% endif %}">Dashboard</a>{% endif %}
     </nav>
 
     <div class="header-actions">
@@ -63,14 +63,14 @@
   </div>
 
   <nav class="mobile-menu" id="mobileMenu" aria-hidden="true">
-    <a href="/">Accueil</a>
-    <a href="/pages/la-commune/">La commune</a>
-    <a href="/gbeleban-en-carte/">Gbéléban en carte</a>
-    <a href="/projets/">Projets</a>
-    <a href="/urbanisme/">Urbanisme</a>
-    <a href="/actualites/">Actualités</a>
-    <a href="/pages/contact/">Contact</a>
-    {% if user.is_authenticated %}<a href="/dashboard/">Dashboard</a>{% endif %}
+    <a href="/" class="{% if request.path == '/' %}active{% endif %}">Accueil</a>
+    <a href="/pages/la-commune/" class="{% if request.path == '/pages/la-commune/' %}active{% endif %}">La commune</a>
+    <a href="/gbeleban-en-carte/" class="{% if '/gbeleban-en-carte/' in request.path %}active{% endif %}">Gbéléban en carte</a>
+    <a href="/projets/" class="{% if '/projets/' in request.path %}active{% endif %}">Projets</a>
+    <a href="/urbanisme/" class="{% if '/urbanisme/' in request.path %}active{% endif %}">Urbanisme</a>
+    <a href="/actualites/" class="{% if '/actualites/' in request.path %}active{% endif %}">Actualités</a>
+    <a href="/pages/contact/" class="{% if request.path == '/pages/contact/' %}active{% endif %}">Contact</a>
+    {% if user.is_authenticated %}<a href="/dashboard/" class="{% if '/dashboard/' in request.path %}active{% endif %}">Dashboard</a>{% endif %}
   </nav>
 </header>
 
