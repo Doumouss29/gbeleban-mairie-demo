@@ -83,8 +83,8 @@ def parcels_geojson(request):
     qs = Parcel.objects.all()
     layer_name = request.GET.get("layer", "").strip()
     if layer_name:
-        qs = qs.filter(source_layer=layer_name)
-    layer_meta = UrbanismLayer.objects.filter(name=layer_name).first() if layer_name else None
+        qs = qs.filter(source_layer__iexact=layer_name)
+    layer_meta = UrbanismLayer.objects.filter(name__iexact=layer_name).first() if layer_name else None
     display_fields = layer_meta.display_fields if layer_meta else []
     features = []
     for p in qs:
@@ -111,7 +111,7 @@ def parcel_search(request):
     qs = Parcel.objects.all()
     layer_name = request.GET.get("layer", "").strip()
     if layer_name:
-        qs = qs.filter(source_layer=layer_name)
+        qs = qs.filter(source_layer__iexact=layer_name)
     for field, param in (("section","section"),("ilot","ilot"),("lot","lot"),("parcel_number","parcelle")):
         value = request.GET.get(param, "").strip()
         if value:
