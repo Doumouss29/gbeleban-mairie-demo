@@ -10,69 +10,21 @@
 .home-news-head{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;margin-bottom:14px}
 .home-news-head h2{margin:6px 0 0;font-size:28px;color:#173d2f}
 .home-news-head>a{font-weight:800;color:#056b3c;white-space:nowrap;margin-top:4px}
-.home-news-card{display:block}
-.home-news-card small{color:#7b837f}
-.home-news-card h3{font-size:21px;line-height:1.25;margin:12px 0 10px;color:#173d2f}
-.home-news-card p{margin:0 0 12px;line-height:1.55;color:#64706a}
-.home-news-card span{font-weight:800;color:#ef7d00}
-.home-news-empty{color:#6d7771;line-height:1.6}
+.home-news-card{display:block}.home-news-card small{color:#7b837f}.home-news-card h3{font-size:21px;line-height:1.25;margin:12px 0 10px;color:#173d2f}.home-news-card p{margin:0 0 12px;line-height:1.55;color:#64706a}.home-news-card span{font-weight:800;color:#ef7d00}.home-news-empty{color:#6d7771;line-height:1.6}
 
-/* Urbanisme : règles explicites pour éviter les limites de :has() */
-body.urbanism-page{height:100vh;overflow:hidden}
-body.urbanism-page footer{display:none}
-body.urbanism-page .urban-pagehead{padding:10px 0 9px !important;min-height:0 !important}
-body.urbanism-page .urban-pagehead .container{width:min(1600px,96%)}
-body.urbanism-page .urban-pagehead .eyebrow{font-size:10px;letter-spacing:1.9px;line-height:1}
-body.urbanism-page .urban-pagehead h1{font-size:26px;margin:3px 0 4px;line-height:1.02}
-body.urbanism-page .urban-pagehead p{margin:0;font-size:13px;line-height:1.15}
-body.urbanism-page .urban-grid{grid-template-columns:230px minmax(0,1fr);height:calc(100vh - 142px - 62px);min-height:0}
-body.urbanism-page .urban-grid aside{padding:16px 12px;overflow-y:auto;min-height:0}
-body.urbanism-page #cadastre-map{height:100%;min-width:0}
+/* Galeries projets / actualités */
+.media-card{padding:0;overflow:hidden}.media-card-body{padding:24px}.media-slider{position:relative;overflow:hidden;background:#eef1ed;height:230px}.media-track{height:100%;display:flex;transition:transform .35s ease}.media-slide{min-width:100%;height:100%}.media-slide img{width:100%;height:100%;object-fit:cover;display:block}.media-prev,.media-next{position:absolute;top:50%;transform:translateY(-50%);width:38px;height:38px;border-radius:50%;border:0;background:#ffffffdd;color:#173d2f;font-size:28px;line-height:1;cursor:pointer;box-shadow:0 3px 12px #0003;z-index:2}.media-prev{left:12px}.media-next{right:12px}.media-dots{position:absolute;left:0;right:0;bottom:10px;display:flex;justify-content:center;gap:7px;z-index:2}.media-dot{width:9px;height:9px;padding:0;border:0;border-radius:50%;background:#ffffff99;box-shadow:0 0 0 1px #0002;cursor:pointer}.media-dot.active{background:#ef7d00;transform:scale(1.15)}
 
-/* WebSIG public : même logique compacte qu'Urbanisme */
-body.websig-page{height:100vh;overflow:hidden}
-body.websig-page footer{display:none}
-body.websig-page .websig-pagehead{padding:10px 0 9px !important;min-height:0 !important}
-body.websig-page .websig-pagehead .container{width:min(1600px,96%)}
-body.websig-page .websig-pagehead .eyebrow{font-size:10px;letter-spacing:1.9px;line-height:1}
-body.websig-page .websig-pagehead h1{font-size:26px;margin:3px 0 4px;line-height:1.02}
-body.websig-page .websig-pagehead p{margin:0;font-size:13px;line-height:1.15}
-body.websig-page .websig-grid{grid-template-columns:230px minmax(0,1fr);height:calc(100vh - 142px - 62px);min-height:0}
-body.websig-page .websig-grid aside{padding:16px 12px;overflow-y:auto;min-height:0}
-body.websig-page #map{height:100%;min-width:0}
+/* Urbanisme */
+body.urbanism-page{height:100vh;overflow:hidden}body.urbanism-page footer{display:none}body.urbanism-page .urban-pagehead{padding:10px 0 9px !important;min-height:0 !important}body.urbanism-page .urban-pagehead .container{width:min(1600px,96%)}body.urbanism-page .urban-pagehead .eyebrow{font-size:10px;letter-spacing:1.9px;line-height:1}body.urbanism-page .urban-pagehead h1{font-size:26px;margin:3px 0 4px;line-height:1.02}body.urbanism-page .urban-pagehead p{margin:0;font-size:13px;line-height:1.15}body.urbanism-page .urban-grid{grid-template-columns:230px minmax(0,1fr);height:calc(100vh - 142px - 62px);min-height:0}body.urbanism-page .urban-grid aside{padding:16px 12px;overflow-y:auto;min-height:0}body.urbanism-page #cadastre-map{height:100%;min-width:0}
+
+/* WebSIG public */
+body.websig-page{height:100vh;overflow:hidden}body.websig-page footer{display:none}body.websig-page .websig-pagehead{padding:10px 0 9px !important;min-height:0 !important}body.websig-page .websig-pagehead .container{width:min(1600px,96%)}body.websig-page .websig-pagehead .eyebrow{font-size:10px;letter-spacing:1.9px;line-height:1}body.websig-page .websig-pagehead h1{font-size:26px;margin:3px 0 4px;line-height:1.02}body.websig-page .websig-pagehead p{margin:0;font-size:13px;line-height:1.15}body.websig-page .websig-grid{grid-template-columns:230px minmax(0,1fr);height:calc(100vh - 142px - 62px);min-height:0}body.websig-page .websig-grid aside{padding:16px 12px;overflow-y:auto;min-height:0}body.websig-page #map{height:100%;min-width:0}
 
 /* Page La commune */
-.commune-head{padding:54px 0;background:linear-gradient(120deg,#173f30,#0d7545)}
-.commune-head h1{margin:10px 0 12px;font-size:48px}
-.commune-head p{max-width:820px;font-size:18px;line-height:1.55;margin:0}
-.commune-section{background:#fbfaf6}
-.commune-layout{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(320px,.75fr);gap:52px;align-items:start}
-.commune-content{max-width:900px}
-.commune-content h2{font-size:30px;color:#0b5f39;margin:38px 0 12px}
-.commune-content p{font-size:17px;line-height:1.8;color:#49564f}
-.commune-lead{font-size:21px!important;color:#253a31!important;line-height:1.75!important;margin-top:0}
-.commune-highlight-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin:28px 0 8px}
-.commune-highlight{background:#fff;border:1px solid #ebe9df;border-bottom:4px solid #ef7d00;border-radius:14px;padding:18px;box-shadow:0 8px 24px #00000008}
-.commune-highlight strong{display:block;color:#056b3c;font-size:14px;text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px}
-.commune-highlight span{font-weight:800;color:#24342d}
-.culture-callout{display:flex;gap:16px;background:#fff6e9;border-left:5px solid #ef7d00;border-radius:14px;padding:20px 22px;margin:28px 0}
-.culture-callout .culture-icon{width:38px;height:38px;border-radius:50%;display:grid;place-items:center;background:#ef7d00;color:#fff;font-size:20px;flex:0 0 auto}
-.culture-callout strong{font-size:20px;color:#8b4700}
-.culture-callout p{margin:6px 0 0}
-.commune-side{position:sticky;top:165px;display:grid;gap:18px}
-.commune-map-card,.commune-side-note{background:#fff;border:1px solid #e6e4db;border-radius:20px;padding:20px;box-shadow:0 14px 36px #00000010}
-.commune-map-title h3{font-size:25px;margin:7px 0 16px;color:#0a5f39}
-#commune-mini-map{height:320px;border-radius:15px;overflow:hidden;border:1px solid #e6e4db}
-.commune-map-card>p{font-size:15px;line-height:1.6;color:#5d6963}
-.commune-map-legend{display:flex;align-items:center;gap:9px;font-weight:800;color:#24342d}
-.commune-map-legend i{width:12px;height:12px;border-radius:50%;background:#d7261e;border:2px solid white;box-shadow:0 0 0 1px #aaa}
-.commune-side-note{background:#153d2f;color:#fff}
-.commune-side-note strong{font-size:20px;color:#ffc184}
-.commune-side-note p{line-height:1.65;margin-bottom:0;color:#f4f7f5}
-.gbeleban-label{background:#fff;border:0;box-shadow:0 2px 10px #0002;color:#173d2f;font-weight:800;padding:5px 8px}
-.gbeleban-label:before{display:none}
+.commune-head{padding:54px 0;background:linear-gradient(120deg,#173f30,#0d7545)}.commune-head h1{margin:10px 0 12px;font-size:48px}.commune-head p{max-width:820px;font-size:18px;line-height:1.55;margin:0}.commune-section{background:#fbfaf6}.commune-layout{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(320px,.75fr);gap:52px;align-items:start}.commune-content{max-width:900px}.commune-content h2{font-size:30px;color:#0b5f39;margin:38px 0 12px}.commune-content p{font-size:17px;line-height:1.8;color:#49564f}.commune-lead{font-size:21px!important;color:#253a31!important;line-height:1.75!important;margin-top:0}.commune-highlight-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin:28px 0 8px}.commune-highlight{background:#fff;border:1px solid #ebe9df;border-bottom:4px solid #ef7d00;border-radius:14px;padding:18px;box-shadow:0 8px 24px #00000008}.commune-highlight strong{display:block;color:#056b3c;font-size:14px;text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px}.commune-highlight span{font-weight:800;color:#24342d}.culture-callout{display:flex;gap:16px;background:#fff6e9;border-left:5px solid #ef7d00;border-radius:14px;padding:20px 22px;margin:28px 0}.culture-callout .culture-icon{width:38px;height:38px;border-radius:50%;display:grid;place-items:center;background:#ef7d00;color:#fff;font-size:20px;flex:0 0 auto}.culture-callout strong{font-size:20px;color:#8b4700}.culture-callout p{margin:6px 0 0}.commune-side{position:sticky;top:165px;display:grid;gap:18px}.commune-map-card,.commune-side-note{background:#fff;border:1px solid #e6e4db;border-radius:20px;padding:20px;box-shadow:0 14px 36px #00000010}.commune-map-title h3{font-size:25px;margin:7px 0 16px;color:#0a5f39}#commune-mini-map{height:320px;border-radius:15px;overflow:hidden;border:1px solid #e6e4db}.commune-map-card>p{font-size:15px;line-height:1.6;color:#5d6963}.commune-map-legend{display:flex;align-items:center;gap:9px;font-weight:800;color:#24342d}.commune-map-legend i{width:12px;height:12px;border-radius:50%;background:#d7261e;border:2px solid white;box-shadow:0 0 0 1px #aaa}.commune-side-note{background:#153d2f;color:#fff}.commune-side-note strong{font-size:20px;color:#ffc184}.commune-side-note p{line-height:1.65;margin-bottom:0;color:#f4f7f5}.gbeleban-label{background:#fff;border:0;box-shadow:0 2px 10px #0002;color:#173d2f;font-weight:800;padding:5px 8px}.gbeleban-label:before{display:none}
 
 @media(max-width:1350px){.navwrap{grid-template-columns:minmax(300px,340px) minmax(0,1fr) 86px}.brand-copy b{font-size:20px}.home-top-grid{grid-template-columns:minmax(0,2.3fr) minmax(280px,.9fr)}}
 @media(max-width:1100px){.brand-copy b{white-space:nowrap}.home-top-grid{grid-template-columns:1fr}.home-quickgrid{grid-template-columns:repeat(3,minmax(0,1fr))}.home-news-panel{min-height:auto}body.urbanism-page,body.websig-page{height:auto;overflow:auto}body.urbanism-page .urban-grid,body.websig-page .websig-grid{grid-template-columns:1fr;height:auto}body.urbanism-page #cadastre-map,body.websig-page #map{height:650px}.commune-layout{grid-template-columns:1fr}.commune-side{position:static}.commune-highlight-grid{grid-template-columns:1fr 1fr}}
-@media(max-width:700px){.home-quickgrid{grid-template-columns:1fr}.commune-head{padding:38px 0}.commune-head h1{font-size:38px}.commune-highlight-grid{grid-template-columns:1fr}#commune-mini-map{height:280px}}
+@media(max-width:700px){.home-quickgrid{grid-template-columns:1fr}.media-slider{height:210px}.commune-head{padding:38px 0}.commune-head h1{font-size:38px}.commune-highlight-grid{grid-template-columns:1fr}#commune-mini-map{height:280px}}
 @media(max-width:420px){.brand-copy b{font-size:15px}}
