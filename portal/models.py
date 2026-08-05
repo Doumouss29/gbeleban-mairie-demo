@@ -58,11 +58,21 @@ class News(models.Model):
     title = models.CharField("Titre", max_length=200)
     excerpt = models.TextField("Résumé", blank=True)
     body = models.TextField("Contenu", blank=True)
-    image_url = models.URLField("Image (URL)", blank=True)
+    image_url = models.URLField("Image historique (URL)", blank=True)
+    image_1_src = models.TextField("Image 1", blank=True)
+    image_2_src = models.TextField("Image 2", blank=True)
+    image_3_src = models.TextField("Image 3", blank=True)
     published_at = models.DateField("Date de publication")
     is_published = models.BooleanField("Publiée", default=True)
     class Meta: ordering = ["-published_at"]
     def __str__(self): return self.title
+    @property
+    def gallery_images(self):
+        images = [self.image_1_src, self.image_2_src, self.image_3_src]
+        images = [img for img in images if img]
+        if not images and self.image_url:
+            images = [self.image_url]
+        return images
 
 
 class Project(models.Model):
@@ -73,11 +83,21 @@ class Project(models.Model):
     status = models.CharField("Statut", max_length=20, choices=STATUS_CHOICES, default="planned")
     progress = models.PositiveSmallIntegerField("Avancement (%)", default=0)
     budget = models.DecimalField("Budget FCFA", max_digits=18, decimal_places=0, null=True, blank=True)
-    image_url = models.URLField("Image (URL)", blank=True)
+    image_url = models.URLField("Image historique (URL)", blank=True)
+    image_1_src = models.TextField("Image 1", blank=True)
+    image_2_src = models.TextField("Image 2", blank=True)
+    image_3_src = models.TextField("Image 3", blank=True)
     latitude = models.DecimalField(max_digits=10, decimal_places=7, null=True, blank=True)
     longitude = models.DecimalField(max_digits=10, decimal_places=7, null=True, blank=True)
     is_published = models.BooleanField("Publié", default=True)
     def __str__(self): return self.title
+    @property
+    def gallery_images(self):
+        images = [self.image_1_src, self.image_2_src, self.image_3_src]
+        images = [img for img in images if img]
+        if not images and self.image_url:
+            images = [self.image_url]
+        return images
 
 
 class MapLayer(models.Model):
