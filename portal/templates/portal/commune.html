@@ -1,0 +1,95 @@
+{% extends 'portal/base.html' %}
+{% load static %}
+{% block title %}La commune de Gbéléban{% endblock %}
+{% block content %}
+<section class="pagehead commune-head">
+  <div class="container">
+    <span class="eyebrow">DÉCOUVRIR GBÉLÉBAN</span>
+    <h1>La commune de Gbéléban</h1>
+    <p>Un territoire du Kabadougou, au cœur du District du Denguélé, entre identité locale, proximité et développement.</p>
+  </div>
+</section>
+
+<section class="section commune-section">
+  <div class="container commune-layout">
+    <article class="commune-content">
+      <p class="commune-lead">Située dans l’extrême nord-ouest de la Côte d’Ivoire, Gbéléban appartient à la région du Kabadougou, dans le District du Denguélé. La commune s’inscrit dans un territoire marqué par les échanges, l’agriculture, la vie communautaire et une forte identité culturelle.</p>
+
+      <h2>Une commune tournée vers l’avenir</h2>
+      <p>Gbéléban affirme progressivement son ambition de moderniser les services de proximité, d’améliorer le cadre de vie et de mieux organiser son développement urbain. La municipalité accompagne cette dynamique à travers des projets d’équipements, d’aménagement du territoire, de gestion foncière et de transformation numérique.</p>
+
+      <h2>Un territoire de proximité et de vie</h2>
+      <p>La commune constitue un espace de vie, de solidarité et d’échanges. Elle joue un rôle essentiel dans l’accès aux services municipaux, l’accompagnement des habitants, la coordination des initiatives locales et la mise en œuvre des actions de développement.</p>
+
+      <div class="commune-highlight-grid">
+        <div class="commune-highlight"><strong>Territoire</strong><span>Région du Kabadougou</span></div>
+        <div class="commune-highlight"><strong>District</strong><span>Denguélé</span></div>
+        <div class="commune-highlight"><strong>Position</strong><span>Nord-ouest de la Côte d’Ivoire</span></div>
+      </div>
+
+      <h2>Une économie locale ancrée dans le territoire</h2>
+      <p>L’économie locale repose notamment sur les activités agricoles, le petit commerce et les services de proximité. Ces activités participent au dynamisme quotidien de la commune et constituent un socle important pour les initiatives de développement local.</p>
+
+      <h2>Une identité culturelle vivante</h2>
+      <p>Gbéléban est attachée à ses traditions, à la transmission des savoir-faire et aux valeurs de solidarité, de respect et de cohésion sociale. La culture locale s’exprime à travers la vie communautaire, les langues et coutumes du territoire, les rencontres traditionnelles et le rôle des autorités coutumières.</p>
+
+      <div class="culture-callout">
+        <span class="culture-icon">✦</span>
+        <div>
+          <strong>Culture locale</strong>
+          <p>La commune puise sa richesse dans une identité largement marquée par la culture malinké du nord-ouest ivoirien, où la transmission orale, la solidarité familiale, les cérémonies et le respect des anciens occupent une place importante.</p>
+        </div>
+      </div>
+
+      <h2>Une municipalité engagée</h2>
+      <p>La mairie de Gbéléban souhaite construire une commune mieux organisée, plus attractive et plus proche de ses citoyens. Le portail municipal s’inscrit dans cette ambition en donnant accès à l’information, aux projets, à la cartographie du territoire et aux futurs services numériques.</p>
+    </article>
+
+    <aside class="commune-side">
+      <div class="commune-map-card">
+        <div class="commune-map-title">
+          <span class="eyebrow green">LOCALISATION</span>
+          <h3>Gbéléban en situation</h3>
+        </div>
+        <div id="commune-mini-map"></div>
+        <p>Gbéléban se situe dans la région du Kabadougou, au sein du District du Denguélé.</p>
+        <div class="commune-map-legend"><i></i><span>Gbéléban</span></div>
+      </div>
+
+      <div class="commune-side-note">
+        <strong>Un territoire à valoriser</strong>
+        <p>Le positionnement géographique de Gbéléban, son potentiel agricole et son identité culturelle constituent des leviers importants pour le développement communal.</p>
+      </div>
+    </aside>
+  </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+(function(){
+  const map=L.map('commune-mini-map',{zoomControl:false,scrollWheelZoom:false,attributionControl:false}).setView([9.58,-7.72],8);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:18}).addTo(map);
+  const gbeleban=[9.584607,-8.131833];
+  const marker=L.circleMarker(gbeleban,{radius:7,color:'#ffffff',weight:3,fillColor:'#d7261e',fillOpacity:1}).addTo(map);
+  marker.bindTooltip('Gbéléban',{permanent:true,direction:'right',offset:[8,0],className:'gbeleban-label'});
+
+  fetch('https://www.geoboundaries.org/data/geoBoundaries-2_0_0/CIV/ADM1/geoBoundaries-2_0_0-CIV-ADM1.geojson')
+    .then(r=>r.json())
+    .then(data=>{
+      const features=(data.features||[]).filter(f=>{
+        const p=f.properties||{};
+        const values=Object.values(p).map(v=>String(v||'').toLowerCase());
+        return values.some(v=>v.includes('kabadougou'));
+      });
+      if(features.length){
+        const boundary=L.geoJSON({type:'FeatureCollection',features:features},{style:{color:'#056b3c',weight:3,fillColor:'#ef7d00',fillOpacity:.10}}).addTo(map);
+        map.fitBounds(boundary.getBounds(),{padding:[18,18]});
+      } else {
+        map.setView(gbeleban,8);
+      }
+    })
+    .catch(()=>map.setView(gbeleban,8));
+})();
+</script>
+{% endblock %}
