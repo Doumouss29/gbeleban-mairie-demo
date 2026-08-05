@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .forms import SiteSettingsAdminForm
+from .forms import SiteSettingsAdminForm, NewsAdminForm, ProjectAdminForm
 from .models import SiteSettings, Page, QuickLink, News, Project, MapLayer, MapFeature, Parcel, Taxpayer, Tax, Payment
 
 admin.site.site_header = "Administration - Commune de Gbéléban"
@@ -11,29 +11,11 @@ admin.site.index_title = "Pilotage du portail municipal"
 class SiteSettingsAdmin(admin.ModelAdmin):
     form = SiteSettingsAdminForm
     fieldsets = (
-        ("Identité de la commune", {
-            "fields": (
-                "municipality_name",
-                "municipality_logo_upload", "municipality_logo_src",
-                "national_arms_upload", "national_arms_src",
-            )
-        }),
-        ("Bannière d'accueil", {
-            "fields": ("hero_title", "hero_text", "hero_image_upload", "hero_image_url")
-        }),
-        ("Le mot du maire", {
-            "fields": (
-                "mayor_name",
-                "mayor_message",
-                "mayor_hero_image_upload", "mayor_hero_image_url",
-                "mayor_section_image_upload", "mayor_section_image_url",
-            )
-        }),
-        ("Coordonnées", {
-            "fields": ("phone", "email", "address")
-        }),
+        ("Identité de la commune", {"fields": ("municipality_name", "municipality_logo_upload", "municipality_logo_src", "national_arms_upload", "national_arms_src")}),
+        ("Bannière d'accueil", {"fields": ("hero_title", "hero_text", "hero_image_upload", "hero_image_url")}),
+        ("Le mot du maire", {"fields": ("mayor_name", "mayor_message", "mayor_hero_image_upload", "mayor_hero_image_url", "mayor_section_image_upload", "mayor_section_image_url")}),
+        ("Coordonnées", {"fields": ("phone", "email", "address")}),
     )
-
     def has_add_permission(self, request):
         return not SiteSettings.objects.exists()
 
@@ -53,15 +35,35 @@ class QuickLinkAdmin(admin.ModelAdmin):
 
 @admin.register(News)
 class NewsAdmin(admin.ModelAdmin):
+    form = NewsAdminForm
     list_display = ("title", "published_at", "is_published")
     list_filter = ("is_published", "published_at")
+    fieldsets = (
+        ("Actualité", {"fields": ("title", "excerpt", "body", "published_at", "is_published")}),
+        ("Galerie - 1 à 3 images", {"fields": (
+            "image_1_upload", "image_1_src",
+            "image_2_upload", "image_2_src",
+            "image_3_upload", "image_3_src",
+            "image_url",
+        )}),
+    )
 
 
 @admin.register(Project)
 class ProjectAdmin(admin.ModelAdmin):
+    form = ProjectAdminForm
     list_display = ("title", "category", "status", "progress", "budget", "is_published")
     list_editable = ("status", "progress", "is_published")
     list_filter = ("status", "category")
+    fieldsets = (
+        ("Projet", {"fields": ("title", "category", "description", "status", "progress", "budget", "latitude", "longitude", "is_published")}),
+        ("Galerie - 1 à 3 images", {"fields": (
+            "image_1_upload", "image_1_src",
+            "image_2_upload", "image_2_src",
+            "image_3_upload", "image_3_src",
+            "image_url",
+        )}),
+    )
 
 
 @admin.register(MapLayer)
