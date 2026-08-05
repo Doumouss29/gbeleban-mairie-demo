@@ -2,6 +2,21 @@
 .navwrap{grid-template-columns:minmax(330px,380px) minmax(0,1fr) 100px}
 .mobile-menu a.active{color:#ef7d00;background:#fff7ef;border-left:4px solid #ef7d00}
 
+/* Accueil : accès rapides + actualité sur la même ligne */
+.home-top-grid{display:grid;grid-template-columns:minmax(0,3fr) minmax(300px,1fr);gap:28px;align-items:stretch}
+.home-quickgrid{grid-template-columns:repeat(3,minmax(0,1fr));gap:22px}
+.home-quickcard{min-height:205px;padding:30px 28px}
+.home-news-panel{background:#fff;border-radius:26px;padding:28px 26px;border-bottom:6px solid #056b3c;box-shadow:0 10px 34px #00000010;min-height:205px}
+.home-news-head{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;margin-bottom:14px}
+.home-news-head h2{margin:6px 0 0;font-size:28px;color:#173d2f}
+.home-news-head>a{font-weight:800;color:#056b3c;white-space:nowrap;margin-top:4px}
+.home-news-card{display:block}
+.home-news-card small{color:#7b837f}
+.home-news-card h3{font-size:21px;line-height:1.25;margin:12px 0 10px;color:#173d2f}
+.home-news-card p{margin:0 0 12px;line-height:1.55;color:#64706a}
+.home-news-card span{font-weight:800;color:#ef7d00}
+.home-news-empty{color:#6d7771;line-height:1.6}
+
 /* Urbanisme : règles explicites pour éviter les limites de :has() */
 body.urbanism-page{height:100vh;overflow:hidden}
 body.urbanism-page footer{display:none}
@@ -45,7 +60,7 @@ body.urbanism-page #cadastre-map{height:100%;min-width:0}
 .gbeleban-label{background:#fff;border:0;box-shadow:0 2px 10px #0002;color:#173d2f;font-weight:800;padding:5px 8px}
 .gbeleban-label:before{display:none}
 
-@media(max-width:1350px){.navwrap{grid-template-columns:minmax(300px,340px) minmax(0,1fr) 86px}.brand-copy b{font-size:20px}}
-@media(max-width:1100px){.brand-copy b{white-space:nowrap}body.urbanism-page{height:auto;overflow:auto}body.urbanism-page .urban-grid{grid-template-columns:1fr;height:auto}body.urbanism-page #cadastre-map{height:650px}.commune-layout{grid-template-columns:1fr}.commune-side{position:static}.commune-highlight-grid{grid-template-columns:1fr 1fr}}
-@media(max-width:700px){.commune-head{padding:38px 0}.commune-head h1{font-size:38px}.commune-highlight-grid{grid-template-columns:1fr}#commune-mini-map{height:280px}}
+@media(max-width:1350px){.navwrap{grid-template-columns:minmax(300px,340px) minmax(0,1fr) 86px}.brand-copy b{font-size:20px}.home-top-grid{grid-template-columns:minmax(0,2.3fr) minmax(280px,.9fr)}}
+@media(max-width:1100px){.brand-copy b{white-space:nowrap}.home-top-grid{grid-template-columns:1fr}.home-quickgrid{grid-template-columns:repeat(3,minmax(0,1fr))}.home-news-panel{min-height:auto}body.urbanism-page{height:auto;overflow:auto}body.urbanism-page .urban-grid{grid-template-columns:1fr;height:auto}body.urbanism-page #cadastre-map{height:650px}.commune-layout{grid-template-columns:1fr}.commune-side{position:static}.commune-highlight-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:700px){.home-quickgrid{grid-template-columns:1fr}.commune-head{padding:38px 0}.commune-head h1{font-size:38px}.commune-highlight-grid{grid-template-columns:1fr}#commune-mini-map{height:280px}}
 @media(max-width:420px){.brand-copy b{font-size:15px}}
