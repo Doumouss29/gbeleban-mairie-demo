@@ -49,7 +49,7 @@ def layer_geojson(request, layer_id):
     if not layer.is_public and not request.user.is_authenticated:
         raise Http404
     features = [{"type":"Feature", "geometry":f.geometry, "properties":f.properties} for f in layer.features.all()]
-    return JsonResponse({"type":"FeatureCollection", "features":features})
+    return JsonResponse({"type":"FeatureCollection", "features":features, "display_fields": layer.display_fields})
 
 
 @login_required
@@ -146,8 +146,9 @@ def import_geojson_view(request):
                 form.cleaned_data["color"],
                 form.cleaned_data["is_public"],
                 form.cleaned_data["is_default_visible"],
+                form.cleaned_data["display_fields"],
             )
-            messages.success(request, f"Couche « {layer.name} » importée : {layer.features.count()} objet(s).")
+            messages.success(request, f"Couche « {layer.name} » importée : {layer.features.count()} objet(s). Champs affichés : {', '.join(layer.display_fields) or 'aucun'}.")
             return redirect("management_home")
         except Exception as exc:
             messages.error(request, str(exc))
