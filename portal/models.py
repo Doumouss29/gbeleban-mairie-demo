@@ -115,7 +115,8 @@ class MapFeature(models.Model):
 
 
 class Parcel(models.Model):
-    reference = models.CharField("Référence", max_length=120, unique=True)
+    source_layer = models.CharField("Couche d'origine", max_length=160, blank=True, db_index=True)
+    reference = models.CharField("Référence", max_length=120)
     section = models.CharField("Section", max_length=80, blank=True)
     ilot = models.CharField("Îlot", max_length=80, blank=True)
     lot = models.CharField("Lot", max_length=80, blank=True)
@@ -124,8 +125,13 @@ class Parcel(models.Model):
     usage = models.CharField("Usage", max_length=120, blank=True)
     geometry = models.JSONField(default=dict)
 
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=["source_layer", "reference"], name="uniq_parcel_layer_reference")
+        ]
+
     def __str__(self):
-        return self.reference
+        return f"{self.source_layer} - {self.reference}" if self.source_layer else self.reference
 
 
 class Taxpayer(models.Model):
