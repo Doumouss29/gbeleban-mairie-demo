@@ -7,7 +7,7 @@ from django.db.models import Sum
 from django.http import JsonResponse, Http404
 from django.shortcuts import render, redirect, get_object_or_404
 from .forms import GeoJSONImportForm, CadastreImportForm
-from .models import SiteSettings, Page, QuickLink, News, Project, MapLayer, Parcel, Taxpayer, Tax, Payment
+from .models import SiteSettings, Page, QuickLink, News, Project, MapLayer, UrbanismLayer, Parcel, Taxpayer, Tax, Payment
 from .services import import_layer, import_cadastre
 
 URBANISM_GROUP = "Accès Urbanisme"
@@ -84,14 +84,24 @@ def parcels_geojson(request):
     layer_name = request.GET.get("layer", "").strip()
     if layer_name:
         qs = qs.filter(source_layer=layer_name)
+    layer_meta = UrbanismLayer.objects.filter(name=layer_name).first() if layer_name else None
+    display_fields = layer_meta.display_fields if layer_meta else []
     features = []
     for p in qs:
-        features.append({"type":"Feature", "geometry":p.geometry, "properties":{
-            "id":p.id, "couche":p.source_layer, "reference":p.reference, "section":p.section, "ilot":p.ilot,
-            "lot":p.lot, "parcelle":p.parcel_number,
-            "superficie":float(p.area_m2) if p.area_m2 is not None else None, "usage":p.usage,
-        }})
-    return JsonResponse({"type":"FeatureCollection", "features":features})
+        props = dict(p.properties or {})
+        props.update({
+            "id": p.id,
+            "couche": p.source_layer,
+            "reference": p.reference,
+            "section": p.section,
+            "ilot": p.ilot,
+            "lot": p.lot,
+            "parcelle": p.parcel_number,
+            "superficie": float(p.area_m2) if p.area_m2 is not None else None,
+            "usage": p.usage,
+        })
+        features.append({"type":"Feature", "geometry":p.geometry, "properties":props})
+    return JsonResponse({"type":"FeatureCollection", "features":features, "display_fields": display_fields})
 
 
 @login_required
