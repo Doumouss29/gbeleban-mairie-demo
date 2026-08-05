@@ -35,6 +35,8 @@ def news(request):
 
 
 def page_detail(request, slug):
+    if slug == "la-commune":
+        return render(request, "portal/commune.html")
     page = get_object_or_404(Page, slug=slug, is_published=True)
     return render(request, "portal/page_detail.html", {"page": page})
 
