@@ -2,17 +2,18 @@
 .navwrap{grid-template-columns:minmax(330px,380px) minmax(0,1fr) 100px}
 .mobile-menu a.active{color:#ef7d00;background:#fff7ef;border-left:4px solid #ef7d00}
 
-/* Urbanisme : vue cartographique prioritaire, sans défilement vertical global */
-body:has(.urban-grid){height:100vh;overflow:hidden}
-body:has(.urban-grid) footer{display:none}
-body:has(.urban-grid) .pagehead.secure{padding:10px 0 9px}
-body:has(.urban-grid) .pagehead.secure .eyebrow{font-size:10px;letter-spacing:2px}
-body:has(.urban-grid) .pagehead.secure h1{font-size:26px;margin:3px 0 4px;line-height:1.02}
-body:has(.urban-grid) .pagehead.secure p{margin:0;font-size:13px;line-height:1.2}
-body:has(.urban-grid) .urban-grid{grid-template-columns:240px minmax(0,1fr);height:calc(100vh - 142px - 74px);min-height:0}
-body:has(.urban-grid) .urban-grid aside{padding:18px 14px;overflow-y:auto;min-height:0}
-body:has(.urban-grid) #cadastre-map{height:100%;min-width:0}
+/* Urbanisme : règles explicites pour éviter les limites de :has() */
+body.urbanism-page{height:100vh;overflow:hidden}
+body.urbanism-page footer{display:none}
+body.urbanism-page .urban-pagehead{padding:6px 0 5px !important;min-height:0 !important}
+body.urbanism-page .urban-pagehead .container{width:min(1600px,96%)}
+body.urbanism-page .urban-pagehead .eyebrow{font-size:9px;letter-spacing:1.8px;line-height:1}
+body.urbanism-page .urban-pagehead h1{font-size:22px;margin:2px 0 3px;line-height:1}
+body.urbanism-page .urban-pagehead p{margin:0;font-size:12px;line-height:1.1}
+body.urbanism-page .urban-grid{grid-template-columns:220px minmax(0,1fr);height:calc(100vh - 142px - 49px);min-height:0}
+body.urbanism-page .urban-grid aside{padding:14px 10px;overflow-y:auto;min-height:0}
+body.urbanism-page #cadastre-map{height:100%;min-width:0}
 
 @media(max-width:1350px){.navwrap{grid-template-columns:minmax(300px,340px) minmax(0,1fr) 86px}.brand-copy b{font-size:20px}}
-@media(max-width:1100px){.brand-copy b{white-space:nowrap}body:has(.urban-grid){height:auto;overflow:auto}body:has(.urban-grid) .urban-grid{grid-template-columns:1fr;height:auto}body:has(.urban-grid) #cadastre-map{height:650px}}
+@media(max-width:1100px){.brand-copy b{white-space:nowrap}body.urbanism-page{height:auto;overflow:auto}body.urbanism-page .urban-grid{grid-template-columns:1fr;height:auto}body.urbanism-page #cadastre-map{height:650px}}
 @media(max-width:420px){.brand-copy b{font-size:15px}}
