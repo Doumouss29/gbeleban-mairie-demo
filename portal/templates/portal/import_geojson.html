@@ -1,1 +1,100 @@
-{% extends 'portal/base.html' %}{% block content %}<section class="pagehead"><div class="container"><h1>Importer une couche GeoJSON</h1></div></section><section class="section"><div class="container formbox"><form method="post" enctype="multipart/form-data">{% csrf_token %}{{ form.as_p }}<button class="btn orange" type="submit">Importer la couche</button></form></div></section>{% endblock %}
+{% extends 'portal/base.html' %}
+{% block content %}
+<section class="pagehead">
+  <div class="container">
+    <h1>Importer une couche GeoJSON</h1>
+    <p>Le fichier est lu dans votre navigateur afin de détecter automatiquement les champs disponibles.</p>
+  </div>
+</section>
+<section class="section">
+  <div class="container formbox">
+    <form method="post" enctype="multipart/form-data" id="geojson-import-form">
+      {% csrf_token %}
+      {{ form.layer_name.as_field_group }}
+      {{ form.category.as_field_group }}
+      {{ form.color.as_field_group }}
+      {{ form.is_public.as_field_group }}
+      {{ form.is_default_visible.as_field_group }}
+      {{ form.geojson_file.as_field_group }}
+      {{ form.display_fields }}
+
+      <div id="detected-fields-box" style="display:none;margin:28px 0;padding:20px;border:1px solid #ddd;border-radius:12px;background:#fafafa;">
+        <h3 style="margin-top:0;">Champs à afficher dans la fiche</h3>
+        <p style="margin-top:0;color:#666;">Cochez les attributs qui doivent apparaître dans les popups de « Gbéléban en carte ».</p>
+        <div id="detected-fields" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;"></div>
+        <div style="margin-top:14px;display:flex;gap:10px;flex-wrap:wrap;">
+          <button type="button" class="btn light" id="select-all-fields">Tout sélectionner</button>
+          <button type="button" class="btn light" id="clear-all-fields">Tout décocher</button>
+        </div>
+      </div>
+
+      <button class="btn orange" type="submit">Importer la couche</button>
+    </form>
+  </div>
+</section>
+<script>
+(function(){
+  const fileInput = document.getElementById('id_geojson_file');
+  const hidden = document.getElementById('id_display_fields');
+  const box = document.getElementById('detected-fields-box');
+  const list = document.getElementById('detected-fields');
+  const selectAll = document.getElementById('select-all-fields');
+  const clearAll = document.getElementById('clear-all-fields');
+
+  function sync(){
+    const selected = Array.from(list.querySelectorAll('input[type=checkbox]:checked')).map(i => i.value);
+    hidden.value = JSON.stringify(selected);
+  }
+
+  function renderFields(fields){
+    list.innerHTML = '';
+    fields.forEach((field, idx) => {
+      const label = document.createElement('label');
+      label.style.display = 'flex';
+      label.style.alignItems = 'center';
+      label.style.gap = '8px';
+      const cb = document.createElement('input');
+      cb.type = 'checkbox';
+      cb.value = field;
+      cb.checked = idx < 12;
+      cb.addEventListener('change', sync);
+      const text = document.createElement('span');
+      text.textContent = field;
+      label.appendChild(cb);
+      label.appendChild(text);
+      list.appendChild(label);
+    });
+    box.style.display = fields.length ? 'block' : 'none';
+    sync();
+  }
+
+  fileInput.addEventListener('change', async function(){
+    const file = this.files && this.files[0];
+    if(!file){ renderFields([]); return; }
+    try{
+      const text = await file.text();
+      const data = JSON.parse(text.replace(/^\uFEFF/, ''));
+      if(data.type !== 'FeatureCollection') throw new Error('Le fichier doit être un FeatureCollection GeoJSON.');
+      const fields = [];
+      (data.features || []).forEach(f => {
+        const props = (f && f.properties) || {};
+        Object.keys(props).forEach(k => { if(!fields.includes(k)) fields.push(k); });
+      });
+      renderFields(fields);
+    }catch(err){
+      renderFields([]);
+      alert('Impossible de lire les champs du GeoJSON : ' + err.message);
+    }
+  });
+
+  selectAll.addEventListener('click', function(){
+    list.querySelectorAll('input[type=checkbox]').forEach(i => i.checked = true);
+    sync();
+  });
+  clearAll.addEventListener('click', function(){
+    list.querySelectorAll('input[type=checkbox]').forEach(i => i.checked = false);
+    sync();
+  });
+})();
+</script>
+{% endblock %}
