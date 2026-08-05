@@ -29,6 +29,18 @@ body.urbanism-page .urban-grid{grid-template-columns:230px minmax(0,1fr);height:
 body.urbanism-page .urban-grid aside{padding:16px 12px;overflow-y:auto;min-height:0}
 body.urbanism-page #cadastre-map{height:100%;min-width:0}
 
+/* WebSIG public : même logique compacte qu'Urbanisme */
+body.websig-page{height:100vh;overflow:hidden}
+body.websig-page footer{display:none}
+body.websig-page .websig-pagehead{padding:10px 0 9px !important;min-height:0 !important}
+body.websig-page .websig-pagehead .container{width:min(1600px,96%)}
+body.websig-page .websig-pagehead .eyebrow{font-size:10px;letter-spacing:1.9px;line-height:1}
+body.websig-page .websig-pagehead h1{font-size:26px;margin:3px 0 4px;line-height:1.02}
+body.websig-page .websig-pagehead p{margin:0;font-size:13px;line-height:1.15}
+body.websig-page .websig-grid{grid-template-columns:230px minmax(0,1fr);height:calc(100vh - 142px - 62px);min-height:0}
+body.websig-page .websig-grid aside{padding:16px 12px;overflow-y:auto;min-height:0}
+body.websig-page #map{height:100%;min-width:0}
+
 /* Page La commune */
 .commune-head{padding:54px 0;background:linear-gradient(120deg,#173f30,#0d7545)}
 .commune-head h1{margin:10px 0 12px;font-size:48px}
@@ -61,6 +73,6 @@ body.urbanism-page #cadastre-map{height:100%;min-width:0}
 .gbeleban-label:before{display:none}
 
 @media(max-width:1350px){.navwrap{grid-template-columns:minmax(300px,340px) minmax(0,1fr) 86px}.brand-copy b{font-size:20px}.home-top-grid{grid-template-columns:minmax(0,2.3fr) minmax(280px,.9fr)}}
-@media(max-width:1100px){.brand-copy b{white-space:nowrap}.home-top-grid{grid-template-columns:1fr}.home-quickgrid{grid-template-columns:repeat(3,minmax(0,1fr))}.home-news-panel{min-height:auto}body.urbanism-page{height:auto;overflow:auto}body.urbanism-page .urban-grid{grid-template-columns:1fr;height:auto}body.urbanism-page #cadastre-map{height:650px}.commune-layout{grid-template-columns:1fr}.commune-side{position:static}.commune-highlight-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:1100px){.brand-copy b{white-space:nowrap}.home-top-grid{grid-template-columns:1fr}.home-quickgrid{grid-template-columns:repeat(3,minmax(0,1fr))}.home-news-panel{min-height:auto}body.urbanism-page,body.websig-page{height:auto;overflow:auto}body.urbanism-page .urban-grid,body.websig-page .websig-grid{grid-template-columns:1fr;height:auto}body.urbanism-page #cadastre-map,body.websig-page #map{height:650px}.commune-layout{grid-template-columns:1fr}.commune-side{position:static}.commune-highlight-grid{grid-template-columns:1fr 1fr}}
 @media(max-width:700px){.home-quickgrid{grid-template-columns:1fr}.commune-head{padding:38px 0}.commune-head h1{font-size:38px}.commune-highlight-grid{grid-template-columns:1fr}#commune-mini-map{height:280px}}
 @media(max-width:420px){.brand-copy b{font-size:15px}}
