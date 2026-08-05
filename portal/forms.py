@@ -82,10 +82,27 @@ class GeoJSONImportForm(forms.Form):
 class CadastreImportForm(forms.Form):
     layer_name = forms.CharField(label="Nom de la couche urbanisme", max_length=160)
     geojson_file = forms.FileField(label="Plan cadastral GeoJSON")
-    reference_field = forms.CharField(label="Champ référence", initial="reference")
-    section_field = forms.CharField(label="Champ section", initial="section", required=False)
-    ilot_field = forms.CharField(label="Champ îlot", initial="ilot", required=False)
-    lot_field = forms.CharField(label="Champ lot", initial="lot", required=False)
-    parcel_field = forms.CharField(label="Champ parcelle", initial="parcelle", required=False)
-    area_field = forms.CharField(label="Champ superficie", initial="superficie", required=False)
-    usage_field = forms.CharField(label="Champ usage", initial="usage", required=False)
+    reference_field = forms.CharField(label="Champ référence", required=False, widget=forms.Select())
+    section_field = forms.CharField(label="Champ section", required=False, widget=forms.Select())
+    ilot_field = forms.CharField(label="Champ îlot", required=False, widget=forms.Select())
+    lot_field = forms.CharField(label="Champ lot", required=False, widget=forms.Select())
+    parcel_field = forms.CharField(label="Champ parcelle", required=False, widget=forms.Select())
+    area_field = forms.CharField(label="Champ superficie", required=False, widget=forms.Select())
+    usage_field = forms.CharField(label="Champ usage", required=False, widget=forms.Select())
+    display_fields = forms.CharField(
+        label="Champs à afficher",
+        required=False,
+        widget=forms.HiddenInput(),
+    )
+
+    def clean_display_fields(self):
+        raw = self.cleaned_data.get("display_fields") or ""
+        if not raw:
+            return []
+        try:
+            value = json.loads(raw)
+        except Exception:
+            raise forms.ValidationError("La sélection des champs à afficher est invalide.")
+        if not isinstance(value, list):
+            raise forms.ValidationError("La sélection des champs à afficher est invalide.")
+        return [str(v) for v in value if str(v).strip()]
