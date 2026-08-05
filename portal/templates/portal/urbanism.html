@@ -1,1 +1,26 @@
-{% extends 'portal/base.html' %}{% load static %}{% block title %}Urbanisme - Gbéléban{% endblock %}{% block content %}<section class="pagehead secure"><div class="container"><span class="eyebrow">ESPACE SÉCURISÉ</span><h1>Urbanisme & plan cadastral</h1><p>Consultation de la démonstration cadastrale de la commune.</p></div></section><section class="urban-grid"><aside><h3>Rechercher une parcelle</h3><form id="parcel-search"><label>Section<input name="section"></label><label>Îlot<input name="ilot"></label><label>Lot<input name="lot"></label><label>Parcelle<input name="parcelle"></label><button class="btn orange" type="submit">Rechercher</button></form><div id="search-results"></div></aside><div id="cadastre-map"></div></section>{% endblock %}{% block scripts %}<script src="{% static 'portal/js/cadastre.js' %}"></script>{% endblock %}
+{% extends 'portal/base.html' %}{% load static %}{% block title %}Urbanisme - Gbéléban{% endblock %}{% block content %}
+<section class="pagehead secure"><div class="container"><span class="eyebrow">ESPACE SÉCURISÉ</span><h1>Urbanisme & plan cadastral</h1><p>Consultez les couches cadastrales importées depuis QGIS et recherchez une parcelle.</p></div></section>
+<section class="urban-grid">
+  <aside>
+    <h3>Couches Urbanisme</h3>
+    <label class="layeritem"><input type="radio" name="urban-layer" value="" checked> <span>Toutes les couches</span></label>
+    {% for layer in urban_layers %}
+      <label class="layeritem"><input type="radio" name="urban-layer" value="{{ layer }}"> <span>{{ layer }}</span></label>
+    {% empty %}
+      <p>Aucune couche Urbanisme importée.</p>
+    {% endfor %}
+
+    <h3 style="margin-top:28px">Rechercher une parcelle</h3>
+    <form id="parcel-search">
+      <input type="hidden" name="layer" id="parcel-layer-filter" value="">
+      <label>Section<input name="section"></label>
+      <label>Îlot<input name="ilot"></label>
+      <label>Lot<input name="lot"></label>
+      <label>Parcelle<input name="parcelle"></label>
+      <button class="btn orange" type="submit">Rechercher</button>
+    </form>
+    <div id="search-results"></div>
+  </aside>
+  <div id="cadastre-map"></div>
+</section>
+{% endblock %}{% block scripts %}<script src="{% static 'portal/js/cadastre.js' %}"></script>{% endblock %}
