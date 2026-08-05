@@ -1,5 +1,5 @@
 {% extends 'portal/base.html' %}{% load static %}{% block title %}Urbanisme - Gbéléban{% endblock %}{% block content %}
-<section class="pagehead secure"><div class="container"><span class="eyebrow">ESPACE SÉCURISÉ</span><h1>Urbanisme & plan cadastral</h1><p>Consultez les couches cadastrales importées depuis QGIS et recherchez une parcelle.</p></div></section>
+<section class="pagehead secure urban-pagehead"><div class="container"><span class="eyebrow">ESPACE SÉCURISÉ</span><h1>Urbanisme & plan cadastral</h1><p>Consultez les couches cadastrales importées depuis QGIS et recherchez une parcelle.</p></div></section>
 <section class="urban-grid">
   <aside>
     <h3>Couches Urbanisme</h3>
@@ -23,4 +23,5 @@
   </aside>
   <div id="cadastre-map"></div>
 </section>
+<script>document.body.classList.add('urbanism-page');</script>
 {% endblock %}{% block scripts %}<script src="{% static 'portal/js/cadastre.js' %}"></script>{% endblock %}
