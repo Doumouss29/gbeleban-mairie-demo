@@ -1,1 +1,160 @@
-{% extends 'portal/base.html' %}{% block content %}<section class="pagehead"><div class="container"><h1>Importer le plan cadastral</h1><p>Associez les champs du GeoJSON aux champs Section, Îlot, Lot et Parcelle.</p></div></section><section class="section"><div class="container formbox"><form method="post" enctype="multipart/form-data">{% csrf_token %}{{ form.as_p }}<button class="btn orange" type="submit">Importer le cadastre</button></form></div></section>{% endblock %}
+{% extends 'portal/base.html' %}
+{% block content %}
+<section class="pagehead">
+  <div class="container">
+    <h1>Importer une couche Urbanisme</h1>
+    <p>Sélectionnez un GeoJSON exporté depuis QGIS. Les champs du fichier seront détectés automatiquement.</p>
+  </div>
+</section>
+<section class="section">
+  <div class="container formbox">
+    <form method="post" enctype="multipart/form-data" id="cadastre-import-form">
+      {% csrf_token %}
+      <p>{{ form.layer_name.label_tag }}{{ form.layer_name }}</p>
+      <p>{{ form.geojson_file.label_tag }}{{ form.geojson_file }}</p>
+
+      <div id="detected-fields-panel" style="display:none">
+        <h3>Correspondance des champs</h3>
+        <p>Choisissez dans le GeoJSON le champ correspondant à chaque information Urbanisme.</p>
+        <p>{{ form.reference_field.label_tag }}{{ form.reference_field }}</p>
+        <p>{{ form.section_field.label_tag }}{{ form.section_field }}</p>
+        <p>{{ form.ilot_field.label_tag }}{{ form.ilot_field }}</p>
+        <p>{{ form.lot_field.label_tag }}{{ form.lot_field }}</p>
+        <p>{{ form.parcel_field.label_tag }}{{ form.parcel_field }}</p>
+        <p>{{ form.area_field.label_tag }}{{ form.area_field }}</p>
+        <p>{{ form.usage_field.label_tag }}{{ form.usage_field }}</p>
+
+        {{ form.display_fields }}
+        <div class="geojson-fields-box">
+          <div class="geojson-fields-head">
+            <div>
+              <h3>Champs à afficher sur la carte</h3>
+              <p>Cochez uniquement les attributs que vous souhaitez afficher lorsque l'on clique sur une entité.</p>
+            </div>
+            <div>
+              <button type="button" class="btn light" id="select-all-fields">Tout sélectionner</button>
+              <button type="button" class="btn light" id="clear-all-fields">Tout décocher</button>
+            </div>
+          </div>
+          <div id="display-fields-list" class="geojson-fields-list"></div>
+        </div>
+      </div>
+
+      <div id="geojson-read-error" class="message" style="display:none"></div>
+      <button class="btn orange" type="submit">Importer la couche Urbanisme</button>
+    </form>
+  </div>
+</section>
+
+<script>
+(function(){
+  const fileInput = document.getElementById('id_geojson_file');
+  const panel = document.getElementById('detected-fields-panel');
+  const list = document.getElementById('display-fields-list');
+  const hidden = document.getElementById('id_display_fields');
+  const errorBox = document.getElementById('geojson-read-error');
+  const selects = {
+    reference: document.getElementById('id_reference_field'),
+    section: document.getElementById('id_section_field'),
+    ilot: document.getElementById('id_ilot_field'),
+    lot: document.getElementById('id_lot_field'),
+    parcelle: document.getElementById('id_parcel_field'),
+    superficie: document.getElementById('id_area_field'),
+    usage: document.getElementById('id_usage_field')
+  };
+
+  function normalize(v){
+    return String(v || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]/g,'');
+  }
+
+  function detectField(fields, candidates){
+    for(const candidate of candidates){
+      const target = normalize(candidate);
+      const found = fields.find(f => normalize(f) === target);
+      if(found) return found;
+    }
+    return '';
+  }
+
+  function fillSelect(select, fields, preferred){
+    if(!select) return;
+    select.innerHTML = '';
+    const empty = document.createElement('option');
+    empty.value = '';
+    empty.textContent = '— Aucun —';
+    select.appendChild(empty);
+    fields.forEach(field => {
+      const opt = document.createElement('option');
+      opt.value = field;
+      opt.textContent = field;
+      if(field === preferred) opt.selected = true;
+      select.appendChild(opt);
+    });
+  }
+
+  function updateHidden(){
+    const selected = [...list.querySelectorAll('input[type="checkbox"]:checked')].map(cb => cb.value);
+    hidden.value = JSON.stringify(selected);
+  }
+
+  async function readGeoJSON(file){
+    errorBox.style.display = 'none';
+    panel.style.display = 'none';
+    list.innerHTML = '';
+    hidden.value = '[]';
+    if(!file) return;
+    try{
+      const text = await file.text();
+      const data = JSON.parse(text.replace(/^\uFEFF/, ''));
+      if(data.type !== 'FeatureCollection' || !Array.isArray(data.features)){
+        throw new Error('Le fichier doit être un GeoJSON FeatureCollection.');
+      }
+      const fields = [];
+      data.features.slice(0, 200).forEach(feature => {
+        const props = feature && feature.properties ? feature.properties : {};
+        Object.keys(props).forEach(key => { if(!fields.includes(key)) fields.push(key); });
+      });
+      if(!fields.length) throw new Error('Aucun champ attributaire n’a été trouvé dans le GeoJSON.');
+
+      fillSelect(selects.reference, fields, detectField(fields, ['reference','référence','ref','id','identifiant']));
+      fillSelect(selects.section, fields, detectField(fields, ['section','sect']));
+      fillSelect(selects.ilot, fields, detectField(fields, ['ilot','îlot','numeroilot','numilot']));
+      fillSelect(selects.lot, fields, detectField(fields, ['lot','numerolot','numlot']));
+      fillSelect(selects.parcelle, fields, detectField(fields, ['parcelle','parcel','numeroparcelle','numparcelle']));
+      fillSelect(selects.superficie, fields, detectField(fields, ['superficie','surface','area','surf']));
+      fillSelect(selects.usage, fields, detectField(fields, ['usage','affectation','destination','typeusage']));
+
+      fields.forEach((field, index) => {
+        const label = document.createElement('label');
+        label.className = 'geojson-field-option';
+        const cb = document.createElement('input');
+        cb.type = 'checkbox';
+        cb.value = field;
+        cb.checked = index < 12;
+        cb.addEventListener('change', updateHidden);
+        const span = document.createElement('span');
+        span.textContent = field;
+        label.appendChild(cb);
+        label.appendChild(span);
+        list.appendChild(label);
+      });
+      updateHidden();
+      panel.style.display = 'block';
+    }catch(err){
+      errorBox.textContent = 'Impossible de lire le GeoJSON : ' + err.message;
+      errorBox.style.display = 'block';
+    }
+  }
+
+  fileInput.addEventListener('change', () => readGeoJSON(fileInput.files[0]));
+  document.getElementById('select-all-fields').addEventListener('click', () => {
+    list.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = true);
+    updateHidden();
+  });
+  document.getElementById('clear-all-fields').addEventListener('click', () => {
+    list.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
+    updateHidden();
+  });
+})();
+</script>
+{% endblock %}
