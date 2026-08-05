@@ -15,6 +15,22 @@ services:
         value: "false"
       - key: SECURE_SSL_REDIRECT
         value: "true"
+      - key: DB_ENGINE
+        value: "postgres"
+      - key: DB_NAME
+        value: "gbeleban"
+      - key: DB_HOST
+        sync: false
+      - key: DB_PORT
+        value: "5432"
+      - key: DB_USER
+        sync: false
+      - key: DB_PASSWORD
+        sync: false
+      - key: DB_SSLMODE
+        value: "require"
+      - key: DB_ADMIN_NAME
+        value: "postgres"
       - key: DJANGO_SUPERUSER_USERNAME
         sync: false
       - key: DJANGO_SUPERUSER_PASSWORD
