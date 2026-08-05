@@ -52,15 +52,17 @@ class SiteSettingsAdminForm(forms.ModelForm):
 
 
 class GeoJSONImportForm(forms.Form):
-    layer_name = forms.CharField(label="Nom de la couche", max_length=160)
+    layer_name = forms.CharField(label="Nom de la couche", max_length=160, help_text="Ex. Écoles, Centres de santé, Voirie, Marchés...")
     category = forms.CharField(label="Catégorie", max_length=100, required=False)
     color = forms.CharField(label="Couleur", initial="#ef7d00", max_length=20)
-    is_public = forms.BooleanField(label="Visible sur la carte publique", initial=True, required=False)
-    geojson_file = forms.FileField(label="Fichier GeoJSON")
+    is_public = forms.BooleanField(label="Visible sur Gbéléban en carte", initial=True, required=False)
+    is_default_visible = forms.BooleanField(label="Visible au démarrage", initial=True, required=False)
+    geojson_file = forms.FileField(label="Fichier GeoJSON exporté depuis QGIS")
 
 
 class CadastreImportForm(forms.Form):
-    geojson_file = forms.FileField(label="Plan cadastral GeoJSON")
+    layer_name = forms.CharField(label="Nom de la couche urbanisme", max_length=160, help_text="Ex. Parcelles cadastrales 2026, Lotissement centre-ville...")
+    geojson_file = forms.FileField(label="Fichier GeoJSON exporté depuis QGIS")
     reference_field = forms.CharField(label="Champ référence", initial="reference")
     section_field = forms.CharField(label="Champ section", initial="section", required=False)
     ilot_field = forms.CharField(label="Champ îlot", initial="ilot", required=False)
