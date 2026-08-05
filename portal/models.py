@@ -11,13 +11,11 @@ class SiteSettings(models.Model):
     phone = models.CharField("Téléphone", max_length=60, blank=True)
     email = models.EmailField("E-mail", blank=True)
     address = models.CharField("Adresse", max_length=255, blank=True)
-
     municipality_logo_src = models.TextField("Logo / armoirie de la commune", blank=True)
     national_arms_src = models.TextField("Armoiries de Côte d'Ivoire", blank=True)
     hero_image_url = models.TextField("Image de couverture (URL ou image importée)", blank=True)
     mayor_hero_image_url = models.TextField("Photo du maire - bloc d'accueil", blank=True)
     mayor_section_image_url = models.TextField("Photo du maire - section Le mot du Maire", blank=True)
-
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
@@ -41,11 +39,8 @@ class Page(models.Model):
     class Meta:
         ordering = ["menu_order", "title"]
 
-    def __str__(self):
-        return self.title
-
-    def get_absolute_url(self):
-        return reverse("page_detail", kwargs={"slug": self.slug})
+    def __str__(self): return self.title
+    def get_absolute_url(self): return reverse("page_detail", kwargs={"slug": self.slug})
 
 
 class QuickLink(models.Model):
@@ -55,12 +50,8 @@ class QuickLink(models.Model):
     url = models.CharField("Lien", max_length=255, default="#")
     is_active = models.BooleanField("Actif", default=True)
     order = models.PositiveIntegerField("Ordre", default=100)
-
-    class Meta:
-        ordering = ["order", "title"]
-
-    def __str__(self):
-        return self.title
+    class Meta: ordering = ["order", "title"]
+    def __str__(self): return self.title
 
 
 class News(models.Model):
@@ -70,12 +61,8 @@ class News(models.Model):
     image_url = models.URLField("Image (URL)", blank=True)
     published_at = models.DateField("Date de publication")
     is_published = models.BooleanField("Publiée", default=True)
-
-    class Meta:
-        ordering = ["-published_at"]
-
-    def __str__(self):
-        return self.title
+    class Meta: ordering = ["-published_at"]
+    def __str__(self): return self.title
 
 
 class Project(models.Model):
@@ -90,9 +77,7 @@ class Project(models.Model):
     latitude = models.DecimalField(max_digits=10, decimal_places=7, null=True, blank=True)
     longitude = models.DecimalField(max_digits=10, decimal_places=7, null=True, blank=True)
     is_published = models.BooleanField("Publié", default=True)
-
-    def __str__(self):
-        return self.title
+    def __str__(self): return self.title
 
 
 class MapLayer(models.Model):
@@ -103,15 +88,20 @@ class MapLayer(models.Model):
     is_public = models.BooleanField("Visible sur la carte publique", default=True)
     is_default_visible = models.BooleanField("Visible au démarrage", default=True)
     display_fields = models.JSONField("Champs à afficher", default=list, blank=True)
-
-    def __str__(self):
-        return self.name
+    def __str__(self): return self.name
 
 
 class MapFeature(models.Model):
     layer = models.ForeignKey(MapLayer, on_delete=models.CASCADE, related_name="features")
     properties = models.JSONField(default=dict)
     geometry = models.JSONField(default=dict)
+
+
+class UrbanismLayer(models.Model):
+    name = models.CharField("Nom de la couche", max_length=160, unique=True)
+    display_fields = models.JSONField("Champs à afficher", default=list, blank=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    def __str__(self): return self.name
 
 
 class Parcel(models.Model):
@@ -123,15 +113,11 @@ class Parcel(models.Model):
     parcel_number = models.CharField("N° parcelle", max_length=80, blank=True)
     area_m2 = models.DecimalField("Superficie m²", max_digits=14, decimal_places=2, null=True, blank=True)
     usage = models.CharField("Usage", max_length=120, blank=True)
+    properties = models.JSONField(default=dict, blank=True)
     geometry = models.JSONField(default=dict)
-
     class Meta:
-        constraints = [
-            models.UniqueConstraint(fields=["source_layer", "reference"], name="uniq_parcel_layer_reference")
-        ]
-
-    def __str__(self):
-        return f"{self.source_layer} - {self.reference}" if self.source_layer else self.reference
+        constraints = [models.UniqueConstraint(fields=["source_layer", "reference"], name="uniq_parcel_layer_reference")]
+    def __str__(self): return f"{self.source_layer} - {self.reference}" if self.source_layer else self.reference
 
 
 class Taxpayer(models.Model):
@@ -139,9 +125,7 @@ class Taxpayer(models.Model):
     phone = models.CharField("Téléphone", max_length=60, blank=True)
     address = models.CharField("Adresse", max_length=255, blank=True)
     parcel = models.ForeignKey(Parcel, null=True, blank=True, on_delete=models.SET_NULL, related_name="taxpayers")
-
-    def __str__(self):
-        return self.name
+    def __str__(self): return self.name
 
 
 class Tax(models.Model):
@@ -151,9 +135,7 @@ class Tax(models.Model):
     year = models.PositiveIntegerField("Année")
     amount_due = models.DecimalField("Montant dû", max_digits=14, decimal_places=0)
     status = models.CharField("Statut", max_length=20, choices=STATUS_CHOICES, default="unpaid")
-
-    def __str__(self):
-        return f"{self.label} - {self.taxpayer}"
+    def __str__(self): return f"{self.label} - {self.taxpayer}"
 
 
 class Payment(models.Model):
@@ -162,6 +144,4 @@ class Payment(models.Model):
     paid_at = models.DateField("Date de paiement")
     method = models.CharField("Mode de paiement", max_length=80, blank=True)
     reference = models.CharField("Référence", max_length=120, blank=True)
-
-    def __str__(self):
-        return f"{self.amount} FCFA - {self.tax}"
+    def __str__(self): return f"{self.amount} FCFA - {self.tax}"
