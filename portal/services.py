@@ -14,26 +14,38 @@ def _load_geojson(uploaded):
     return data
 
 
-def import_layer(uploaded, name, category="", color="#ef7d00", is_public=True, is_default_visible=True):
+def _detect_fields(data):
+    fields = []
+    for feature in data.get("features", []):
+        props = feature.get("properties") or {}
+        for key in props.keys():
+            if key not in fields:
+                fields.append(key)
+    return fields
+
+
+def import_layer(uploaded, name, category="", color="#ef7d00", is_public=True, is_default_visible=True, display_fields=None):
     data = _load_geojson(uploaded)
+    detected_fields = _detect_fields(data)
+    selected_fields = [f for f in (display_fields or []) if f in detected_fields]
+    if not selected_fields:
+        selected_fields = detected_fields[:12]
+
     layer = MapLayer.objects.create(
         name=name,
         category=category,
         color=color,
         is_public=is_public,
         is_default_visible=is_default_visible,
+        display_fields=selected_fields,
     )
-    fields = []
+
     for feature in data.get("features", []):
         props = feature.get("properties") or {}
         geom = feature.get("geometry") or {}
         if geom:
             MapFeature.objects.create(layer=layer, properties=props, geometry=geom)
-        for key in props:
-            if key not in fields and len(fields) < 12:
-                fields.append(key)
-    layer.display_fields = fields
-    layer.save(update_fields=["display_fields"])
+
     return layer
 
 
