@@ -67,17 +67,27 @@ def urbanism(request):
     if not _has_group_access(request.user, URBANISM_GROUP):
         messages.error(request, "Votre compte n'a pas accès à l'espace Urbanisme.")
         return redirect("my_space")
-    return render(request, "portal/urbanism.html")
+    urban_layers = list(
+        Parcel.objects.exclude(source_layer="")
+        .values_list("source_layer", flat=True)
+        .distinct()
+        .order_by("source_layer")
+    )
+    return render(request, "portal/urbanism.html", {"urban_layers": urban_layers})
 
 
 @login_required
 def parcels_geojson(request):
     if not _has_group_access(request.user, URBANISM_GROUP):
         return JsonResponse({"detail": "Accès refusé"}, status=403)
+    qs = Parcel.objects.all()
+    layer_name = request.GET.get("layer", "").strip()
+    if layer_name:
+        qs = qs.filter(source_layer=layer_name)
     features = []
-    for p in Parcel.objects.all():
+    for p in qs:
         features.append({"type":"Feature", "geometry":p.geometry, "properties":{
-            "id":p.id, "reference":p.reference, "section":p.section, "ilot":p.ilot,
+            "id":p.id, "couche":p.source_layer, "reference":p.reference, "section":p.section, "ilot":p.ilot,
             "lot":p.lot, "parcelle":p.parcel_number,
             "superficie":float(p.area_m2) if p.area_m2 is not None else None, "usage":p.usage,
         }})
@@ -89,11 +99,17 @@ def parcel_search(request):
     if not _has_group_access(request.user, URBANISM_GROUP):
         return JsonResponse({"detail": "Accès refusé"}, status=403)
     qs = Parcel.objects.all()
+    layer_name = request.GET.get("layer", "").strip()
+    if layer_name:
+        qs = qs.filter(source_layer=layer_name)
     for field, param in (("section","section"),("ilot","ilot"),("lot","lot"),("parcel_number","parcelle")):
         value = request.GET.get(param, "").strip()
         if value:
             qs = qs.filter(**{f"{field}__iexact": value})
-    return JsonResponse({"results":[{"id":p.id,"reference":p.reference,"section":p.section,"ilot":p.ilot,"lot":p.lot,"parcelle":p.parcel_number} for p in qs[:50]]})
+    return JsonResponse({"results":[{
+        "id":p.id,"couche":p.source_layer,"reference":p.reference,"section":p.section,
+        "ilot":p.ilot,"lot":p.lot,"parcelle":p.parcel_number
+    } for p in qs[:50]]})
 
 
 @login_required
@@ -123,7 +139,14 @@ def import_geojson_view(request):
     form = GeoJSONImportForm(request.POST or None, request.FILES or None)
     if request.method == "POST" and form.is_valid():
         try:
-            layer = import_layer(form.cleaned_data["geojson_file"], form.cleaned_data["layer_name"], form.cleaned_data["category"], form.cleaned_data["color"], form.cleaned_data["is_public"])
+            layer = import_layer(
+                form.cleaned_data["geojson_file"],
+                form.cleaned_data["layer_name"],
+                form.cleaned_data["category"],
+                form.cleaned_data["color"],
+                form.cleaned_data["is_public"],
+                form.cleaned_data["is_default_visible"],
+            )
             messages.success(request, f"Couche « {layer.name} » importée : {layer.features.count()} objet(s).")
             return redirect("management_home")
         except Exception as exc:
@@ -136,8 +159,8 @@ def import_cadastre_view(request):
     form = CadastreImportForm(request.POST or None, request.FILES or None)
     if request.method == "POST" and form.is_valid():
         try:
-            created, updated = import_cadastre(form.cleaned_data["geojson_file"], form.cleaned_data)
-            messages.success(request, f"Cadastre importé : {created} créée(s), {updated} mise(s) à jour.")
+            layer_name, created, updated = import_cadastre(form.cleaned_data["geojson_file"], form.cleaned_data)
+            messages.success(request, f"Couche Urbanisme « {layer_name} » importée : {created} créée(s), {updated} mise(s) à jour.")
             return redirect("management_home")
         except Exception as exc:
             messages.error(request, str(exc))
