@@ -180,8 +180,8 @@ class MunicipalRevenueEntry(models.Model):
         verbose_name = "Collecte municipale"
         verbose_name_plural = "Collectes municipales"
         indexes = [
-            models.Index(fields=["collection_date"]),
-            models.Index(fields=["theme", "collection_date"]),
+            models.Index(fields=["collection_date"], name="portal_muni_collect_2837f4_idx"),
+            models.Index(fields=["theme", "collection_date"], name="portal_muni_theme_i_2992e1_idx"),
         ]
 
     def __str__(self):
