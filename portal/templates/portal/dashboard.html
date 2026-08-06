@@ -13,6 +13,7 @@
       <label>Au<input type="date" name="end" value="{{ end_date|date:'Y-m-d' }}"></label>
       <button class="btn orange" type="submit">Appliquer</button>
       <a class="btn light" href="/dashboard/">Réinitialiser</a>
+      <a class="btn pdf-btn" href="/dashboard/export-pdf/?start={{ start_date|date:'Y-m-d' }}&end={{ end_date|date:'Y-m-d' }}{% if selected_theme %}&theme={{ selected_theme }}{% endif %}">⬇ Exporter le rapport PDF</a>
     </form>
 
     <div class="dashboard-period">Période analysée : <b>{{ start_date|date:'d/m/Y' }}</b> au <b>{{ end_date|date:'d/m/Y' }}</b></div>
@@ -32,6 +33,11 @@
     <div class="dashboard-charts">
       <div class="chartbox"><canvas id="themeChart"></canvas></div>
       <div class="chartbox"><canvas id="trendChart"></canvas></div>
+    </div>
+
+    <div class="dashboard-report-note">
+      <b>Rapport PDF</b>
+      <span>L’export reprend automatiquement les filtres actifs, les indicateurs, la répartition par thématique, la répartition par agent de saisie et le détail des collectes.</span>
     </div>
   </div>
 </section>
