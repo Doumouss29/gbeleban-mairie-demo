@@ -9,7 +9,6 @@ class Command(BaseCommand):
     help = "Ajoute les contenus de démonstration sans écraser les contenus existants."
 
     def handle(self, *args, **options):
-        # Groupes fonctionnels utilisés pour piloter les accès applicatifs.
         Group.objects.get_or_create(name="Accès Urbanisme")
         Group.objects.get_or_create(name="Accès Dashboard")
 
@@ -48,6 +47,24 @@ class Command(BaseCommand):
         News.objects.get_or_create(
             title="Bienvenue sur le portail numérique de Gbéléban",
             defaults={"excerpt": "Découvrez les projets, services et informations de la commune.", "published_at": date.today()}
+        )
+
+        News.objects.get_or_create(
+            title="La gestion municipale de Gbéléban saluée lors du Conseil municipal",
+            defaults={
+                "excerpt": "À l’occasion de la deuxième réunion du Conseil municipal de l’exercice 2026, la gestion de l’équipe municipale et les investissements engagés en faveur du développement de Gbéléban ont été salués.",
+                "body": (
+                    "Le samedi 6 juin 2026, le Sénateur du Kabadougou, Vassiriki Diaby, a pris part à la deuxième réunion du Conseil municipal de Gbéléban au titre de l’exercice 2026.\n\n"
+                    "À l’issue des travaux, consacrés à l’examen des différents points inscrits à l’ordre du jour, il a exprimé sa satisfaction quant à la gestion de la municipalité et aux résultats des actions de développement conduites sous l’autorité de Madame Sita Ouattara, Maire de Gbéléban.\n\n"
+                    "Le Sénateur a notamment mis en avant l’orientation du budget primitif 2026 : 13 % des ressources sont consacrées au fonctionnement, contre 87 % destinées aux investissements. Une répartition qu’il a présentée comme le signe d’une gestion rigoureuse et résolument tournée vers le développement de la commune.\n\n"
+                    "Il a également rappelé le rôle du Sénat dans la représentation et le suivi des collectivités territoriales, soulignant à ce titre l’importance d’une gestion locale efficace et d’investissements visibles au bénéfice des populations.\n\n"
+                    "Au cours des dernières années, la municipalité de Gbéléban a engagé plusieurs actions visant à renforcer les infrastructures de base, améliorer les équipements structurants et accompagner la transformation progressive de la commune. Ces réalisations participent à l’amélioration du cadre de vie et à l’attractivité du territoire.\n\n"
+                    "Cette dynamique traduit l’ambition portée par l’équipe municipale : faire de Gbéléban une commune moderne, mieux équipée, attractive et tournée vers l’avenir.\n\n"
+                    "Source : Sercom / lemeridien.ci"
+                ),
+                "published_at": date(2026, 6, 8),
+                "is_published": True,
+            }
         )
 
         if not MapLayer.objects.exists():
