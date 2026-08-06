@@ -15,6 +15,7 @@ urlpatterns = [
     path("urbanisme/", views.urbanism, name="urbanism"),
     path("api/cadastre.geojson", views.parcels_geojson, name="parcels_geojson"),
     path("api/cadastre/recherche/", views.parcel_search, name="parcel_search"),
+    path("collecte-municipale/", views.municipal_collection, name="municipal_collection"),
     path("dashboard/", views.dashboard, name="dashboard"),
     path("gestion/", views.management_home, name="management_home"),
     path("gestion/sig/import/", views.import_geojson_view, name="import_geojson"),
