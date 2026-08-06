@@ -67,6 +67,23 @@ class Command(BaseCommand):
             }
         )
 
+        News.objects.get_or_create(
+            title="Gbéléban renforce son attractivité avec un programme de logements modernes",
+            defaults={
+                "excerpt": "La commune poursuit sa transformation avec un programme de logements destinés notamment aux fonctionnaires et agents affectés à Gbéléban, afin d’améliorer les conditions d’accueil et de renforcer l’attractivité du territoire.",
+                "body": (
+                    "Gbéléban poursuit sa dynamique de modernisation avec la réalisation de nouveaux logements destinés en priorité aux fonctionnaires et agents en poste dans la commune. Ce programme répond à un besoin concret : améliorer les conditions d’hébergement dans une localité frontalière où l’offre de logements adaptés a longtemps été limitée.\n\n"
+                    "Une première phase porte sur vingt logements modernes de quatre pièces, comprenant trois chambres et un salon. Au 20 mai 2026, l’avancement des travaux était annoncé à environ 95 %, plaçant cette opération en phase finale de réalisation.\n\n"
+                    "Au-delà du confort résidentiel, le projet poursuit un objectif plus large d’attractivité territoriale. En facilitant l’installation des agents de l’État et des personnels affectés à Gbéléban, la commune entend renforcer durablement la présence des services publics et améliorer le cadre de vie des personnes appelées à y travailler.\n\n"
+                    "La programmation prévoit également quinze logements supplémentaires de trois pièces, puis une extension de cinq unités. À terme, l’ensemble du programme devrait ainsi dépasser quarante logements. Selon les informations communiquées au moment de l’annonce, la livraison des premiers logements était prévue à partir d’août 2026.\n\n"
+                    "Cette opération s’inscrit dans le Plan triennal 2025-2026-2027 de la commune, avec une orientation centrée sur les infrastructures sociales, l’amélioration du cadre de vie et le renforcement de l’attractivité de Gbéléban. Elle illustre la volonté municipale de poursuivre une transformation urbaine progressive, associant équipements, habitat et amélioration des services à la population.\n\n"
+                    "Source : Le Méridien, article publié le 20 mai 2026."
+                ),
+                "published_at": date(2026, 5, 20),
+                "is_published": True,
+            }
+        )
+
         if not MapLayer.objects.exists():
             layer = MapLayer.objects.create(
                 name="Équipements de démonstration", category="Services publics", color="#ef7d00",
