@@ -48,16 +48,18 @@
         </div>
         <a href="/actualites/">Tout voir →</a>
       </div>
-      {% for n in news_items|slice:":1" %}
-      <a class="home-news-card" href="/actualites/">
-        <small>{{ n.published_at }}</small>
-        <h3>{{ n.title }}</h3>
-        <p>{{ n.excerpt|truncatechars:150 }}</p>
-        <span>Lire l’actualité →</span>
-      </a>
-      {% empty %}
-      <div class="home-news-empty">Aucune actualité publiée pour le moment.</div>
-      {% endfor %}
+      <div class="home-news-list">
+        {% for n in news_items|slice:":2" %}
+        <a class="home-news-card" href="/actualites/">
+          <small>{{ n.published_at|date:'j F Y' }}</small>
+          <h3>{{ n.title }}</h3>
+          <p>{{ n.excerpt|truncatechars:115 }}</p>
+          <span>Lire l’actualité →</span>
+        </a>
+        {% empty %}
+        <div class="home-news-empty">Aucune actualité publiée pour le moment.</div>
+        {% endfor %}
+      </div>
     </aside>
   </div>
 </section>
