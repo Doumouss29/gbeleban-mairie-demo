@@ -1,0 +1,115 @@
+{% extends 'portal/base.html' %}
+{% block title %}Collecte municipale - Gbéléban{% endblock %}
+{% block content %}
+<section class="pagehead secure collection-head">
+  <div class="container">
+    <span class="eyebrow">RECETTES MUNICIPALES</span>
+    <h1>Collecte municipale</h1>
+    <p>Configurez les thématiques de recettes et enregistrez les montants collectés au fil des périodes.</p>
+  </div>
+</section>
+
+<section class="section collection-section">
+  <div class="container">
+    <div class="collection-kpis">
+      <div><small>Aujourd’hui</small><b>{{ today_total|floatformat:0 }} FCFA</b></div>
+      <div><small>Mois en cours</small><b>{{ month_total|floatformat:0 }} FCFA</b></div>
+      <div><small>Thématiques actives</small><b>{{ active_themes.count }}</b></div>
+    </div>
+
+    <div class="collection-layout">
+      <div class="collection-main">
+        <div class="collection-panel">
+          <div class="collection-panel-head">
+            <div><span class="eyebrow green">SAISIE</span><h2>Ajouter une collecte</h2></div>
+          </div>
+          {% if active_themes %}
+          <form method="post" class="collection-form collection-entry-form">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="add_entry">
+            <label>Thématique
+              <select name="theme_id" required>
+                <option value="">Choisir...</option>
+                {% for theme in active_themes %}<option value="{{ theme.id }}">{{ theme.name }} — {{ theme.get_frequency_display }}</option>{% endfor %}
+              </select>
+            </label>
+            <label>Date de collecte<input type="date" name="collection_date" value="{{ today|date:'Y-m-d' }}" required></label>
+            <label>Montant collecté (FCFA)<input type="number" min="1" step="1" name="amount" required placeholder="Ex. 125000"></label>
+            <label>Référence / quittance<input name="receipt_reference" maxlength="120" placeholder="Optionnel"></label>
+            <label class="full">Commentaire<textarea name="comment" rows="3" placeholder="Observations, contexte, anomalie éventuelle..."></textarea></label>
+            <div class="full"><button class="btn orange" type="submit">Enregistrer la collecte</button></div>
+          </form>
+          {% else %}
+          <div class="collection-empty">Créez d’abord une thématique de recette dans le panneau de droite.</div>
+          {% endif %}
+        </div>
+
+        <div class="collection-panel">
+          <div class="collection-panel-head"><div><span class="eyebrow green">HISTORIQUE</span><h2>Dernières collectes</h2></div><a href="/dashboard/">Voir le dashboard →</a></div>
+          <div class="collection-table-wrap">
+            <table class="collection-table">
+              <thead><tr><th>Date</th><th>Thématique</th><th>Périodicité</th><th>Montant</th><th>Référence</th><th>Commentaire</th><th></th></tr></thead>
+              <tbody>
+                {% for entry in recent_entries %}
+                <tr>
+                  <td>{{ entry.collection_date|date:'d/m/Y' }}</td>
+                  <td><b>{{ entry.theme.name }}</b></td>
+                  <td>{{ entry.theme.get_frequency_display }}</td>
+                  <td><strong>{{ entry.amount|floatformat:0 }} FCFA</strong></td>
+                  <td>{{ entry.receipt_reference|default:'—' }}</td>
+                  <td>{{ entry.comment|default:'—'|truncatechars:70 }}</td>
+                  <td>
+                    <form method="post" onsubmit="return confirm('Supprimer cette ligne de collecte ?');">
+                      {% csrf_token %}<input type="hidden" name="action" value="delete_entry"><input type="hidden" name="entry_id" value="{{ entry.id }}"><button class="collection-delete" type="submit">×</button>
+                    </form>
+                  </td>
+                </tr>
+                {% empty %}<tr><td colspan="7">Aucune collecte enregistrée.</td></tr>{% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <aside class="collection-sidebar">
+        <div class="collection-panel">
+          <span class="eyebrow green">PARAMÉTRAGE</span>
+          <h2>Nouvelle thématique</h2>
+          <p class="collection-help">Exemples possibles selon les recettes effectivement instituées par la commune : taxe communale de l’entreprenant, droits liés au marché, occupation du domaine communal ou prestations municipales.</p>
+          <form method="post" class="collection-form">
+            {% csrf_token %}<input type="hidden" name="action" value="save_theme">
+            <label>Nom<input name="name" required placeholder="Ex. Droits du marché"></label>
+            <label>Périodicité
+              <select name="frequency"><option value="daily">Quotidienne</option><option value="weekly">Hebdomadaire</option><option value="monthly">Mensuelle</option></select>
+            </label>
+            <label>Objectif par période (FCFA)<input type="number" min="0" step="1" name="target_amount" placeholder="Optionnel"></label>
+            <label>Description<textarea name="description" rows="3"></textarea></label>
+            <label class="collection-check"><input type="checkbox" name="is_active" checked> Thématique active</label>
+            <button class="btn orange" type="submit">Créer la thématique</button>
+          </form>
+        </div>
+
+        <div class="collection-panel">
+          <span class="eyebrow green">THÉMATIQUES</span><h2>Configuration</h2>
+          <div class="theme-list">
+            {% for theme in themes %}
+            <details class="theme-item">
+              <summary><span><b>{{ theme.name }}</b><small>{{ theme.get_frequency_display }}{% if theme.target_amount %} · objectif {{ theme.target_amount|floatformat:0 }} FCFA{% endif %}</small></span><i class="{% if theme.is_active %}on{% endif %}"></i></summary>
+              <form method="post" class="collection-form compact">
+                {% csrf_token %}<input type="hidden" name="action" value="save_theme"><input type="hidden" name="theme_id" value="{{ theme.id }}">
+                <label>Nom<input name="name" value="{{ theme.name }}" required></label>
+                <label>Périodicité<select name="frequency"><option value="daily" {% if theme.frequency == 'daily' %}selected{% endif %}>Quotidienne</option><option value="weekly" {% if theme.frequency == 'weekly' %}selected{% endif %}>Hebdomadaire</option><option value="monthly" {% if theme.frequency == 'monthly' %}selected{% endif %}>Mensuelle</option></select></label>
+                <label>Objectif / période<input type="number" min="0" step="1" name="target_amount" value="{{ theme.target_amount|default_if_none:'' }}"></label>
+                <label>Description<textarea name="description" rows="2">{{ theme.description }}</textarea></label>
+                <label class="collection-check"><input type="checkbox" name="is_active" {% if theme.is_active %}checked{% endif %}> Active</label>
+                <button class="btn light" type="submit">Mettre à jour</button>
+              </form>
+            </details>
+            {% empty %}<p>Aucune thématique créée.</p>{% endfor %}
+          </div>
+        </div>
+      </aside>
+    </div>
+  </div>
+</section>
+{% endblock %}
