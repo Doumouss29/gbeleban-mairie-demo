@@ -11,6 +11,7 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         Group.objects.get_or_create(name="Accès Urbanisme")
         Group.objects.get_or_create(name="Accès Dashboard")
+        Group.objects.get_or_create(name="Accès Collecte municipale")
 
         SiteSettings.objects.get_or_create(id=1, defaults={
             "municipality_name": "Commune de Gbéléban",
