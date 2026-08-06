@@ -29,21 +29,10 @@ class Command(BaseCommand):
             Page.objects.get_or_create(slug=slug, defaults={"title": title, "menu_order": order, "summary": summary, "content": content})
 
         for title, desc, icon, url, order in [
-            ("Mes démarches", "État civil, demandes et informations utiles", "📄", "/pages/demarches/", 10),
             ("Nos projets", "Réalisés, en cours et à venir", "🏗️", "/projets/", 30),
             ("Gbéléban en carte", "Équipements et points d’intérêt", "📍", "/gbeleban-en-carte/", 40),
         ]:
             QuickLink.objects.get_or_create(title=title, defaults={"description": desc, "icon": icon, "url": url, "order": order})
-
-        for title, category, status, progress, budget in [
-            ("Réhabilitation d'une école primaire", "Éducation", "ongoing", 65, 45000000),
-            ("Aménagement de voirie communale", "Voirie", "done", 100, 80000000),
-            ("Projet de marché municipal", "Commerce", "planned", 0, 120000000),
-        ]:
-            Project.objects.get_or_create(title=title, defaults={
-                "category": category, "status": status, "progress": progress, "budget": budget,
-                "description": "Donnée de démonstration à remplacer par les informations officielles."
-            })
 
         News.objects.get_or_create(
             title="La gestion municipale de Gbéléban saluée lors du Conseil municipal",
