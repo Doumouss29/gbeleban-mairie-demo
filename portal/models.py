@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.db import models
 from django.urls import reverse
 
@@ -138,6 +139,53 @@ class Parcel(models.Model):
     class Meta:
         constraints = [models.UniqueConstraint(fields=["source_layer", "reference"], name="uniq_parcel_layer_reference")]
     def __str__(self): return f"{self.source_layer} - {self.reference}" if self.source_layer else self.reference
+
+
+class MunicipalRevenueTheme(models.Model):
+    FREQUENCY_CHOICES = [
+        ("daily", "Quotidienne"),
+        ("weekly", "Hebdomadaire"),
+        ("monthly", "Mensuelle"),
+    ]
+    name = models.CharField("Thématique de recette", max_length=160, unique=True)
+    description = models.TextField("Description", blank=True)
+    frequency = models.CharField("Périodicité", max_length=20, choices=FREQUENCY_CHOICES, default="daily")
+    target_amount = models.DecimalField("Objectif par période (FCFA)", max_digits=16, decimal_places=0, null=True, blank=True)
+    is_active = models.BooleanField("Active", default=True)
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name="municipal_revenue_themes")
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["name"]
+        verbose_name = "Thématique de collecte municipale"
+        verbose_name_plural = "Thématiques de collecte municipale"
+
+    def __str__(self):
+        return self.name
+
+
+class MunicipalRevenueEntry(models.Model):
+    theme = models.ForeignKey(MunicipalRevenueTheme, on_delete=models.PROTECT, related_name="entries")
+    collection_date = models.DateField("Date de collecte")
+    amount = models.DecimalField("Montant collecté (FCFA)", max_digits=16, decimal_places=0)
+    comment = models.TextField("Commentaire", blank=True)
+    receipt_reference = models.CharField("Référence / quittance", max_length=120, blank=True)
+    entered_by = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name="municipal_revenue_entries")
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["-collection_date", "-created_at"]
+        verbose_name = "Collecte municipale"
+        verbose_name_plural = "Collectes municipales"
+        indexes = [
+            models.Index(fields=["collection_date"]),
+            models.Index(fields=["theme", "collection_date"]),
+        ]
+
+    def __str__(self):
+        return f"{self.theme} - {self.collection_date} - {self.amount} FCFA"
 
 
 class Taxpayer(models.Model):
