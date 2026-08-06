@@ -1,6 +1,7 @@
 from django.contrib.auth.views import LoginView, LogoutView
 from django.urls import path
 from . import views
+from . import pdf_reports
 
 urlpatterns = [
     path("", views.home, name="home"),
@@ -17,6 +18,7 @@ urlpatterns = [
     path("api/cadastre/recherche/", views.parcel_search, name="parcel_search"),
     path("collecte-municipale/", views.municipal_collection, name="municipal_collection"),
     path("dashboard/", views.dashboard, name="dashboard"),
+    path("dashboard/export-pdf/", pdf_reports.dashboard_pdf, name="dashboard_pdf"),
     path("gestion/", views.management_home, name="management_home"),
     path("gestion/sig/import/", views.import_geojson_view, name="import_geojson"),
     path("gestion/cadastre/import/", views.import_cadastre_view, name="import_cadastre"),
