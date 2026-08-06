@@ -1,6 +1,9 @@
 from django.contrib import admin
 from .forms import SiteSettingsAdminForm, NewsAdminForm, ProjectAdminForm
-from .models import SiteSettings, Page, QuickLink, News, Project, MapLayer, MapFeature, Parcel, Taxpayer, Tax, Payment
+from .models import (
+    SiteSettings, Page, QuickLink, News, Project, MapLayer, MapFeature, Parcel,
+    Taxpayer, Tax, Payment, MunicipalRevenueTheme, MunicipalRevenueEntry,
+)
 
 admin.site.site_header = "Administration - Commune de Gbéléban"
 admin.site.site_title = "Gbéléban Admin"
@@ -70,6 +73,21 @@ class ProjectAdmin(admin.ModelAdmin):
 class MapLayerAdmin(admin.ModelAdmin):
     list_display = ("name", "category", "is_public", "is_default_visible")
     list_editable = ("is_public", "is_default_visible")
+
+
+@admin.register(MunicipalRevenueTheme)
+class MunicipalRevenueThemeAdmin(admin.ModelAdmin):
+    list_display = ("name", "frequency", "target_amount", "is_active", "updated_at")
+    list_editable = ("frequency", "target_amount", "is_active")
+    list_filter = ("frequency", "is_active")
+
+
+@admin.register(MunicipalRevenueEntry)
+class MunicipalRevenueEntryAdmin(admin.ModelAdmin):
+    list_display = ("collection_date", "theme", "amount", "receipt_reference", "entered_by")
+    list_filter = ("theme", "collection_date")
+    search_fields = ("theme__name", "receipt_reference", "comment")
+    date_hierarchy = "collection_date"
 
 
 admin.site.register(MapFeature)
