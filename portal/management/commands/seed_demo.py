@@ -46,11 +46,6 @@ class Command(BaseCommand):
             })
 
         News.objects.get_or_create(
-            title="Bienvenue sur le portail numérique de Gbéléban",
-            defaults={"excerpt": "Découvrez les projets, services et informations de la commune.", "published_at": date.today()}
-        )
-
-        News.objects.get_or_create(
             title="La gestion municipale de Gbéléban saluée lors du Conseil municipal",
             defaults={
                 "excerpt": "À l’occasion de la deuxième réunion du Conseil municipal de l’exercice 2026, la gestion de l’équipe municipale et les investissements engagés en faveur du développement de Gbéléban ont été salués.",
