@@ -2,9 +2,13 @@ import calendar
 import json
 from datetime import date, datetime, timedelta
 from decimal import Decimal, InvalidOperation
+from django.conf import settings
 from django.contrib import messages
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.decorators import login_required
+from django.core.mail import EmailMessage
+from django.core.validators import validate_email
+from django.core.exceptions import ValidationError
 from django.db.models import Sum
 from django.http import JsonResponse, Http404
 from django.shortcuts import render, redirect, get_object_or_404
@@ -12,6 +16,7 @@ from .forms import GeoJSONImportForm, CadastreImportForm
 from .models import (
     SiteSettings, Page, QuickLink, News, Project, MapLayer, UrbanismLayer, Parcel,
     Taxpayer, Tax, Payment, MunicipalRevenueTheme, MunicipalRevenueEntry,
+    ContactRecipient, ContactMessage,
 )
 from .services import import_layer, import_cadastre
 
@@ -59,9 +64,82 @@ def news(request):
     return render(request, "portal/news.html", {"news_items": News.objects.filter(is_published=True)})
 
 
+def contact(request):
+    form_data = {
+        "name": "",
+        "email": "",
+        "phone": "",
+        "subject": "",
+        "message": "",
+    }
+
+    if request.method == "POST":
+        form_data = {key: request.POST.get(key, "").strip() for key in form_data}
+        errors = []
+
+        if not form_data["name"]:
+            errors.append("Le nom est obligatoire.")
+        if not form_data["email"]:
+            errors.append("L’adresse e-mail est obligatoire.")
+        else:
+            try:
+                validate_email(form_data["email"])
+            except ValidationError:
+                errors.append("L’adresse e-mail saisie n’est pas valide.")
+        if not form_data["subject"]:
+            errors.append("L’objet est obligatoire.")
+        if not form_data["message"]:
+            errors.append("Le message est obligatoire.")
+
+        if errors:
+            for error in errors:
+                messages.error(request, error)
+        else:
+            saved = ContactMessage.objects.create(**form_data)
+            recipients = list(
+                ContactRecipient.objects.filter(is_active=True).values_list("email", flat=True)
+            )
+
+            if recipients:
+                body = (
+                    f"Nouveau message reçu depuis le portail municipal de Gbéléban.\n\n"
+                    f"Nom : {saved.name}\n"
+                    f"E-mail : {saved.email}\n"
+                    f"Téléphone : {saved.phone or 'Non renseigné'}\n"
+                    f"Objet : {saved.subject}\n\n"
+                    f"Message :\n{saved.message}\n\n"
+                    f"Le message est également archivé dans l'administration du portail."
+                )
+                try:
+                    email = EmailMessage(
+                        subject=f"[Gbéléban] {saved.subject}",
+                        body=body,
+                        from_email=settings.DEFAULT_FROM_EMAIL,
+                        to=recipients,
+                        reply_to=[saved.email],
+                    )
+                    sent = email.send(fail_silently=False)
+                    if sent:
+                        saved.email_sent = True
+                        saved.save(update_fields=["email_sent"])
+                except Exception:
+                    # Le message reste conservé en base même si SMTP est indisponible.
+                    pass
+
+            messages.success(request, "Votre message a bien été transmis à la mairie.")
+            return redirect("page_detail", slug="contact")
+
+    return render(request, "portal/contact.html", {
+        "form_data": form_data,
+        "public_recipients": ContactRecipient.objects.filter(is_active=True),
+    })
+
+
 def page_detail(request, slug):
     if slug == "la-commune":
         return render(request, "portal/commune.html")
+    if slug == "contact":
+        return contact(request)
     page = get_object_or_404(Page, slug=slug, is_published=True)
     return render(request, "portal/page_detail.html", {"page": page})
 
