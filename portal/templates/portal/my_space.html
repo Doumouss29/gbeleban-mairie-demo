@@ -15,10 +15,15 @@
       {% if can_urbanism %}
       <a class="access-card" href="/urbanisme/">
         <span class="access-icon">🗺️</span>
-        <div>
-          <h2>Urbanisme</h2>
-          <p>Accéder au plan cadastral, aux parcelles et aux outils de consultation urbanistique.</p>
-        </div>
+        <div><h2>Urbanisme</h2><p>Accéder au plan cadastral, aux parcelles et aux outils de consultation urbanistique.</p></div>
+        <span class="access-arrow">→</span>
+      </a>
+      {% endif %}
+
+      {% if can_collection %}
+      <a class="access-card" href="/collecte-municipale/">
+        <span class="access-icon">💰</span>
+        <div><h2>Collecte municipale</h2><p>Créer les thématiques de recettes, définir leur périodicité et enregistrer les montants collectés.</p></div>
         <span class="access-arrow">→</span>
       </a>
       {% endif %}
@@ -26,27 +31,21 @@
       {% if can_dashboard %}
       <a class="access-card" href="/dashboard/">
         <span class="access-icon">📊</span>
-        <div>
-          <h2>Dashboard</h2>
-          <p>Consulter les indicateurs de pilotage, les taxes, paiements et données de synthèse.</p>
-        </div>
+        <div><h2>Dashboard</h2><p>Analyser les recettes municipales, les objectifs et les tendances par période et par thématique.</p></div>
         <span class="access-arrow">→</span>
       </a>
       {% endif %}
     </div>
 
-    {% if not can_urbanism and not can_dashboard %}
+    {% if not can_urbanism and not can_dashboard and not can_collection %}
       <div class="no-access-card">
         <h2>Aucun service attribué</h2>
-        <p>Votre compte est actif, mais aucun accès Urbanisme ou Dashboard ne lui a encore été attribué. Contactez l’administrateur du portail.</p>
+        <p>Votre compte est actif, mais aucun service ne lui a encore été attribué. Contactez l’administrateur du portail.</p>
       </div>
     {% endif %}
 
     <div class="space-footer-actions">
-      <form method="post" action="/deconnexion/">
-        {% csrf_token %}
-        <button type="submit" class="btn light">Se déconnecter</button>
-      </form>
+      <form method="post" action="/deconnexion/">{% csrf_token %}<button type="submit" class="btn light">Se déconnecter</button></form>
     </div>
   </div>
 </section>
