@@ -37,6 +37,7 @@
             <label>Montant collecté (FCFA)<input type="number" min="1" step="1" name="amount" required placeholder="Ex. 125000"></label>
             <label>Référence / quittance<input name="receipt_reference" maxlength="120" placeholder="Optionnel"></label>
             <label class="full">Commentaire<textarea name="comment" rows="3" placeholder="Observations, contexte, anomalie éventuelle..."></textarea></label>
+            <div class="full collection-agent-note">La saisie sera automatiquement attribuée à <b>{{ user.get_full_name|default:user.username }}</b>.</div>
             <div class="full"><button class="btn orange" type="submit">Enregistrer la collecte</button></div>
           </form>
           {% else %}
@@ -48,7 +49,7 @@
           <div class="collection-panel-head"><div><span class="eyebrow green">HISTORIQUE</span><h2>Dernières collectes</h2></div><a href="/dashboard/">Voir le dashboard →</a></div>
           <div class="collection-table-wrap">
             <table class="collection-table">
-              <thead><tr><th>Date</th><th>Thématique</th><th>Périodicité</th><th>Montant</th><th>Référence</th><th>Commentaire</th><th></th></tr></thead>
+              <thead><tr><th>Date</th><th>Thématique</th><th>Périodicité</th><th>Montant</th><th>Agent de saisie</th><th>Référence</th><th>Commentaire</th><th></th></tr></thead>
               <tbody>
                 {% for entry in recent_entries %}
                 <tr>
@@ -56,6 +57,7 @@
                   <td><b>{{ entry.theme.name }}</b></td>
                   <td>{{ entry.theme.get_frequency_display }}</td>
                   <td><strong>{{ entry.amount|floatformat:0 }} FCFA</strong></td>
+                  <td>{% if entry.entered_by %}{{ entry.entered_by.get_full_name|default:entry.entered_by.username }}{% else %}—{% endif %}</td>
                   <td>{{ entry.receipt_reference|default:'—' }}</td>
                   <td>{{ entry.comment|default:'—'|truncatechars:70 }}</td>
                   <td>
@@ -64,7 +66,7 @@
                     </form>
                   </td>
                 </tr>
-                {% empty %}<tr><td colspan="7">Aucune collecte enregistrée.</td></tr>{% endfor %}
+                {% empty %}<tr><td colspan="8">Aucune collecte enregistrée.</td></tr>{% endfor %}
               </tbody>
             </table>
           </div>
