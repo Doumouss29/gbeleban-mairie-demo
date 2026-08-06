@@ -1,1 +1,46 @@
-{% extends 'portal/base.html' %}{% block title %}Dashboard - Gbéléban{% endblock %}{% block head %}<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>{% endblock %}{% block content %}<section class="pagehead secure"><div class="container"><span class="eyebrow">PILOTAGE MUNICIPAL</span><h1>Tableau de bord du Maire</h1><p>Données de démonstration — les montants ne sont pas officiels.</p></div></section><section class="section"><div class="container"><div class="kpis"><div><small>Montant attendu</small><b>{{ amount_due|floatformat:0 }} FCFA</b></div><div><small>Montant recouvré</small><b>{{ amount_paid|floatformat:0 }} FCFA</b></div><div><small>Reste à recouvrer</small><b>{{ amount_remaining|floatformat:0 }} FCFA</b></div><div><small>Taux de recouvrement</small><b>{{ collection_rate }} %</b></div><div><small>Contribuables</small><b>{{ taxpayers_count }}</b></div><div><small>Projets</small><b>{{ projects_count }}</b></div></div><div class="chartbox"><canvas id="taxChart"></canvas></div></div></section>{% endblock %}{% block scripts %}<script>const d={{ status_counts_json|safe }};new Chart(document.getElementById('taxChart'),{type:'doughnut',data:{labels:['Payées','Partielles','Impayées'],datasets:[{data:[d.paid,d.partial,d.unpaid]}]},options:{plugins:{title:{display:true,text:'Répartition des taxes - démo'}}}});</script>{% endblock %}
+{% extends 'portal/base.html' %}
+{% block title %}Dashboard - Gbéléban{% endblock %}
+{% block head %}<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>{% endblock %}
+{% block content %}
+<section class="pagehead secure dashboard-head"><div class="container"><span class="eyebrow">PILOTAGE MUNICIPAL</span><h1>Tableau de bord des recettes</h1><p>Suivez les montants collectés, les objectifs et leur évolution dans le temps.</p></div></section>
+<section class="section dashboard-section">
+  <div class="container">
+    <form method="get" class="dashboard-filters">
+      <label>Thématique
+        <select name="theme"><option value="">Toutes les thématiques</option>{% for theme in themes %}<option value="{{ theme.id }}" {% if selected_theme == theme.id|stringformat:'s' %}selected{% endif %}>{{ theme.name }}</option>{% endfor %}</select>
+      </label>
+      <label>Du<input type="date" name="start" value="{{ start_date|date:'Y-m-d' }}"></label>
+      <label>Au<input type="date" name="end" value="{{ end_date|date:'Y-m-d' }}"></label>
+      <button class="btn orange" type="submit">Appliquer</button>
+      <a class="btn light" href="/dashboard/">Réinitialiser</a>
+    </form>
+
+    <div class="dashboard-period">Période analysée : <b>{{ start_date|date:'d/m/Y' }}</b> au <b>{{ end_date|date:'d/m/Y' }}</b></div>
+
+    <div class="kpis dashboard-kpis">
+      <div><small>Objectif théorique</small><b>{{ amount_due|floatformat:0 }} FCFA</b></div>
+      <div><small>Montant collecté</small><b>{{ amount_paid|floatformat:0 }} FCFA</b></div>
+      <div><small>Écart à l’objectif</small><b>{{ amount_remaining|floatformat:0 }} FCFA</b></div>
+      <div><small>Taux de réalisation</small><b>{{ collection_rate }} %</b></div>
+      <div><small>Lignes de collecte</small><b>{{ entries_count }}</b></div>
+      <div><small>Thématiques suivies</small><b>{{ active_themes_count }}</b></div>
+      <div><small>Projets publiés</small><b>{{ projects_count }}</b></div>
+    </div>
+
+    {% if amount_due == 0 %}<div class="dashboard-note">Aucun objectif n’est défini pour les thématiques sélectionnées. Les montants collectés restent suivis normalement ; ajoutez un objectif par période dans « Collecte municipale » pour calculer le taux de réalisation.</div>{% endif %}
+
+    <div class="dashboard-charts">
+      <div class="chartbox"><canvas id="themeChart"></canvas></div>
+      <div class="chartbox"><canvas id="trendChart"></canvas></div>
+    </div>
+  </div>
+</section>
+{% endblock %}
+{% block scripts %}
+<script>
+const themeLabels={{ theme_labels_json|safe }}, themeValues={{ theme_values_json|safe }};
+const dateLabels={{ date_labels_json|safe }}, dateValues={{ date_values_json|safe }};
+new Chart(document.getElementById('themeChart'),{type:'bar',data:{labels:themeLabels,datasets:[{label:'Montant collecté (FCFA)',data:themeValues}]},options:{responsive:true,plugins:{title:{display:true,text:'Recettes par thématique'},legend:{display:false}},scales:{y:{beginAtZero:true}}}});
+new Chart(document.getElementById('trendChart'),{type:'line',data:{labels:dateLabels,datasets:[{label:'Montant collecté (FCFA)',data:dateValues,tension:.25,fill:false}]},options:{responsive:true,plugins:{title:{display:true,text:'Évolution des collectes'}},scales:{y:{beginAtZero:true}}}});
+</script>
+{% endblock %}
