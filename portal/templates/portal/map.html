@@ -1,1 +1,43 @@
-{% extends 'portal/base.html' %}{% load static %}{% block title %}Gbéléban en carte{% endblock %}{% block content %}<section class="pagehead websig-pagehead"><div class="container"><span class="eyebrow">WEB SIG CITOYEN</span><h1>Gbéléban en carte</h1><p>Découvrez les équipements, services et points importants de la commune.</p></div></section><section class="maplayout websig-grid"><aside><h3>Couches</h3>{% for layer in layers %}<label class="layeritem"><input type="checkbox" class="layer-toggle" data-id="{{ layer.id }}" data-color="{{ layer.color }}" {% if layer.is_default_visible %}checked{% endif %}> <span>{{ layer.name }}</span></label>{% empty %}<p>Aucune couche.</p>{% endfor %}</aside><div id="map"></div></section><script>document.body.classList.add('websig-page');</script>{% endblock %}{% block scripts %}<script src="{% static 'portal/js/map.js' %}"></script>{% endblock %}
+{% extends 'portal/base.html' %}{% load static %}
+{% block title %}Gbéléban en carte{% endblock %}
+{% block head %}
+<link href="https://unpkg.com/maplibre-gl@5.6.2/dist/maplibre-gl.css" rel="stylesheet">
+{% endblock %}
+{% block content %}
+<section class="pagehead websig-pagehead">
+  <div class="container">
+    <span class="eyebrow">WEB SIG CITOYEN</span>
+    <h1>Gbéléban en carte</h1>
+    <p>Découvrez les équipements, services et points importants de la commune.</p>
+  </div>
+</section>
+<section class="maplayout websig-grid">
+  <aside>
+    <div class="websig-tools">
+      <h3>Affichage</h3>
+      <button type="button" id="toggle-3d" class="websig-3d-btn" aria-pressed="false">
+        <span>◩</span><b>Vue 3D</b><small>Incliner la carte et extruder les bâtiments</small>
+      </button>
+      <label class="layeritem admin-3d-toggle">
+        <input type="checkbox" id="admin-buildings-toggle" checked>
+        <span>Bâtiments publics 3D</span>
+      </label>
+      <p class="websig-3d-help">Les volumes sont générés automatiquement à partir des emprises publiques disponibles. Les hauteurs non renseignées sont estimées.</p>
+    </div>
+
+    <h3>Couches</h3>
+    {% for layer in layers %}
+      <label class="layeritem">
+        <input type="checkbox" class="layer-toggle" data-id="{{ layer.id }}" data-color="{{ layer.color }}" {% if layer.is_default_visible %}checked{% endif %}>
+        <span>{{ layer.name }}</span>
+      </label>
+    {% empty %}<p>Aucune couche.</p>{% endfor %}
+  </aside>
+  <div id="map"></div>
+</section>
+<script>document.body.classList.add('websig-page');</script>
+{% endblock %}
+{% block scripts %}
+<script src="https://unpkg.com/maplibre-gl@5.6.2/dist/maplibre-gl.js"></script>
+<script src="{% static 'portal/js/map.js' %}"></script>
+{% endblock %}
