@@ -1,5 +1,5 @@
 {% extends 'portal/base.html' %}{% load static %}{% block title %}Urbanisme - Gbéléban{% endblock %}{% block content %}
-<section class="pagehead secure urban-pagehead"><div class="container"><span class="eyebrow">ESPACE SÉCURISÉ</span><h1>Urbanisme & plan cadastral</h1><p>Consultez les couches cadastrales importées depuis QGIS et recherchez une parcelle.</p></div></section>
+<section class="pagehead secure urban-pagehead"><div class="container"><span class="eyebrow">ESPACE SÉCURISÉ</span><h1>Urbanisme & plan cadastral</h1><p>Consultez le plan cadastral de la commune et recherchez une parcelle.</p></div></section>
 <section class="urban-grid">
   <aside>
     <h3>Couches Urbanisme</h3>
@@ -7,7 +7,7 @@
     {% for layer in urban_layers %}
       <label class="layeritem"><input type="radio" name="urban-layer" value="{{ layer }}"> <span>{{ layer }}</span></label>
     {% empty %}
-      <p>Aucune couche Urbanisme importée.</p>
+      <p>Aucune couche Urbanisme disponible.</p>
     {% endfor %}
 
     <h3 style="margin-top:28px">Rechercher une parcelle</h3>
