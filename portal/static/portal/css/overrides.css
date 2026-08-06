@@ -2,6 +2,11 @@
 .navwrap{grid-template-columns:minmax(330px,380px) minmax(0,1fr) 100px}
 .mobile-menu a.active{color:#ef7d00;background:#fff7ef;border-left:4px solid #ef7d00}
 
+/* Accueil : photo du maire toujours visible en entier, quel que soit l'écran */
+.mayor-hero-photo{height:auto!important;min-height:0!important;background:#fff!important;display:block}
+.mayor-hero-photo img{width:100%!important;height:auto!important;max-height:none!important;object-fit:contain!important;object-position:center!important;display:block}
+.mayor-hero-photo .photo-placeholder{min-height:300px}
+
 /* Accueil : accès rapides + actualité sur la même ligne */
 .home-top-grid{display:grid;grid-template-columns:minmax(0,3fr) minmax(300px,1fr);gap:28px;align-items:stretch}
 .home-quickgrid{grid-template-columns:repeat(3,minmax(0,1fr));gap:22px}
