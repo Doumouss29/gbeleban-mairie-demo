@@ -44,6 +44,40 @@ class Page(models.Model):
     def get_absolute_url(self): return reverse("page_detail", kwargs={"slug": self.slug})
 
 
+class ContactRecipient(models.Model):
+    email = models.EmailField("Adresse e-mail", unique=True)
+    label = models.CharField("Libellé", max_length=120, blank=True, help_text="Ex. Secrétariat, Maire, Service communication")
+    is_active = models.BooleanField("Recevoir les messages", default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["email"]
+        verbose_name = "Destinataire des contacts"
+        verbose_name_plural = "Destinataires des contacts"
+
+    def __str__(self):
+        return f"{self.label} — {self.email}" if self.label else self.email
+
+
+class ContactMessage(models.Model):
+    name = models.CharField("Nom", max_length=160)
+    email = models.EmailField("E-mail")
+    phone = models.CharField("Téléphone", max_length=60, blank=True)
+    subject = models.CharField("Objet", max_length=200)
+    message = models.TextField("Message")
+    created_at = models.DateTimeField("Reçu le", auto_now_add=True)
+    email_sent = models.BooleanField("E-mail envoyé", default=False)
+    is_processed = models.BooleanField("Traité", default=False)
+
+    class Meta:
+        ordering = ["-created_at"]
+        verbose_name = "Message de contact"
+        verbose_name_plural = "Messages de contact"
+
+    def __str__(self):
+        return f"{self.subject} — {self.name}"
+
+
 class QuickLink(models.Model):
     title = models.CharField("Titre", max_length=120)
     description = models.CharField("Description", max_length=220, blank=True)
