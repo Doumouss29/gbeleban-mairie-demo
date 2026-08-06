@@ -3,6 +3,7 @@ from .forms import SiteSettingsAdminForm, NewsAdminForm, ProjectAdminForm
 from .models import (
     SiteSettings, Page, QuickLink, News, Project, MapLayer, MapFeature, Parcel,
     Taxpayer, Tax, Payment, MunicipalRevenueTheme, MunicipalRevenueEntry,
+    ContactRecipient, ContactMessage,
 )
 
 admin.site.site_header = "Administration - Commune de Gbéléban"
@@ -21,6 +22,23 @@ class SiteSettingsAdmin(admin.ModelAdmin):
     )
     def has_add_permission(self, request):
         return not SiteSettings.objects.exists()
+
+
+@admin.register(ContactRecipient)
+class ContactRecipientAdmin(admin.ModelAdmin):
+    list_display = ("email", "label", "is_active", "created_at")
+    list_editable = ("is_active",)
+    search_fields = ("email", "label")
+
+
+@admin.register(ContactMessage)
+class ContactMessageAdmin(admin.ModelAdmin):
+    list_display = ("created_at", "name", "email", "subject", "email_sent", "is_processed")
+    list_filter = ("email_sent", "is_processed", "created_at")
+    list_editable = ("is_processed",)
+    search_fields = ("name", "email", "phone", "subject", "message")
+    readonly_fields = ("name", "email", "phone", "subject", "message", "created_at", "email_sent")
+    date_hierarchy = "created_at"
 
 
 @admin.register(Page)
