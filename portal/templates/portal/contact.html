@@ -1,0 +1,57 @@
+{% extends 'portal/base.html' %}
+{% block title %}Contact - Mairie de Gbéléban{% endblock %}
+{% block content %}
+<section class="pagehead contact-head">
+  <div class="container">
+    <span class="eyebrow">NOUS CONTACTER</span>
+    <h1>Contactez la mairie</h1>
+    <p>Une question, une demande ou une information à transmettre ? Écrivez directement aux services municipaux.</p>
+  </div>
+</section>
+
+<section class="section contact-section">
+  <div class="container contact-layout">
+    <div class="contact-card contact-info-card">
+      <span class="eyebrow green">MAIRIE DE GBÉLÉBAN</span>
+      <h2>À votre écoute</h2>
+      <p>Utilisez le formulaire pour transmettre votre demande. Chaque message est enregistré dans le portail afin d’assurer son suivi par les services municipaux.</p>
+
+      <div class="contact-info-list">
+        <div><span>☎</span><p><small>Téléphone</small><b>{{ site_settings.phone|default:'À renseigner' }}</b></p></div>
+        <div><span>✉</span><p><small>E-mail public</small><b>{{ site_settings.email|default:'À renseigner' }}</b></p></div>
+        <div><span>📍</span><p><small>Adresse</small><b>{{ site_settings.address|default:'Mairie de Gbéléban' }}</b></p></div>
+        <div><span>🕘</span><p><small>Horaires</small><b>Lundi au vendredi · 08h00 à 17h00</b></p></div>
+      </div>
+    </div>
+
+    <div class="contact-card contact-form-card">
+      <span class="eyebrow green">FORMULAIRE</span>
+      <h2>Envoyer un message</h2>
+      <form method="post" class="contact-form">
+        {% csrf_token %}
+        <div class="contact-form-grid">
+          <label>Nom et prénom
+            <input type="text" name="name" maxlength="160" required value="{{ form_data.name }}" placeholder="Votre nom">
+          </label>
+          <label>Adresse e-mail
+            <input type="email" name="email" required value="{{ form_data.email }}" placeholder="vous@exemple.com">
+          </label>
+          <label>Téléphone <small>(optionnel)</small>
+            <input type="text" name="phone" maxlength="60" value="{{ form_data.phone }}" placeholder="Votre numéro">
+          </label>
+          <label>Objet
+            <input type="text" name="subject" maxlength="200" required value="{{ form_data.subject }}" placeholder="Objet de votre demande">
+          </label>
+          <label class="full">Message
+            <textarea name="message" rows="7" required placeholder="Décrivez votre demande...">{{ form_data.message }}</textarea>
+          </label>
+        </div>
+        <div class="contact-submit-row">
+          <button type="submit" class="btn orange">Envoyer le message</button>
+          <small>Votre message est transmis aux destinataires configurés par l’administrateur du portail.</small>
+        </div>
+      </form>
+    </div>
+  </div>
+</section>
+{% endblock %}
