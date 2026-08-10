@@ -120,5 +120,8 @@
 })();
 </script>
 {% block scripts %}{% endblock %}
+{% if '/gbeleban-en-carte/' in request.path %}
+<script src="{% static 'portal/js/map-rotation.js' %}"></script>
+{% endif %}
 </body>
 </html>
