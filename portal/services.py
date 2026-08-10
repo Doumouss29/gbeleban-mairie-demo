@@ -76,6 +76,7 @@ def import_cadastre(uploaded, fields):
 
     objects = []
     refs = []
+    seen_refs = set()
     for idx, feature in enumerate(data.get("features", []), 1):
         props = feature.get("properties") or {}
         geom = feature.get("geometry") or {}
@@ -83,9 +84,26 @@ def import_cadastre(uploaded, fields):
             continue
 
         raw_ref = props.get(ref_key)
-        reference = str(raw_ref if raw_ref not in (None, "") else idx).strip()
         if ref_key == "id_auto":
-            reference = f"GBL-{reference}"
+            if raw_ref in (None, ""):
+                # Le fichier contient quelques entités sans id_auto. Utiliser simplement
+                # l'index de la ligne peut entrer en collision avec un vrai id_auto
+                # (ex. GBL-1288). On réserve donc un préfixe distinct.
+                reference = f"GBL-AUTO-{idx}"
+            else:
+                reference = f"GBL-{str(raw_ref).strip()}"
+        else:
+            reference = str(raw_ref if raw_ref not in (None, "") else f"AUTO-{idx}").strip()
+
+        # Sécurité supplémentaire : aucune référence du fichier ne doit provoquer
+        # une violation de la contrainte (source_layer, reference).
+        if reference in seen_refs:
+            base_reference = reference
+            suffix = 2
+            while reference in seen_refs:
+                reference = f"{base_reference}-{suffix}"
+                suffix += 1
+        seen_refs.add(reference)
         refs.append(reference)
 
         area = None
