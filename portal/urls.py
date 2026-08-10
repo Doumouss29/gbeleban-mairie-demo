@@ -2,6 +2,7 @@ from django.contrib.auth.views import LoginView, LogoutView
 from django.urls import path
 from . import views
 from . import pdf_reports
+from . import public_map_views
 
 urlpatterns = [
     path("", views.home, name="home"),
@@ -11,7 +12,8 @@ urlpatterns = [
     path("projets/", views.projects, name="projects"),
     path("actualites/", views.news, name="news"),
     path("pages/<slug:slug>/", views.page_detail, name="page_detail"),
-    path("gbeleban-en-carte/", views.map_public, name="map_public"),
+    path("gbeleban-en-carte/", public_map_views.map_public, name="map_public"),
+    path("api/gbeleban-carte.geojson", public_map_views.public_map_geojson, name="public_map_geojson"),
     path("api/couches/<int:layer_id>.geojson", views.layer_geojson, name="layer_geojson"),
     path("urbanisme/", views.urbanism, name="urbanism"),
     path("api/cadastre.geojson", views.parcels_geojson, name="parcels_geojson"),
