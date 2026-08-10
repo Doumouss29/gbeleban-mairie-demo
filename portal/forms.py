@@ -28,10 +28,10 @@ class SiteSettingsAdminForm(forms.ModelForm):
         fields = "__all__"
         widgets = {
             "municipality_logo_src": forms.TextInput(attrs={"placeholder": "URL ou laisser vide si vous importez un fichier"}),
-            "national_arms_src": forms.TextInput(attrs={"placeholder": "URL ou laisser vide si vous importez un fichier"}),
-            "hero_image_url": forms.TextInput(attrs={"placeholder": "URL ou laisser vide si vous importez un fichier"}),
-            "mayor_hero_image_url": forms.TextInput(attrs={"placeholder": "URL ou laisser vide si vous importez un fichier"}),
-            "mayor_section_image_url": forms.TextInput(attrs={"placeholder": "URL ou laisser vide si vous importez un fichier"}),
+            "national_arms_src": forms.TextInput(attrs={"placeholder": "URL ou laisser vide si vous importez une image"}),
+            "hero_image_url": forms.TextInput(attrs={"placeholder": "URL ou laisser vide si vous importez une image"}),
+            "mayor_hero_image_url": forms.TextInput(attrs={"placeholder": "URL ou laisser vide si vous importez une image"}),
+            "mayor_section_image_url": forms.TextInput(attrs={"placeholder": "URL ou laisser vide si vous importez une image"}),
         }
 
     def save(self, commit=True):
@@ -113,8 +113,14 @@ class GeoJSONImportForm(forms.Form):
 
 
 class CadastreImportForm(forms.Form):
-    layer_name = forms.CharField(label="Nom de la couche urbanisme", max_length=160)
+    layer_name = forms.CharField(label="Nom de la couche urbanisme", max_length=160, initial="Cadastre Gbéléban")
     geojson_file = forms.FileField(label="Plan cadastral GeoJSON")
+    replace_existing = forms.BooleanField(
+        label="Remplacer entièrement le cadastre existant",
+        required=False,
+        initial=True,
+        help_text="Supprime les anciennes parcelles et leur ancien rattachement propriétaire avant d'importer ce fichier."
+    )
     reference_field = forms.CharField(label="Champ référence", required=False, widget=forms.Select())
     section_field = forms.CharField(label="Champ section", required=False, widget=forms.Select())
     ilot_field = forms.CharField(label="Champ îlot", required=False, widget=forms.Select())
