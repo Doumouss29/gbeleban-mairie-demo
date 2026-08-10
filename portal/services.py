@@ -1,5 +1,6 @@
 import json
 from decimal import Decimal, InvalidOperation
+from django.core.management import call_command
 from django.db import transaction
 from .models import MapLayer, MapFeature, UrbanismLayer, Parcel
 
@@ -61,7 +62,6 @@ def import_cadastre(uploaded, fields):
     if not selected_fields:
         selected_fields = detected_fields[:12]
 
-    # Valeurs par défaut adaptées au fichier parcelles_gbeleban_all.geojson.
     ref_key = fields.get("reference_field") or ("id_auto" if "id_auto" in detected_fields else "reference")
     ilot_key = fields.get("ilot_field") or ("ILOT" if "ILOT" in detected_fields else "")
     lot_key = fields.get("lot_field") or ("LOT" if "LOT" in detected_fields else "")
@@ -119,9 +119,6 @@ def import_cadastre(uploaded, fields):
 
     with transaction.atomic():
         if replace_existing:
-            # Les historiques de propriété dépendent des parcelles. On supprime d'abord
-            # les rattachements ; le seed propriétaires les recréera ensuite sur les
-            # nouvelles géométries à partir du GUIDE GBELEBAN.
             try:
                 from .registry_models import ParcelOwnership
                 ParcelOwnership.objects.all().delete()
@@ -135,12 +132,19 @@ def import_cadastre(uploaded, fields):
             defaults={"display_fields": selected_fields},
         )
 
-        Parcel.objects.bulk_create(
-            objects,
-            batch_size=500,
-            update_conflicts=not replace_existing,
-            unique_fields=["source_layer", "reference"] if not replace_existing else None,
-            update_fields=["section", "ilot", "lot", "parcel_number", "area_m2", "usage", "properties", "geometry"] if not replace_existing else None,
-        )
+        if replace_existing:
+            Parcel.objects.bulk_create(objects, batch_size=500)
+        else:
+            Parcel.objects.bulk_create(
+                objects,
+                batch_size=500,
+                update_conflicts=True,
+                unique_fields=["source_layer", "reference"],
+                update_fields=["section", "ilot", "lot", "parcel_number", "area_m2", "usage", "properties", "geometry"],
+            )
+
+    if replace_existing:
+        # Reconstitue immédiatement le lien parcelle/propriétaire à partir du GUIDE GBELEBAN.
+        call_command("seed_parcel_owners")
 
     return layer_name, created, updated, replace_existing
