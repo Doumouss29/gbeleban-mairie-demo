@@ -1,12 +1,11 @@
 from datetime import date
-from decimal import Decimal
 from django.contrib.auth.models import Group
 from django.core.management.base import BaseCommand
-from portal.models import SiteSettings, Page, QuickLink, News, Project, Taxpayer, Tax, Payment, MapLayer, MapFeature, Parcel
+from portal.models import SiteSettings, Page, QuickLink, News, MapLayer, Parcel, Taxpayer
 
 
 class Command(BaseCommand):
-    help = "Ajoute les contenus de démonstration sans écraser les contenus existants."
+    help = "Initialise uniquement les contenus structurels du portail et nettoie les anciennes données de démonstration."
 
     def handle(self, *args, **options):
         Group.objects.get_or_create(name="Accès Urbanisme")
@@ -69,34 +68,24 @@ class Command(BaseCommand):
             }
         )
 
-        if not MapLayer.objects.exists():
-            layer = MapLayer.objects.create(
-                name="Équipements de démonstration", category="Services publics", color="#ef7d00",
-                is_public=True, is_default_visible=True, display_fields=["nom", "type", "statut"]
-            )
-            for props, coords in [
-                ({"nom": "Mairie de Gbéléban", "type": "Administration", "statut": "Démonstration"}, [-8.1318, 9.5846]),
-                ({"nom": "École primaire - exemple", "type": "Éducation", "statut": "Démonstration"}, [-8.1289, 9.5863]),
-                ({"nom": "Centre de santé - exemple", "type": "Santé", "statut": "Démonstration"}, [-8.1342, 9.5829]),
-            ]:
-                MapFeature.objects.create(layer=layer, properties=props, geometry={"type": "Point", "coordinates": coords})
+        # Suppression définitive des anciennes données techniques de démonstration.
+        # Ces suppressions sont volontairement ciblées afin de ne jamais toucher
+        # les vraies données ajoutées depuis l'administration.
+        demo_layers = MapLayer.objects.filter(name="Équipements de démonstration")
+        deleted_layers = demo_layers.count()
+        demo_layers.delete()
 
-        if not Parcel.objects.exists():
-            for ref, section, ilot, lot, num, b in [
-                ("DEMO-S01-I01-L01", "01", "01", "01", "1", [-8.1330, 9.5836, -8.1325, 9.5841]),
-                ("DEMO-S01-I01-L02", "01", "01", "02", "2", [-8.1325, 9.5836, -8.1320, 9.5841]),
-                ("DEMO-S01-I01-L03", "01", "01", "03", "3", [-8.1320, 9.5836, -8.1315, 9.5841]),
-            ]:
-                minx, miny, maxx, maxy = b
-                geom = {"type": "Polygon", "coordinates": [[[minx, miny], [maxx, miny], [maxx, maxy], [minx, maxy], [minx, miny]]]}
-                Parcel.objects.create(reference=ref, section=section, ilot=ilot, lot=lot, parcel_number=num, area_m2=250, usage="Habitation", geometry=geom)
+        deleted_parcels, _ = Parcel.objects.filter(reference__startswith="DEMO-").delete()
 
-        if not Taxpayer.objects.exists():
-            tp1 = Taxpayer.objects.create(name="Démonstration - Marché central", phone="0700000000")
-            tp2 = Taxpayer.objects.create(name="Démonstration - Commerce A", phone="0500000000")
-            t1 = Tax.objects.create(taxpayer=tp1, label="Taxe de marché", year=date.today().year, amount_due=Decimal("250000"), status="partial")
-            t2 = Tax.objects.create(taxpayer=tp2, label="Taxe commerciale", year=date.today().year, amount_due=Decimal("180000"), status="paid")
-            Payment.objects.create(tax=t1, amount=Decimal("150000"), paid_at=date.today(), method="Espèces", reference="DEMO-001")
-            Payment.objects.create(tax=t2, amount=Decimal("180000"), paid_at=date.today(), method="Mobile Money", reference="DEMO-002")
+        demo_taxpayers = Taxpayer.objects.filter(name__startswith="Démonstration -")
+        deleted_taxpayers = demo_taxpayers.count()
+        demo_taxpayers.delete()
 
-        self.stdout.write(self.style.SUCCESS("Données de démonstration prêtes."))
+        if deleted_layers or deleted_parcels or deleted_taxpayers:
+            self.stdout.write(self.style.WARNING(
+                f"Nettoyage démo : {deleted_layers} couche(s), "
+                f"{deleted_parcels} enregistrement(s) cadastral(aux), "
+                f"{deleted_taxpayers} contribuable(s) supprimé(s)."
+            ))
+
+        self.stdout.write(self.style.SUCCESS("Initialisation du portail terminée — aucune donnée SIG de démonstration créée."))
