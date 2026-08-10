@@ -8,25 +8,25 @@ const parcelRenderer=L.canvas({padding:.35,tolerance:8});
 const cmap=L.map('cadastre-map',{zoomControl:true,minZoom:12,maxZoom:22,preferCanvas:true,renderer:parcelRenderer,zoomAnimation:true,fadeAnimation:false}).setView([9.5846,-8.1318],16);
 osmBasemap.addTo(cmap);
 
-const basemapControl=L.control({position:'topright'});
+const basemapControl=L.control({position:'topleft'});
 basemapControl.onAdd=function(){
-  const box=L.DomUtil.create('div','leaflet-bar');
-  box.style.background='#fff';box.style.padding='7px 9px';box.style.borderRadius='8px';box.style.boxShadow='0 1px 6px #0002';
-  const label=L.DomUtil.create('label','',box);label.style.display='grid';label.style.gap='3px';label.style.fontSize='11px';label.style.fontWeight='700';label.style.color='#173d2f';label.textContent='Fond de plan';
-  const select=L.DomUtil.create('select','',label);select.style.minWidth='145px';select.style.padding='5px 7px';select.style.border='1px solid #d9ddd8';select.style.borderRadius='6px';select.style.background='#fff';
-  select.innerHTML='<option value="osm">OSM standard</option><option value="imagery">Orthophoto / satellite</option>';
-  L.DomEvent.disableClickPropagation(box);L.DomEvent.disableScrollPropagation(box);
-  select.addEventListener('change',()=>{
-    if(select.value==='imagery'){
-      if(cmap.hasLayer(osmBasemap))cmap.removeLayer(osmBasemap);
-      imageryBasemap.addTo(cmap);
-    }else{
-      if(cmap.hasLayer(imageryBasemap))cmap.removeLayer(imageryBasemap);
-      osmBasemap.addTo(cmap);
-    }
-    if(parcelLayer)parcelLayer.bringToFront();
-  });
-  return box;
+  const wrap=L.DomUtil.create('div','cadastre-basemap-control');
+  wrap.style.position='relative';wrap.style.marginTop='8px';
+  const button=L.DomUtil.create('button','leaflet-bar cadastre-basemap-toggle',wrap);
+  button.type='button';button.title='Changer de fond de plan';button.setAttribute('aria-label','Changer de fond de plan');button.setAttribute('aria-expanded','false');
+  button.innerHTML='<span aria-hidden="true" style="font-size:20px;line-height:1">🗺️</span>';
+  Object.assign(button.style,{width:'34px',height:'34px',padding:'0',display:'grid',placeItems:'center',background:'#fff',border:'0',borderRadius:'4px',boxShadow:'0 1px 5px #0004',cursor:'pointer'});
+  const menu=L.DomUtil.create('div','cadastre-basemap-menu',wrap);
+  Object.assign(menu.style,{position:'absolute',left:'42px',top:'0',display:'none',minWidth:'118px',background:'#fff',border:'1px solid #d7ddd7',borderRadius:'9px',padding:'6px',boxShadow:'0 5px 18px #0003'});
+  const makeOption=(label,value)=>{const opt=L.DomUtil.create('button','',menu);opt.type='button';opt.dataset.basemap=value;opt.textContent=label;Object.assign(opt.style,{display:'block',width:'100%',border:'0',borderRadius:'7px',padding:'7px 9px',background:value==='osm'?'#173d2f':'#f4f5f1',color:value==='osm'?'#fff':'#173d2f',fontWeight:'700',fontSize:'11px',textAlign:'left',cursor:'pointer',margin:value==='osm'?'0 0 4px':'0'});return opt;};
+  const osmButton=makeOption('OSM','osm');
+  const imageryButton=makeOption('Ortho','imagery');
+  const setActive=(value)=>{[osmButton,imageryButton].forEach(btn=>{const active=btn.dataset.basemap===value;btn.style.background=active?'#173d2f':'#f4f5f1';btn.style.color=active?'#fff':'#173d2f';});};
+  const changeBasemap=(value)=>{if(value==='imagery'){if(cmap.hasLayer(osmBasemap))cmap.removeLayer(osmBasemap);if(!cmap.hasLayer(imageryBasemap))imageryBasemap.addTo(cmap);}else{if(cmap.hasLayer(imageryBasemap))cmap.removeLayer(imageryBasemap);if(!cmap.hasLayer(osmBasemap))osmBasemap.addTo(cmap);}setActive(value);menu.style.display='none';button.setAttribute('aria-expanded','false');if(parcelLayer)parcelLayer.bringToFront();};
+  osmButton.addEventListener('click',()=>changeBasemap('osm'));imageryButton.addEventListener('click',()=>changeBasemap('imagery'));
+  button.addEventListener('click',()=>{const open=menu.style.display!=='none';menu.style.display=open?'none':'block';button.setAttribute('aria-expanded',String(!open));});
+  L.DomEvent.disableClickPropagation(wrap);L.DomEvent.disableScrollPropagation(wrap);
+  return wrap;
 };
 basemapControl.addTo(cmap);
 
