@@ -54,64 +54,93 @@ def import_layer(uploaded, name, category="", color="#ef7d00", is_public=True, i
 
 def import_cadastre(uploaded, fields):
     data = _load_geojson(uploaded)
-    layer_name = (fields.get("layer_name") or "Parcelles cadastrales").strip()
+    layer_name = (fields.get("layer_name") or "Cadastre Gbéléban").strip()
+    replace_existing = bool(fields.get("replace_existing"))
     detected_fields = _detect_fields(data)
     selected_fields = [f for f in (fields.get("display_fields") or []) if f in detected_fields]
     if not selected_fields:
         selected_fields = detected_fields[:12]
 
-    refs = []
-    objects = []
-    ref_key = fields.get("reference_field") or "reference"
+    # Valeurs par défaut adaptées au fichier parcelles_gbeleban_all.geojson.
+    ref_key = fields.get("reference_field") or ("id_auto" if "id_auto" in detected_fields else "reference")
+    ilot_key = fields.get("ilot_field") or ("ILOT" if "ILOT" in detected_fields else "")
+    lot_key = fields.get("lot_field") or ("LOT" if "LOT" in detected_fields else "")
+    area_key = fields.get("area_field") or ("SUPERFICIE" if "SUPERFICIE" in detected_fields else "")
+    usage_key = fields.get("usage_field") or ("AFFECTATION" if "AFFECTATION" in detected_fields else "")
+    section_key = fields.get("section_field") or ""
+    parcel_key = fields.get("parcel_field") or ""
 
-    def prop_value(props, form_key):
-        key = fields.get(form_key)
+    def prop_value(props, key):
         value = props.get(key, "") if key else ""
-        return "" if value is None else str(value)
+        return "" if value is None else str(value).strip()
 
+    objects = []
+    refs = []
     for idx, feature in enumerate(data.get("features", []), 1):
         props = feature.get("properties") or {}
         geom = feature.get("geometry") or {}
-        reference = str(props.get(ref_key) or f"IMPORT-{idx}")
+        if not geom:
+            continue
+
+        raw_ref = props.get(ref_key)
+        reference = str(raw_ref if raw_ref not in (None, "") else idx).strip()
+        if ref_key == "id_auto":
+            reference = f"GBL-{reference}"
         refs.append(reference)
 
         area = None
-        area_key = fields.get("area_field")
         if area_key and props.get(area_key) not in (None, ""):
             try:
                 area = Decimal(str(props.get(area_key)))
-            except InvalidOperation:
+            except (InvalidOperation, ValueError):
                 area = None
 
         objects.append(Parcel(
             source_layer=layer_name,
             reference=reference,
-            section=prop_value(props, "section_field"),
-            ilot=prop_value(props, "ilot_field"),
-            lot=prop_value(props, "lot_field"),
-            parcel_number=prop_value(props, "parcel_field"),
+            section=prop_value(props, section_key),
+            ilot=prop_value(props, ilot_key),
+            lot=prop_value(props, lot_key),
+            parcel_number=prop_value(props, parcel_key),
             area_m2=area,
-            usage=prop_value(props, "usage_field"),
+            usage=prop_value(props, usage_key),
             properties=props,
             geometry=geom,
         ))
 
-    existing = set(Parcel.objects.filter(source_layer=layer_name, reference__in=refs).values_list("reference", flat=True))
-    created = sum(1 for r in refs if r not in existing)
-    updated = len(refs) - created
+    if not objects:
+        raise ValueError("Le GeoJSON ne contient aucune parcelle exploitable.")
+
+    existing = set()
+    if not replace_existing:
+        existing = set(Parcel.objects.filter(source_layer=layer_name, reference__in=refs).values_list("reference", flat=True))
+    created = len(objects) if replace_existing else sum(1 for r in refs if r not in existing)
+    updated = 0 if replace_existing else len(refs) - created
 
     with transaction.atomic():
+        if replace_existing:
+            # Les historiques de propriété dépendent des parcelles. On supprime d'abord
+            # les rattachements ; le seed propriétaires les recréera ensuite sur les
+            # nouvelles géométries à partir du GUIDE GBELEBAN.
+            try:
+                from .registry_models import ParcelOwnership
+                ParcelOwnership.objects.all().delete()
+            except Exception:
+                pass
+            Parcel.objects.all().delete()
+            UrbanismLayer.objects.all().delete()
+
         UrbanismLayer.objects.update_or_create(
             name=layer_name,
             defaults={"display_fields": selected_fields},
         )
-        if objects:
-            Parcel.objects.bulk_create(
-                objects,
-                batch_size=500,
-                update_conflicts=True,
-                unique_fields=["source_layer", "reference"],
-                update_fields=["section", "ilot", "lot", "parcel_number", "area_m2", "usage", "properties", "geometry"],
-            )
 
-    return layer_name, created, updated
+        Parcel.objects.bulk_create(
+            objects,
+            batch_size=500,
+            update_conflicts=not replace_existing,
+            unique_fields=["source_layer", "reference"] if not replace_existing else None,
+            update_fields=["section", "ilot", "lot", "parcel_number", "area_m2", "usage", "properties", "geometry"] if not replace_existing else None,
+        )
+
+    return layer_name, created, updated, replace_existing
