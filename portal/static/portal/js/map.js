@@ -36,14 +36,32 @@ const map=new maplibregl.Map({
         ],
         tileSize:256,
         attribution:'© OpenStreetMap contributors'
+      },
+      imagery:{
+        type:'raster',
+        tiles:['https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'],
+        tileSize:256,
+        attribution:'Tiles © Esri'
       }
     },
-    layers:[{id:'osm',type:'raster',source:'osm'}]
+    layers:[
+      {id:'basemap-osm',type:'raster',source:'osm',layout:{visibility:'visible'}},
+      {id:'basemap-imagery',type:'raster',source:'imagery',layout:{visibility:'none'}}
+    ]
   }
 });
 
 map.addControl(new maplibregl.NavigationControl({visualizePitch:true}),'top-right');
 map.addControl(new maplibregl.ScaleControl({maxWidth:120,unit:'metric'}));
+
+function normalizeText(value){
+  return String(value??'')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g,'')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g,' ')
+    .trim();
+}
 
 function escapeHtml(value){
   return String(value??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
@@ -93,6 +111,16 @@ function featureCentroid(feature){
   if(!rings.length) return DEFAULT_CENTER;
   rings.sort((a,b)=>Math.abs(ringArea(b))-Math.abs(ringArea(a)));
   return ringCentroid(rings[0]);
+}
+
+function isSacredForest(props){
+  const name=normalizeText(props&&props.AFFECTATION);
+  return name.includes('foret sacree')||name.includes('bois sacre')||name.includes('foret sacre');
+}
+
+function visualForFeature(props,cfg){
+  if(isSacredForest(props)) return {icon:'🌳',color:'#2f8a57'};
+  return {icon:cfg.icon,color:cfg.color};
 }
 
 function selectedGroups(){
@@ -197,7 +225,6 @@ function sizeWebsigToViewport(){
   const grid=document.querySelector('.websig-grid');
   if(!grid) return;
   if(window.matchMedia('(max-width:1100px)').matches){
-    grid.style.height='';
     requestAnimationFrame(()=>map.resize());
     return;
   }
@@ -208,24 +235,123 @@ function sizeWebsigToViewport(){
   requestAnimationFrame(()=>map.resize());
 }
 
+function setupMobileLayers(){
+  const grid=document.querySelector('.websig-grid');
+  const openBtn=document.getElementById('mobile-layers-toggle');
+  const closeBtn=document.getElementById('mobile-layers-close');
+  const backdrop=document.getElementById('mobile-layers-backdrop');
+  if(!grid||!openBtn) return;
+  const close=()=>{
+    grid.classList.remove('mobile-layers-open');
+    openBtn.setAttribute('aria-expanded','false');
+  };
+  openBtn.addEventListener('click',()=>{
+    const opening=!grid.classList.contains('mobile-layers-open');
+    grid.classList.toggle('mobile-layers-open',opening);
+    openBtn.setAttribute('aria-expanded',opening?'true':'false');
+  });
+  if(closeBtn) closeBtn.addEventListener('click',close);
+  if(backdrop) backdrop.addEventListener('click',close);
+  document.querySelectorAll('.group-toggle').forEach(cb=>cb.addEventListener('change',()=>{
+    if(window.matchMedia('(max-width:600px)').matches) setTimeout(close,120);
+  }));
+}
+
+function setupLegend(){
+  const box=document.getElementById('websig-legend');
+  const btn=document.getElementById('legend-toggle');
+  if(!box||!btn) return;
+  btn.addEventListener('click',()=>{
+    const collapsed=box.classList.toggle('collapsed');
+    btn.textContent=collapsed?'Afficher':'Réduire';
+  });
+  if(!window.matchMedia('(max-width:1100px)').matches){
+    box.classList.remove('collapsed');
+  }
+}
+
+function setupBasemapSelector(){
+  const select=document.getElementById('basemap-select');
+  if(!select) return;
+  select.addEventListener('change',()=>{
+    const imagery=select.value==='imagery';
+    if(map.getLayer('basemap-osm')) map.setLayoutProperty('basemap-osm','visibility',imagery?'none':'visible');
+    if(map.getLayer('basemap-imagery')) map.setLayoutProperty('basemap-imagery','visibility',imagery?'visible':'none');
+  });
+}
+
+function haversineMeters(a,b){
+  const R=6371000;
+  const toRad=d=>d*Math.PI/180;
+  const dLat=toRad(b[1]-a[1]);
+  const dLon=toRad(b[0]-a[0]);
+  const lat1=toRad(a[1]);
+  const lat2=toRad(b[1]);
+  const h=Math.sin(dLat/2)**2+Math.cos(lat1)*Math.cos(lat2)*Math.sin(dLon/2)**2;
+  return 2*R*Math.asin(Math.sqrt(h));
+}
+
+function deduplicateMarkerFeatures(features){
+  const accepted=[];
+  for(const feature of features||[]){
+    const props=feature.properties||{};
+    const name=normalizeText(props.AFFECTATION);
+    const group=normalizeText(props.GROUPE);
+    const center=featureCentroid(feature);
+    if(!name){
+      accepted.push(feature);
+      continue;
+    }
+    const duplicate=accepted.some(existing=>{
+      const ep=existing.properties||{};
+      if(normalizeText(ep.AFFECTATION)!==name||normalizeText(ep.GROUPE)!==group) return false;
+      return haversineMeters(featureCentroid(existing),center)<=80;
+    });
+    if(!duplicate) accepted.push(feature);
+  }
+  return accepted;
+}
+
 function addMarker(feature){
   const props=feature.properties||{};
   const group=props.GROUPE;
   const cfg=GROUPS[group];
   if(!cfg) return;
+  const visual=visualForFeature(props,cfg);
   const el=document.createElement('div');
   el.className='websig-marker';
-  el.style.background=cfg.color;
+  el.style.background=visual.color;
   el.title=props.AFFECTATION||group;
+  el.setAttribute('role','button');
+  el.setAttribute('tabindex','0');
+  el.setAttribute('aria-label',`Afficher les informations : ${props.AFFECTATION||group}`);
   const icon=document.createElement('span');
-  icon.textContent=cfg.icon;
+  icon.textContent=visual.icon;
   el.appendChild(icon);
   const center=featureCentroid(feature);
-  el.addEventListener('click',()=>{
-    new maplibregl.Popup({offset:28,maxWidth:'330px'})
+  let lastTouch=0;
+  const showPopup=()=>{
+    new maplibregl.Popup({offset:28,maxWidth:'330px',closeOnClick:true})
       .setLngLat(center)
       .setHTML(popupHtml(props))
       .addTo(map);
+  };
+  el.addEventListener('click',e=>{
+    if(Date.now()-lastTouch<500) return;
+    e.stopPropagation();
+    showPopup();
+  });
+  el.addEventListener('pointerup',e=>{
+    if(e.pointerType!=='touch'&&e.pointerType!=='pen') return;
+    lastTouch=Date.now();
+    e.stopPropagation();
+    showPopup();
+  });
+  el.addEventListener('keydown',e=>{
+    if(e.key==='Enter'||e.key===' '){
+      e.preventDefault();
+      showPopup();
+    }
   });
   const marker=new maplibregl.Marker({element:el,anchor:'bottom'}).setLngLat(center).addTo(map);
   markers.push({marker,element:el,group});
@@ -294,7 +420,7 @@ async function loadPublicData(){
   if(!response.ok) throw new Error('Impossible de charger les données de Gbéléban en carte.');
   publicData=await response.json();
   add3DLayers(publicData);
-  (publicData.features||[]).forEach(addMarker);
+  deduplicateMarkerFeatures(publicData.features||[]).forEach(addMarker);
   fitPublicExtent(publicData);
   updateVisibility();
 }
@@ -303,6 +429,9 @@ map.on('load',async()=>{
   document.querySelectorAll('.group-toggle').forEach(cb=>cb.addEventListener('change',updateVisibility));
   setupAllGroupsToggle();
   setupSidebarResize();
+  setupMobileLayers();
+  setupLegend();
+  setupBasemapSelector();
   sizeWebsigToViewport();
 
   const btn=document.getElementById('toggle-3d');
