@@ -103,6 +103,15 @@ function layerId(group){
   return `websig-3d-${Object.keys(GROUPS).indexOf(group)}`;
 }
 
+function syncAllGroupsButton(){
+  const btn=document.getElementById('toggle-all-groups');
+  const boxes=[...document.querySelectorAll('.group-toggle')];
+  if(!btn||!boxes.length) return;
+  const allChecked=boxes.every(cb=>cb.checked);
+  btn.textContent=allChecked?'Tout décocher':'Tout cocher';
+  btn.setAttribute('aria-pressed',allChecked?'true':'false');
+}
+
 function updateVisibility(){
   const selected=selectedGroups();
   markers.forEach(item=>{
@@ -115,6 +124,88 @@ function updateVisibility(){
       map.setLayoutProperty(id,'visibility',visible?'visible':'none');
     }
   });
+  syncAllGroupsButton();
+}
+
+function setupAllGroupsToggle(){
+  const btn=document.getElementById('toggle-all-groups');
+  const boxes=[...document.querySelectorAll('.group-toggle')];
+  if(!btn||!boxes.length) return;
+  btn.addEventListener('click',()=>{
+    const shouldCheck=!boxes.every(cb=>cb.checked);
+    boxes.forEach(cb=>{cb.checked=shouldCheck;});
+    updateVisibility();
+  });
+  syncAllGroupsButton();
+}
+
+function setupSidebarResize(){
+  const grid=document.querySelector('.websig-grid');
+  const handle=document.getElementById('websig-resizer');
+  if(!grid||!handle) return;
+
+  const MIN_WIDTH=190;
+  const MAX_WIDTH=520;
+  const storageKey='gbeleban-websig-sidebar-width';
+
+  function applyWidth(width,save=true){
+    const w=Math.max(MIN_WIDTH,Math.min(MAX_WIDTH,Number(width)||230));
+    grid.style.setProperty('--websig-side-width',`${w}px`);
+    if(save){
+      try{localStorage.setItem(storageKey,String(Math.round(w)));}catch(e){}
+    }
+    requestAnimationFrame(()=>map.resize());
+  }
+
+  try{
+    const saved=parseFloat(localStorage.getItem(storageKey));
+    if(Number.isFinite(saved)) applyWidth(saved,false);
+  }catch(e){}
+
+  function widthFromPointer(clientX){
+    const rect=grid.getBoundingClientRect();
+    applyWidth(clientX-rect.left);
+  }
+
+  handle.addEventListener('pointerdown',e=>{
+    if(window.matchMedia('(max-width:1100px)').matches) return;
+    handle.setPointerCapture(e.pointerId);
+    handle.classList.add('active');
+    document.body.classList.add('websig-resizing');
+    e.preventDefault();
+  });
+  handle.addEventListener('pointermove',e=>{
+    if(handle.hasPointerCapture(e.pointerId)) widthFromPointer(e.clientX);
+  });
+  function stopResize(e){
+    if(e.pointerId!==undefined && handle.hasPointerCapture(e.pointerId)) handle.releasePointerCapture(e.pointerId);
+    handle.classList.remove('active');
+    document.body.classList.remove('websig-resizing');
+    requestAnimationFrame(()=>map.resize());
+  }
+  handle.addEventListener('pointerup',stopResize);
+  handle.addEventListener('pointercancel',stopResize);
+  handle.addEventListener('keydown',e=>{
+    if(e.key!=='ArrowLeft'&&e.key!=='ArrowRight') return;
+    const current=parseFloat(getComputedStyle(grid).getPropertyValue('--websig-side-width'))||230;
+    applyWidth(current+(e.key==='ArrowRight'?20:-20));
+    e.preventDefault();
+  });
+}
+
+function sizeWebsigToViewport(){
+  const grid=document.querySelector('.websig-grid');
+  if(!grid) return;
+  if(window.matchMedia('(max-width:1100px)').matches){
+    grid.style.height='';
+    requestAnimationFrame(()=>map.resize());
+    return;
+  }
+  const top=grid.getBoundingClientRect().top;
+  const bottomGap=14;
+  const available=Math.max(420,window.innerHeight-top-bottomGap);
+  grid.style.height=`${available}px`;
+  requestAnimationFrame(()=>map.resize());
 }
 
 function addMarker(feature){
@@ -210,8 +301,15 @@ async function loadPublicData(){
 
 map.on('load',async()=>{
   document.querySelectorAll('.group-toggle').forEach(cb=>cb.addEventListener('change',updateVisibility));
+  setupAllGroupsToggle();
+  setupSidebarResize();
+  sizeWebsigToViewport();
+
   const btn=document.getElementById('toggle-3d');
   if(btn) btn.addEventListener('click',()=>set3D(!is3D));
+
+  window.addEventListener('resize',sizeWebsigToViewport);
+
   try{
     await loadPublicData();
   }catch(err){
