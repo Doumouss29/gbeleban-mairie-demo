@@ -1,21 +1,39 @@
-const DEFAULT_CENTER=[-8.1318,9.5846];
-const DEFAULT_ZOOM=15;
-let is3D=true;
-const loadedLayers={};
+const DEFAULT_CENTER=[-8.1260,9.5845];
+const DEFAULT_ZOOM=14.2;
+let is3D=false;
+let publicData=null;
+const markers=[];
+
+const GROUPS={
+  'ADMINISTRATION & SERVICES PUBLICS':{color:'#e67e22',icon:'🏛️',height:7},
+  'ÉDUCATION':{color:'#2f6fb2',icon:'🎓',height:6},
+  'SANTÉ & ACTION SOCIALE':{color:'#c7473c',icon:'🏥',height:8},
+  'COMMERCES & TRANSPORTS':{color:'#b78334',icon:'🛒',height:5},
+  'SPORTS & LOISIRS':{color:'#6f52a1',icon:'⚽',height:2.2},
+  'ESPACES VERTS & ENVIRONNEMENT':{color:'#2f8a57',icon:'🌳',height:1.2},
+  'CULTURE & LIEUX REMARQUABLES':{color:'#d3a321',icon:'⭐',height:4},
+  'CULTES':{color:'#7a5a91',icon:'🕊️',height:6.5},
+  'ÉQUIPEMENTS TECHNIQUES':{color:'#557789',icon:'⚙️',height:5.5},
+  'CIMETIÈRE':{color:'#77756f',icon:'✦',height:1.4}
+};
 
 const map=new maplibregl.Map({
   container:'map',
   center:DEFAULT_CENTER,
   zoom:DEFAULT_ZOOM,
-  pitch:52,
-  bearing:-18,
+  pitch:0,
+  bearing:0,
   attributionControl:true,
   style:{
     version:8,
     sources:{
       osm:{
         type:'raster',
-        tiles:['https://a.tile.openstreetmap.org/{z}/{x}/{y}.png','https://b.tile.openstreetmap.org/{z}/{x}/{y}.png','https://c.tile.openstreetmap.org/{z}/{x}/{y}.png'],
+        tiles:[
+          'https://a.tile.openstreetmap.org/{z}/{x}/{y}.png',
+          'https://b.tile.openstreetmap.org/{z}/{x}/{y}.png',
+          'https://c.tile.openstreetmap.org/{z}/{x}/{y}.png'
+        ],
         tileSize:256,
         attribution:'© OpenStreetMap contributors'
       }
@@ -23,203 +41,182 @@ const map=new maplibregl.Map({
     layers:[{id:'osm',type:'raster',source:'osm'}]
   }
 });
+
 map.addControl(new maplibregl.NavigationControl({visualizePitch:true}),'top-right');
 map.addControl(new maplibregl.ScaleControl({maxWidth:120,unit:'metric'}));
 
 function escapeHtml(value){
   return String(value??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
 }
+
 function popupHtml(props){
-  return Object.entries(props||{}).filter(([k])=>!String(k).startsWith('_')).map(([k,v])=>`<div><b>${escapeHtml(k)}</b> : ${escapeHtml(v)}</div>`).join('');
-}
-function geometryType(data){
-  const f=(data.features||[]).find(x=>x.geometry);
-  return f?.geometry?.type||'';
-}
-function sourceId(id){return `municipal-source-${id}`;}
-function layerIds(id){return [`municipal-fill-${id}`,`municipal-line-${id}`,`municipal-point-${id}`];}
-
-function addMunicipalLayer(id,data,color){
-  if(map.getSource(sourceId(id))) return;
-  map.addSource(sourceId(id),{type:'geojson',data});
-  const type=geometryType(data);
-  const ids=layerIds(id);
-
-  if(type.includes('Polygon')){
-    map.addLayer({id:ids[0],type:'fill',source:sourceId(id),paint:{'fill-color':color,'fill-opacity':0.30}});
-    map.addLayer({id:ids[1],type:'line',source:sourceId(id),paint:{'line-color':color,'line-width':2}});
-  }else if(type.includes('Line')){
-    map.addLayer({id:ids[1],type:'line',source:sourceId(id),paint:{'line-color':color,'line-width':3}});
-  }else{
-    map.addLayer({id:ids[2],type:'circle',source:sourceId(id),paint:{'circle-radius':7,'circle-color':color,'circle-stroke-color':'#fff','circle-stroke-width':2}});
+  const rows=[];
+  if(props.AFFECTATION) rows.push(['Affectation',props.AFFECTATION]);
+  if(props.GROUPE) rows.push(['Thématique',props.GROUPE]);
+  if(props.ILOT) rows.push(['Îlot',props.ILOT]);
+  if(props.LOT) rows.push(['Lot',props.LOT]);
+  if(props.SUPERFICIE!==null && props.SUPERFICIE!==undefined && props.SUPERFICIE!==''){
+    const n=Number(props.SUPERFICIE);
+    rows.push(['Superficie',Number.isFinite(n)?`${n.toLocaleString('fr-FR')} m²`:props.SUPERFICIE]);
   }
-
-  ids.filter(x=>map.getLayer(x)).forEach(layerId=>{
-    map.on('click',layerId,e=>{
-      const f=e.features?.[0];
-      if(!f)return;
-      new maplibregl.Popup({maxWidth:'340px'}).setLngLat(e.lngLat).setHTML(popupHtml(f.properties)).addTo(map);
-    });
-    map.on('mouseenter',layerId,()=>map.getCanvas().style.cursor='pointer');
-    map.on('mouseleave',layerId,()=>map.getCanvas().style.cursor='');
-  });
-  loadedLayers[id]=ids;
+  return `<div class="websig-popup"><strong>${escapeHtml(props.AFFECTATION||'Équipement')}</strong><dl>${rows.map(([k,v])=>`<dt>${escapeHtml(k)}</dt><dd>${escapeHtml(v)}</dd>`).join('')}</dl></div>`;
 }
 
-async function toggleMunicipalLayer(cb){
-  const id=cb.dataset.id;
-  const color=cb.dataset.color||'#ef7d00';
-  if(!loadedLayers[id]){
-    if(!cb.checked)return;
-    const data=await fetch(`/api/couches/${id}.geojson`).then(r=>r.json());
-    addMunicipalLayer(id,data,color);
+function ringArea(ring){
+  let a=0;
+  for(let i=0;i<ring.length-1;i++) a+=ring[i][0]*ring[i+1][1]-ring[i+1][0]*ring[i][1];
+  return a/2;
+}
+
+function ringCentroid(ring){
+  let area2=0,cx=0,cy=0;
+  for(let i=0;i<ring.length-1;i++){
+    const p=ring[i],q=ring[i+1];
+    const cross=p[0]*q[1]-q[0]*p[1];
+    area2+=cross;
+    cx+=(p[0]+q[0])*cross;
+    cy+=(p[1]+q[1])*cross;
   }
-  (loadedLayers[id]||[]).forEach(layerId=>{
-    if(map.getLayer(layerId))map.setLayoutProperty(layerId,'visibility',cb.checked?'visible':'none');
+  if(Math.abs(area2)<1e-12){
+    const pts=ring.slice(0,-1);
+    return [pts.reduce((s,p)=>s+p[0],0)/pts.length,pts.reduce((s,p)=>s+p[1],0)/pts.length];
+  }
+  return [cx/(3*area2),cy/(3*area2)];
+}
+
+function featureCentroid(feature){
+  const g=feature.geometry||{};
+  if(g.type==='Point') return g.coordinates;
+  let rings=[];
+  if(g.type==='Polygon') rings=[g.coordinates[0]];
+  if(g.type==='MultiPolygon') rings=g.coordinates.map(poly=>poly[0]);
+  if(!rings.length) return DEFAULT_CENTER;
+  rings.sort((a,b)=>Math.abs(ringArea(b))-Math.abs(ringArea(a)));
+  return ringCentroid(rings[0]);
+}
+
+function selectedGroups(){
+  return new Set([...document.querySelectorAll('.group-toggle:checked')].map(cb=>cb.dataset.group));
+}
+
+function layerId(group){
+  return `websig-3d-${Object.keys(GROUPS).indexOf(group)}`;
+}
+
+function updateVisibility(){
+  const selected=selectedGroups();
+  markers.forEach(item=>{
+    item.element.style.display=(!is3D && selected.has(item.group))?'grid':'none';
   });
-}
-
-function estimatedHeight(tags){
-  const direct=parseFloat(tags.height);
-  if(Number.isFinite(direct))return Math.max(3,direct);
-  const levels=parseFloat(tags['building:levels']);
-  if(Number.isFinite(levels))return Math.max(3,levels*3.4);
-  const kind=(tags.amenity||tags.office||tags.government||'').toLowerCase();
-  if(kind.includes('hospital'))return 10;
-  if(kind.includes('school'))return 7;
-  if(kind.includes('townhall')||kind.includes('government'))return 8;
-  if(kind.includes('police'))return 6;
-  if(kind.includes('market'))return 5;
-  return 6;
-}
-function adminColor(tags){
-  const kind=(tags.amenity||tags.office||tags.government||tags.type_bat||'').toLowerCase();
-  if(kind.includes('school')||kind.includes('education'))return '#ef7d00';
-  if(kind.includes('hospital')||kind.includes('clinic')||kind.includes('health'))return '#c63b32';
-  if(kind.includes('police')||kind.includes('security'))return '#335f9e';
-  if(kind.includes('market'))return '#a16b24';
-  return '#056b3c';
-}
-
-function rectangleFeature(name,type,lon,lat,widthDeg,heightDeg,heightM){
-  const x=widthDeg/2,y=heightDeg/2;
-  return {
-    type:'Feature',
-    geometry:{type:'Polygon',coordinates:[[[lon-x,lat-y],[lon+x,lat-y],[lon+x,lat+y],[lon-x,lat+y],[lon-x,lat-y]]]},
-    properties:{
-      name,
-      type_bat:type,
-      _height:heightM,
-      _color:adminColor({type_bat:type}),
-      _indicative:true
-    }
-  };
-}
-
-function indicativeBuildings(){
-  // Maquette volontairement indicative pour visualiser le potentiel 3D.
-  // Les emprises/positions exactes seront remplacées lorsqu'une donnée terrain ou SIG fiable sera disponible.
-  return [
-    rectangleFeature('Mairie de Gbéléban','government',-8.13182,9.58462,0.00024,0.00015,8),
-    rectangleFeature('Centre de santé de Gbéléban','health',-8.13095,9.58425,0.00028,0.00016,8),
-    rectangleFeature('École maternelle','education',-8.13272,9.58518,0.00026,0.00014,6),
-    rectangleFeature('École primaire','education',-8.13325,9.58485,0.00034,0.00016,7),
-    rectangleFeature('Collège / lycée moderne','education',-8.12995,9.58515,0.00042,0.00020,9),
-    rectangleFeature('Équipement de sécurité','security',-8.13215,9.58372,0.00022,0.00014,6),
-    rectangleFeature('Marché / équipement économique','market',-8.13055,9.58358,0.00038,0.00020,5)
-  ];
-}
-
-function addBuildingsToMap(features,sourceLabel){
-  const data={type:'FeatureCollection',features};
-  map.addSource('admin-buildings',{type:'geojson',data});
-  map.addLayer({
-    id:'admin-buildings-3d',type:'fill-extrusion',source:'admin-buildings',
-    paint:{
-      'fill-extrusion-color':['coalesce',['get','_color'],'#056b3c'],
-      'fill-extrusion-height':['coalesce',['to-number',['get','_height']],6],
-      'fill-extrusion-base':0,
-      'fill-extrusion-opacity':0.90
+  Object.keys(GROUPS).forEach(group=>{
+    const id=layerId(group);
+    if(map.getLayer(id)){
+      const visible=is3D && selected.has(group);
+      map.setLayoutProperty(id,'visibility',visible?'visible':'none');
     }
   });
-  map.addLayer({
-    id:'admin-buildings-labels',type:'symbol',source:'admin-buildings',
-    layout:{
-      'text-field':['coalesce',['get','name'],['get','nom'],'Bâtiment public'],
-      'text-size':12,
-      'text-anchor':'bottom',
-      'text-offset':[0,-0.6],
-      'text-allow-overlap':false
-    },
-    paint:{'text-color':'#173d2f','text-halo-color':'#ffffff','text-halo-width':2}
-  });
-  map.on('click','admin-buildings-3d',e=>{
-    const f=e.features?.[0];if(!f)return;
-    const p=f.properties||{};
-    const indicative=String(p._indicative)==='true';
-    const html=`<div class="building-popup"><strong>${escapeHtml(p.name||p.nom||'Bâtiment public')}</strong><div>Type : ${escapeHtml(p.amenity||p.type_bat||p.office||'Équipement public')}</div><div>Hauteur 3D : ${escapeHtml(p._height||6)} m</div>${indicative?'<div class="building-indicative">Maquette indicative — position et emprise à confirmer.</div>':''}</div>`;
-    new maplibregl.Popup({maxWidth:'320px'}).setLngLat(e.lngLat).setHTML(html).addTo(map);
-  });
-  map.on('mouseenter','admin-buildings-3d',()=>map.getCanvas().style.cursor='pointer');
-  map.on('mouseleave','admin-buildings-3d',()=>map.getCanvas().style.cursor='');
-  const help=document.querySelector('.websig-3d-help');
-  if(help)help.textContent=sourceLabel;
 }
 
-async function loadAdministrativeBuildings(){
-  const query=`[out:json][timeout:20];(
-    way(around:3500,9.5846,-8.1318)["building"]["amenity"~"townhall|school|hospital|clinic|police|marketplace"];
-    way(around:3500,9.5846,-8.1318)["building"]["office"="government"];
-    way(around:3500,9.5846,-8.1318)["building"]["government"];
-    way(around:3500,9.5846,-8.1318)["building"]["name"~"Mairie|Sous-préfecture|Préfecture|Gendarmerie|Police|École|EPP|Collège|Lycée|Hôpital|Centre de santé|Marché",i];
-  );out tags geom;`;
-  let osmFeatures=[];
-  try{
-    const r=await fetch('https://overpass-api.de/api/interpreter',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded;charset=UTF-8'},body:'data='+encodeURIComponent(query)});
-    if(!r.ok)throw new Error('Overpass indisponible');
-    const json=await r.json();
-    osmFeatures=(json.elements||[]).filter(el=>el.type==='way'&&Array.isArray(el.geometry)&&el.geometry.length>=4).map(el=>{
-      const coords=el.geometry.map(p=>[p.lon,p.lat]);
-      if(coords.length&&JSON.stringify(coords[0])!==JSON.stringify(coords[coords.length-1]))coords.push(coords[0]);
-      const tags=el.tags||{};
-      return {type:'Feature',geometry:{type:'Polygon',coordinates:[coords]},properties:{...tags,_height:estimatedHeight(tags),_color:adminColor(tags),nom:tags.name||'Bâtiment public',_indicative:false}};
-    });
-  }catch(err){
-    osmFeatures=[];
-  }
+function addMarker(feature){
+  const props=feature.properties||{};
+  const group=props.GROUPE;
+  const cfg=GROUPS[group];
+  if(!cfg) return;
+  const el=document.createElement('div');
+  el.className='websig-marker';
+  el.style.background=cfg.color;
+  el.title=props.AFFECTATION||group;
+  const icon=document.createElement('span');
+  icon.textContent=cfg.icon;
+  el.appendChild(icon);
+  const center=featureCentroid(feature);
+  el.addEventListener('click',()=>{
+    new maplibregl.Popup({offset:28,maxWidth:'330px'})
+      .setLngLat(center)
+      .setHTML(popupHtml(props))
+      .addTo(map);
+  });
+  const marker=new maplibregl.Marker({element:el,anchor:'bottom'}).setLngLat(center).addTo(map);
+  markers.push({marker,element:el,group});
+}
 
-  if(osmFeatures.length>=3){
-    addBuildingsToMap(osmFeatures,'Bâtiments publics détectés dans les données ouvertes. Les hauteurs absentes sont estimées.');
-  }else{
-    addBuildingsToMap(indicativeBuildings(),'Maquette 3D indicative pour visualiser les principaux équipements. Les positions et emprises exactes seront affinées avec des données SIG ou terrain.');
+function add3DLayers(data){
+  map.addSource('gbeleban-public',{type:'geojson',data});
+  Object.entries(GROUPS).forEach(([group,cfg])=>{
+    const id=layerId(group);
+    map.addLayer({
+      id,
+      type:'fill-extrusion',
+      source:'gbeleban-public',
+      filter:['==',['get','GROUPE'],group],
+      layout:{visibility:'none'},
+      paint:{
+        'fill-extrusion-color':cfg.color,
+        'fill-extrusion-height':cfg.height,
+        'fill-extrusion-base':0,
+        'fill-extrusion-opacity':0.88
+      }
+    });
+    map.on('click',id,e=>{
+      const f=e.features&&e.features[0];
+      if(!f) return;
+      new maplibregl.Popup({maxWidth:'330px'}).setLngLat(e.lngLat).setHTML(popupHtml(f.properties||{})).addTo(map);
+    });
+    map.on('mouseenter',id,()=>map.getCanvas().style.cursor='pointer');
+    map.on('mouseleave',id,()=>map.getCanvas().style.cursor='');
+  });
+}
+
+function fitPublicExtent(data){
+  const bounds=new maplibregl.LngLatBounds();
+  function visit(coords){
+    if(!Array.isArray(coords)) return;
+    if(coords.length>=2 && typeof coords[0]==='number' && typeof coords[1]==='number'){
+      bounds.extend(coords);
+      return;
+    }
+    coords.forEach(visit);
   }
+  (data.features||[]).forEach(f=>visit(f.geometry&&f.geometry.coordinates));
+  if(!bounds.isEmpty()) map.fitBounds(bounds,{padding:{top:45,bottom:45,left:45,right:45},maxZoom:14.35,duration:0});
 }
 
 function set3D(enabled){
   is3D=enabled;
-  map.easeTo({pitch:enabled?52:0,bearing:enabled?-18:0,zoom:enabled?15:14,duration:700});
   const btn=document.getElementById('toggle-3d');
-  if(btn){btn.classList.toggle('active',enabled);btn.setAttribute('aria-pressed',enabled?'true':'false');}
+  const note=document.getElementById('websig-mode-note');
+  if(btn){
+    btn.classList.toggle('active',enabled);
+    btn.setAttribute('aria-pressed',enabled?'true':'false');
+  }
+  if(note){
+    note.textContent=enabled
+      ? 'Vue 3D : les mêmes groupes sont extrudés avec une couleur et un volume adaptés à leur thématique. Les hauteurs sont symboliques.'
+      : 'Vue par défaut : pictogrammes placés sur les équipements du plan d’aménagement.';
+  }
+  map.easeTo({pitch:enabled?52:0,bearing:enabled?-18:0,zoom:enabled?14.55:14.2,duration:700});
+  updateVisibility();
+}
+
+async function loadPublicData(){
+  const response=await fetch('/api/gbeleban-carte.geojson');
+  if(!response.ok) throw new Error('Impossible de charger les données de Gbéléban en carte.');
+  publicData=await response.json();
+  add3DLayers(publicData);
+  (publicData.features||[]).forEach(addMarker);
+  fitPublicExtent(publicData);
+  updateVisibility();
 }
 
 map.on('load',async()=>{
-  document.querySelectorAll('.layer-toggle').forEach(cb=>{
-    cb.addEventListener('change',()=>toggleMunicipalLayer(cb));
-    if(cb.checked)toggleMunicipalLayer(cb);
-  });
-  await loadAdministrativeBuildings();
-  const adminToggle=document.getElementById('admin-buildings-toggle');
-  if(adminToggle){
-    adminToggle.addEventListener('change',()=>{
-      ['admin-buildings-3d','admin-buildings-labels'].forEach(id=>{
-        if(map.getLayer(id))map.setLayoutProperty(id,'visibility',adminToggle.checked?'visible':'none');
-      });
-    });
-  }
+  document.querySelectorAll('.group-toggle').forEach(cb=>cb.addEventListener('change',updateVisibility));
   const btn=document.getElementById('toggle-3d');
-  if(btn){
-    btn.classList.add('active');
-    btn.setAttribute('aria-pressed','true');
-    btn.addEventListener('click',()=>set3D(!is3D));
+  if(btn) btn.addEventListener('click',()=>set3D(!is3D));
+  try{
+    await loadPublicData();
+  }catch(err){
+    console.error(err);
+    const note=document.getElementById('websig-mode-note');
+    if(note) note.textContent='Les données cartographiques sont temporairement indisponibles.';
   }
 });
