@@ -5,16 +5,16 @@ let publicData=null;
 const markers=[];
 
 const GROUPS={
-  'ADMINISTRATION & SERVICES PUBLICS':{color:'#e67e22',icon:'🏛️',height:7},
-  'ÉDUCATION':{color:'#2f6fb2',icon:'🎓',height:6},
-  'SANTÉ & ACTION SOCIALE':{color:'#c7473c',icon:'🏥',height:8},
-  'COMMERCES & TRANSPORTS':{color:'#b78334',icon:'🛒',height:5},
-  'SPORTS & LOISIRS':{color:'#6f52a1',icon:'⚽',height:2.2},
-  'ESPACES VERTS & ENVIRONNEMENT':{color:'#2f8a57',icon:'🌳',height:1.2},
-  'CULTURE & LIEUX REMARQUABLES':{color:'#d3a321',icon:'⭐',height:4},
-  'CULTES':{color:'#7a5a91',icon:'🕊️',height:6.5},
-  'ÉQUIPEMENTS TECHNIQUES':{color:'#557789',icon:'⚙️',height:5.5},
-  'CIMETIÈRE':{color:'#77756f',icon:'✦',height:1.4}
+  'ADMINISTRATION & SERVICES PUBLICS':{color:'#e67e22',icon:'🏛️',height:15},
+  'ÉDUCATION':{color:'#2f6fb2',icon:'🎓',height:13},
+  'SANTÉ & ACTION SOCIALE':{color:'#c7473c',icon:'🏥',height:16},
+  'COMMERCES & TRANSPORTS':{color:'#b78334',icon:'🛒',height:11},
+  'SPORTS & LOISIRS':{color:'#6f52a1',icon:'⚽',height:3.5},
+  'ESPACES VERTS & ENVIRONNEMENT':{color:'#2f8a57',icon:'🌳',height:1.5},
+  'CULTURE & LIEUX REMARQUABLES':{color:'#d3a321',icon:'⭐',height:10},
+  'CULTES':{color:'#7a5a91',icon:'🕊️',height:14},
+  'ÉQUIPEMENTS TECHNIQUES':{color:'#557789',icon:'⚙️',height:12},
+  'CIMETIÈRE':{color:'#77756f',icon:'✦',height:1.8}
 };
 
 const map=new maplibregl.Map({
