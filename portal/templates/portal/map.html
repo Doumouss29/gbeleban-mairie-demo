@@ -3,11 +3,27 @@
 {% block head %}
 <link href="https://unpkg.com/maplibre-gl@5.6.2/dist/maplibre-gl.css" rel="stylesheet">
 <style>
-.websig-tools{margin-bottom:18px;padding-bottom:16px;border-bottom:1px solid #e5e7e3}.websig-tools h3{margin-bottom:10px}.websig-3d-btn{width:100%;display:grid;grid-template-columns:34px 1fr;gap:2px 10px;text-align:left;align-items:center;padding:12px;border:1px solid #d9ddd9;border-radius:13px;background:#fff;color:#173d2f;cursor:pointer}.websig-3d-btn>span{grid-row:1/3;font-size:25px;color:#056b3c}.websig-3d-btn b{font-size:15px}.websig-3d-btn small{font-size:11px;color:#7b847f;line-height:1.25}.websig-3d-btn.active{background:#173d2f;color:#fff;border-color:#173d2f}.websig-3d-btn.active>span{color:#ffc184}.websig-3d-btn.active small{color:#d8e3de}.websig-mode-note{font-size:11px!important;line-height:1.45!important;color:#7a837e!important;margin:8px 0 0!important}.websig-layer-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px}.websig-layer-head h3{margin:0}.websig-all-btn{border:1px solid #d8ddd9;background:#fff;color:#056b3c;border-radius:9px;padding:7px 9px;font-size:11px;font-weight:800;cursor:pointer;white-space:nowrap}.websig-all-btn:hover{background:#f3f8f5;border-color:#056b3c}.websig-layer-list{display:grid;gap:8px}.websig-layer-item{display:grid;grid-template-columns:20px 30px 1fr;align-items:center;gap:7px;padding:9px 10px;border:1px solid #e7e6df;border-radius:11px;background:#fff;cursor:pointer}.websig-layer-item input{margin:0}.websig-layer-icon{width:27px;height:27px;border-radius:8px;display:grid;place-items:center;font-size:16px;background:var(--group-soft,#f4f4f4)}.websig-layer-item span:last-child{font-size:12px;line-height:1.25;font-weight:750;color:#273830}.websig-resizer{position:relative;width:8px;min-width:8px;height:100%;cursor:col-resize;background:#eef0ec;touch-action:none;z-index:5}.websig-resizer:after{content:"";position:absolute;top:0;bottom:0;left:3px;width:2px;background:#cfd5d0;transition:.15s}.websig-resizer:hover:after,.websig-resizer.active:after{background:#ef7d00;width:3px;left:2px}.websig-resizing,.websig-resizing *{cursor:col-resize!important;user-select:none!important}.maplibregl-popup-content{border-radius:12px;padding:14px 16px;box-shadow:0 8px 28px #0002}.websig-popup strong{display:block;color:#056b3c;font-size:16px;margin-bottom:8px}.websig-popup dl{display:grid;grid-template-columns:auto 1fr;gap:5px 10px;margin:0}.websig-popup dt{font-weight:800;color:#45534c}.websig-popup dd{margin:0;color:#59645f}.websig-marker{width:38px;height:38px;border-radius:50%;border:3px solid #fff;box-shadow:0 3px 12px #0004;display:grid;place-items:center;cursor:pointer}.websig-marker span{font-size:18px;line-height:1}.websig-marker:hover{z-index:5;filter:brightness(1.06);box-shadow:0 4px 15px #0005}
-body.websig-page .websig-grid{--websig-side-width:230px;grid-template-columns:var(--websig-side-width) 8px minmax(0,1fr)!important;box-sizing:border-box;border-bottom:12px solid #f5f1ea;overflow:hidden}
+.websig-tools{margin-bottom:18px;padding-bottom:16px;border-bottom:1px solid #e5e7e3}.websig-tools h3{margin-bottom:10px}.websig-3d-btn{width:100%;display:grid;grid-template-columns:34px 1fr;gap:2px 10px;text-align:left;align-items:center;padding:12px;border:1px solid #d9ddd9;border-radius:13px;background:#fff;color:#173d2f;cursor:pointer}.websig-3d-btn>span{grid-row:1/3;font-size:25px;color:#056b3c}.websig-3d-btn b{font-size:15px}.websig-3d-btn small{font-size:11px;color:#7b847f;line-height:1.25}.websig-3d-btn.active{background:#173d2f;color:#fff;border-color:#173d2f}.websig-3d-btn.active>span{color:#ffc184}.websig-3d-btn.active small{color:#d8e3de}.websig-mode-note{font-size:11px!important;line-height:1.45!important;color:#7a837e!important;margin:8px 0 0!important}.websig-layer-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px}.websig-layer-head h3{margin:0}.websig-all-btn{border:1px solid #d8ddd9;background:#fff;color:#056b3c;border-radius:9px;padding:7px 9px;font-size:11px;font-weight:800;cursor:pointer;white-space:nowrap}.websig-all-btn:hover{background:#f3f8f5;border-color:#056b3c}.websig-layer-list{display:grid;gap:8px}.websig-layer-item{display:grid;grid-template-columns:20px 30px 1fr;align-items:center;gap:7px;padding:9px 10px;border:1px solid #e7e6df;border-radius:11px;background:#fff;cursor:pointer}.websig-layer-item input{margin:0}.websig-layer-icon{width:27px;height:27px;border-radius:8px;display:grid;place-items:center;font-size:16px;background:var(--group-soft,#f4f4f4)}.websig-layer-item span:last-child{font-size:12px;line-height:1.25;font-weight:750;color:#273830}.websig-resizer{position:relative;width:8px;min-width:8px;height:100%;cursor:col-resize;background:#eef0ec;touch-action:none;z-index:5}.websig-resizer:after{content:"";position:absolute;top:0;bottom:0;left:3px;width:2px;background:#cfd5d0;transition:.15s}.websig-resizer:hover:after,.websig-resizer.active:after{background:#ef7d00;width:3px;left:2px}.websig-resizing,.websig-resizing *{cursor:col-resize!important;user-select:none!important}.maplibregl-popup-content{border-radius:12px;padding:14px 16px;box-shadow:0 8px 28px #0002}.websig-popup strong{display:block;color:#056b3c;font-size:16px;margin-bottom:8px}.websig-popup dl{display:grid;grid-template-columns:auto 1fr;gap:5px 10px;margin:0}.websig-popup dt{font-weight:800;color:#45534c}.websig-popup dd{margin:0;color:#59645f}.websig-marker{width:38px;height:38px;border-radius:50%;border:3px solid #fff;box-shadow:0 3px 12px #0004;display:grid;place-items:center;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent}.websig-marker span{font-size:18px;line-height:1;pointer-events:none}.websig-marker:hover{z-index:5;filter:brightness(1.06);box-shadow:0 4px 15px #0005}
+body.websig-page .websig-grid{--websig-side-width:230px;grid-template-columns:var(--websig-side-width) 8px minmax(0,1fr)!important;box-sizing:border-box;border-bottom:12px solid #f5f1ea;overflow:hidden;position:relative}
 body.websig-page .websig-grid aside{box-sizing:border-box;min-width:0;border-right:0!important}
-body.websig-page #map{min-width:0;height:100%}
-@media(max-width:1100px){body.websig-page .websig-grid{grid-template-columns:1fr!important;border-bottom:0;overflow:visible}.websig-resizer{display:none}body.websig-page #map{height:650px}}
+.websig-map-wrap{position:relative;min-width:0;height:100%;overflow:hidden;background:#ecebe7}.websig-map-wrap #map{position:absolute;inset:0;width:100%;height:100%!important;min-width:0}
+.websig-map-control{position:absolute;z-index:7;background:#fff;border:1px solid #d9ded9;border-radius:11px;box-shadow:0 5px 18px #0002;color:#263a31}.websig-basemap{top:12px;right:54px;padding:8px 10px;display:flex;align-items:center;gap:7px}.websig-basemap label{font-size:11px;font-weight:850;color:#335044}.websig-basemap select{max-width:210px;border:1px solid #ccd4cf;border-radius:8px;padding:6px 8px;background:#fff;color:#263a31;font-size:11px;font-weight:700}.websig-legend{left:12px;bottom:12px;width:min(255px,calc(100% - 24px));padding:10px 12px}.websig-legend-title{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:12px;font-weight:900;color:#173d2f;margin-bottom:7px}.websig-legend-grid{display:grid;grid-template-columns:1fr 1fr;gap:5px 10px}.websig-legend-item{display:grid;grid-template-columns:20px 1fr;gap:6px;align-items:center;font-size:9px;line-height:1.15;color:#45534c}.websig-legend-symbol{width:20px;height:20px;border-radius:50%;display:grid;place-items:center;color:#fff;font-size:11px;border:2px solid #fff;box-shadow:0 1px 4px #0002}.websig-mobile-layers{display:none;position:absolute;z-index:12;left:10px;top:10px;border:0;border-radius:11px;background:#173d2f;color:#fff;padding:10px 12px;font-size:12px;font-weight:850;box-shadow:0 5px 16px #0003}.websig-mobile-close{display:none;width:100%;margin:0 0 12px;border:1px solid #d7ddd8;border-radius:9px;background:#f7f9f7;color:#173d2f;padding:9px;font-weight:850}.websig-legend-toggle{display:none;border:0;background:transparent;color:#056b3c;font-size:11px;font-weight:850;padding:0}.websig-mobile-backdrop{display:none}
+@media(max-width:1100px){
+  body.websig-page .websig-grid{grid-template-columns:1fr!important;border-bottom:10px solid #f5f1ea;overflow:hidden;position:relative;height:calc(100dvh - 190px)!important;min-height:520px}
+  .websig-resizer{display:none}
+  .websig-map-wrap{grid-column:1;grid-row:1;height:100%;min-height:520px}
+  body.websig-page .websig-grid aside{position:absolute;z-index:20;left:10px;top:58px;bottom:10px;width:min(335px,calc(100% - 20px));max-width:none;padding:14px!important;border-radius:14px;border:1px solid #d8ddd9!important;box-shadow:0 12px 35px #0004;background:#fbfaf7;overflow-y:auto;transform:translateX(calc(-100% - 24px));transition:transform .22s ease}
+  body.websig-page .websig-grid.mobile-layers-open aside{transform:translateX(0)}
+  .websig-mobile-layers{display:block}
+  .websig-mobile-close{display:block}
+  .websig-mobile-backdrop{position:absolute;z-index:15;inset:0;background:#0004}
+  body.websig-page .websig-grid.mobile-layers-open .websig-mobile-backdrop{display:block}
+  .websig-basemap{top:10px;right:10px;max-width:calc(100% - 126px);padding:6px 8px}.websig-basemap label{display:none}.websig-basemap select{max-width:180px;padding:7px 8px}
+  .websig-legend{left:10px;bottom:10px;width:min(245px,calc(100% - 20px));padding:9px 10px}.websig-legend-toggle{display:inline-block}.websig-legend.collapsed .websig-legend-grid{display:none}.websig-legend.collapsed .websig-legend-title{margin-bottom:0}
+  .websig-legend-grid{grid-template-columns:1fr}.websig-legend-item{font-size:10px}
+  .maplibregl-ctrl-top-right{top:48px}
+}
+@media(max-width:600px){body.websig-page .websig-grid{height:calc(100dvh - 170px)!important;min-height:500px}.websig-basemap select{max-width:155px;font-size:10px}.websig-mobile-layers{font-size:11px;padding:9px 10px}.websig-marker{width:40px;height:40px}.websig-marker span{font-size:19px}}
 </style>
 {% endblock %}
 {% block content %}
@@ -19,7 +35,8 @@ body.websig-page #map{min-width:0;height:100%}
   </div>
 </section>
 <section class="maplayout websig-grid">
-  <aside>
+  <aside id="websig-sidebar">
+    <button type="button" id="mobile-layers-close" class="websig-mobile-close">✕ Fermer les couches</button>
     <div class="websig-tools">
       <h3>Affichage</h3>
       <button type="button" id="toggle-3d" class="websig-3d-btn" aria-pressed="false">
@@ -46,7 +63,33 @@ body.websig-page #map{min-width:0;height:100%}
     </div>
   </aside>
   <div id="websig-resizer" class="websig-resizer" role="separator" aria-orientation="vertical" aria-label="Redimensionner le panneau des couches" tabindex="0" title="Glisser pour agrandir ou réduire le panneau des couches"></div>
-  <div id="map"></div>
+  <div class="websig-map-wrap">
+    <div id="map"></div>
+    <button type="button" id="mobile-layers-toggle" class="websig-mobile-layers" aria-controls="websig-sidebar" aria-expanded="false">☰ Couches</button>
+    <div id="mobile-layers-backdrop" class="websig-mobile-backdrop"></div>
+    <div class="websig-map-control websig-basemap">
+      <label for="basemap-select">Fond de plan</label>
+      <select id="basemap-select" aria-label="Choisir le fond de plan">
+        <option value="osm">OSM standard</option>
+        <option value="imagery">Orthophoto / satellite</option>
+      </select>
+    </div>
+    <div id="websig-legend" class="websig-map-control websig-legend collapsed">
+      <div class="websig-legend-title"><span>Légende</span><button type="button" id="legend-toggle" class="websig-legend-toggle">Afficher</button></div>
+      <div class="websig-legend-grid">
+        <div class="websig-legend-item"><span class="websig-legend-symbol" style="background:#e67e22">🏛️</span><span>Administration</span></div>
+        <div class="websig-legend-item"><span class="websig-legend-symbol" style="background:#2f6fb2">🎓</span><span>Éducation</span></div>
+        <div class="websig-legend-item"><span class="websig-legend-symbol" style="background:#c7473c">🏥</span><span>Santé & social</span></div>
+        <div class="websig-legend-item"><span class="websig-legend-symbol" style="background:#b78334">🛒</span><span>Commerce & transport</span></div>
+        <div class="websig-legend-item"><span class="websig-legend-symbol" style="background:#6f52a1">⚽</span><span>Sports & loisirs</span></div>
+        <div class="websig-legend-item"><span class="websig-legend-symbol" style="background:#2f8a57">🌳</span><span>Espaces verts / forêt sacrée</span></div>
+        <div class="websig-legend-item"><span class="websig-legend-symbol" style="background:#d3a321">⭐</span><span>Culture</span></div>
+        <div class="websig-legend-item"><span class="websig-legend-symbol" style="background:#7a5a91">🕊️</span><span>Cultes</span></div>
+        <div class="websig-legend-item"><span class="websig-legend-symbol" style="background:#557789">⚙️</span><span>Équipements techniques</span></div>
+        <div class="websig-legend-item"><span class="websig-legend-symbol" style="background:#77756f">✦</span><span>Cimetière</span></div>
+      </div>
+    </div>
+  </div>
 </section>
 <script>document.body.classList.add('websig-page');</script>
 {% endblock %}
