@@ -1,27 +1,57 @@
-{% extends 'portal/base.html' %}{% load static %}{% block title %}Urbanisme - Gbéléban{% endblock %}{% block content %}
-<section class="pagehead secure urban-pagehead"><div class="container"><span class="eyebrow">ESPACE SÉCURISÉ</span><h1>Urbanisme & plan cadastral</h1><p>Consultez le plan cadastral de la commune et recherchez une parcelle.</p></div></section>
+{% extends 'portal/base.html' %}{% load static %}
+{% block title %}Urbanisme - Gbéléban{% endblock %}
+{% block head %}
+<style>
+.urban-pagehead{padding:12px 0 10px!important}.urban-pagehead h1{font-size:27px;margin:4px 0}.urban-pagehead p{margin:0;font-size:13px}
+.urban-grid{display:grid;grid-template-columns:280px minmax(0,1fr);height:calc(100vh - 205px);min-height:560px;background:#fff;border-top:1px solid #e8e9e5}.urban-grid>aside{padding:16px 14px;overflow:auto;border-right:1px solid #dedfd9;background:#fbfbf8}.urban-grid h3{font-size:15px;margin:0 0 10px;color:#173d2f}.urban-grid label{font-size:12px}.urban-grid input,.urban-grid select,.urban-grid textarea{width:100%;box-sizing:border-box;border:1px solid #d9ddd8;border-radius:8px;padding:8px 9px;background:white}.urban-grid textarea{min-height:72px;resize:vertical}.urban-grid .layeritem{display:flex;align-items:center;gap:7px;padding:5px 2px}.urban-grid .layeritem input{width:auto}.urban-grid #parcel-search{display:grid;gap:7px}.urban-grid #parcel-search label{display:grid;gap:3px}.parcel-result{display:block;width:100%;text-align:left;border:0;border-bottom:1px solid #ecece7;background:transparent;padding:8px 2px;font-size:11px;cursor:pointer}.parcel-result:hover{color:#e67e22}
+#cadastre-map{position:relative;background:#f6f5ef;min-width:0}.leaflet-container{background:#f6f5ef}.lot-label{background:transparent!important;border:0!important;box-shadow:none!important;color:#111!important;font-weight:700;font-size:10px;text-shadow:0 1px 0 #fff,1px 0 0 #fff,-1px 0 0 #fff,0 -1px 0 #fff}.lot-label:before{display:none!important}
+.parcel-card{position:absolute;z-index:800;right:14px;top:14px;width:min(360px,calc(100% - 28px));background:#fff;border:1px solid #dedfd9;border-radius:14px;box-shadow:0 10px 32px #0002;padding:16px;display:none}.parcel-card.open{display:block}.parcel-card-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}.parcel-card h3{font-size:19px;margin:0}.parcel-card-close{border:0;background:#f2f3ef;width:30px;height:30px;border-radius:50%;cursor:pointer}.parcel-meta{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin:13px 0}.parcel-meta div{background:#f7f7f3;border-radius:9px;padding:8px;font-size:11px}.parcel-meta b{display:block;color:#777;font-size:9px;text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px}.owner-summary{border-top:1px solid #ecece7;padding-top:12px}.owner-summary-title{font-size:10px;text-transform:uppercase;letter-spacing:1px;color:#777}.owner-name{font-weight:800;color:#173d2f;margin:5px 0}.owner-empty{font-size:12px;color:#777}.parcel-card-actions{display:flex;gap:8px;margin-top:12px}.parcel-card-actions button{flex:1;border-radius:9px;padding:9px 10px;cursor:pointer;border:1px solid #173d2f;background:#fff;color:#173d2f;font-weight:700}.parcel-card-actions .primary{background:#173d2f;color:#fff}
+.registry-modal{position:fixed;inset:0;z-index:4000;display:none}.registry-modal.open{display:block}.registry-backdrop{position:absolute;inset:0;background:#071b14aa}.registry-dialog{position:absolute;inset:3vh 3vw;background:#fff;border-radius:18px;overflow:hidden;display:grid;grid-template-rows:auto 1fr;box-shadow:0 20px 70px #0006}.registry-head{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid #e4e6e1;background:#173d2f;color:#fff}.registry-head h2{margin:0;font-size:20px}.registry-head button{border:0;background:#ffffff20;color:#fff;width:34px;height:34px;border-radius:50%;font-size:20px;cursor:pointer}.registry-body{display:grid;grid-template-columns:minmax(320px,39%) minmax(0,1fr);min-height:0}.registry-history{padding:16px;overflow:auto;background:#f7f7f3;border-right:1px solid #e3e5df}.registry-editor{padding:18px 20px;overflow:auto}.registry-section-title{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}.registry-section-title h3{margin:0;color:#173d2f}.history-card{background:#fff;border:1px solid #e1e3de;border-radius:12px;padding:12px;margin-bottom:9px}.history-card.current{border-left:4px solid #0a7040}.history-card.old{opacity:.86}.history-card h4{margin:0 0 5px;font-size:14px}.history-card .badge{display:inline-block;font-size:9px;border-radius:999px;padding:3px 6px;background:#e9eee9;color:#285d46;margin-right:4px}.history-card .period{font-size:11px;color:#68736d;margin:6px 0}.history-card button{border:0;background:none;color:#d16b13;font-weight:700;padding:2px 0;cursor:pointer}.owner-form{display:grid;gap:13px}.owner-form fieldset{border:1px solid #e0e3dd;border-radius:12px;padding:13px}.owner-form legend{padding:0 7px;font-weight:800;color:#173d2f;font-size:12px}.form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.form-grid .full{grid-column:1/-1}.owner-form label{display:grid;gap:4px;font-size:11px;color:#53615b}.owner-form input,.owner-form select,.owner-form textarea{border:1px solid #d6dbd5;border-radius:8px;padding:9px;width:100%;box-sizing:border-box}.owner-type-tabs{display:grid;grid-template-columns:1fr 1fr;gap:8px}.owner-type-tabs label{display:flex;align-items:center;gap:7px;border:1px solid #d6dbd5;border-radius:9px;padding:9px;cursor:pointer}.owner-type-tabs input{width:auto}.legal-fields{display:none}.owner-form.legal .legal-fields{display:grid}.owner-form.legal .physical-fields{display:none}.registry-actions{display:flex;flex-wrap:wrap;gap:8px;position:sticky;bottom:-18px;background:#fff;padding:12px 0 2px}.registry-actions button{border:0;border-radius:9px;padding:10px 13px;font-weight:800;cursor:pointer}.registry-actions .add{background:#173d2f;color:#fff}.registry-actions .replace{background:#e67e22;color:#fff}.registry-actions .save{background:#2f6fb2;color:#fff}.registry-actions .cancel{background:#eceee9;color:#324038}.form-message{display:none;padding:9px 11px;border-radius:8px;font-size:12px}.form-message.show{display:block}.form-message.error{background:#fde9e7;color:#9c3027}.form-message.ok{background:#e5f4ea;color:#17643c}
+@media(max-width:1100px){.urban-grid{grid-template-columns:1fr;height:auto}.urban-grid>aside{border-right:0;border-bottom:1px solid #ddd}.urban-grid #cadastre-map{height:70vh;min-height:540px}.registry-dialog{inset:2vh 2vw}.registry-body{grid-template-columns:1fr}.registry-history{max-height:36vh;border-right:0;border-bottom:1px solid #ddd}.form-grid{grid-template-columns:1fr}}
+</style>
+{% endblock %}
+{% block content %}
+<section class="pagehead secure urban-pagehead"><div class="container"><span class="eyebrow">ESPACE SÉCURISÉ</span><h1>Urbanisme & plan cadastral</h1><p>Consultez les lots, leurs propriétaires actuels et l’historique des mutations.</p></div></section>
 <section class="urban-grid">
   <aside>
     <h3>Couches Urbanisme</h3>
     <label class="layeritem"><input type="radio" name="urban-layer" value="" checked> <span>Toutes les couches</span></label>
-    {% for layer in urban_layers %}
-      <label class="layeritem"><input type="radio" name="urban-layer" value="{{ layer }}"> <span>{{ layer }}</span></label>
-    {% empty %}
-      <p>Aucune couche Urbanisme disponible.</p>
-    {% endfor %}
-
-    <h3 style="margin-top:28px">Rechercher une parcelle</h3>
+    {% for layer in urban_layers %}<label class="layeritem"><input type="radio" name="urban-layer" value="{{ layer }}"> <span>{{ layer }}</span></label>{% empty %}<p>Aucune couche Urbanisme disponible.</p>{% endfor %}
+    <h3 style="margin-top:22px">Rechercher une parcelle</h3>
     <form id="parcel-search">
       <input type="hidden" name="layer" id="parcel-layer-filter" value="">
-      <label>Section<input name="section"></label>
-      <label>Îlot<input name="ilot"></label>
-      <label>Lot<input name="lot"></label>
-      <label>Parcelle<input name="parcelle"></label>
+      <label>Section<input name="section"></label><label>Îlot<input name="ilot"></label><label>Lot<input name="lot"></label><label>Parcelle<input name="parcelle"></label>
       <button class="btn orange" type="submit">Rechercher</button>
     </form>
     <div id="search-results"></div>
   </aside>
-  <div id="cadastre-map"></div>
+  <div id="cadastre-map">
+    <div id="parcel-card" class="parcel-card" aria-live="polite"></div>
+  </div>
 </section>
+
+<div id="registry-modal" class="registry-modal" aria-hidden="true">
+  <div class="registry-backdrop" data-close-registry></div>
+  <div class="registry-dialog" role="dialog" aria-modal="true" aria-labelledby="registry-title">
+    <div class="registry-head"><div><small>GESTION CADASTRALE</small><h2 id="registry-title">Fiche parcelle</h2></div><button type="button" data-close-registry>×</button></div>
+    <div class="registry-body">
+      <div class="registry-history"><div class="registry-section-title"><h3>Propriétaires & historique</h3></div><div id="ownership-history"></div></div>
+      <div class="registry-editor">
+        <div class="registry-section-title"><h3 id="editor-title">Ajouter un propriétaire</h3><button type="button" id="new-owner-reset" class="btn">Nouveau</button></div>
+        <div id="owner-form-message" class="form-message"></div>
+        <form id="owner-form" class="owner-form" enctype="multipart/form-data">
+          <input type="hidden" name="owner_id" id="owner-id"><input type="hidden" name="ownership_id" id="ownership-id">
+          <fieldset><legend>Type de propriétaire</legend><div class="owner-type-tabs"><label><input type="radio" name="person_type" value="physical" checked> Personne physique</label><label><input type="radio" name="person_type" value="legal"> Personne morale</label></div></fieldset>
+          <fieldset class="physical-fields"><legend>Identité — personne physique</legend><div class="form-grid"><label>Nom *<input name="last_name"></label><label>Prénoms<input name="first_names"></label><label>Date de naissance<input type="date" name="birth_date"></label><label>Lieu de naissance<input name="birth_place"></label><label>Nationalité<input name="nationality"></label><label>Profession<input name="profession"></label></div></fieldset>
+          <fieldset class="legal-fields"><legend>Personne morale</legend><div class="form-grid"><label class="full">Raison sociale / dénomination *<input name="legal_name"></label><label>Forme juridique<input name="legal_form"></label><label>RCCM / immatriculation<input name="registration_number"></label><label>Identifiant fiscal<input name="tax_number"></label><label>Représentant<input name="representative_name"></label><label>Fonction<input name="representative_function"></label></div></fieldset>
+          <fieldset><legend>Coordonnées & pièce d’identité</legend><div class="form-grid"><label>Téléphone<input name="phone"></label><label>E-mail<input type="email" name="email"></label><label class="full">Adresse<input name="address"></label><label>Type de pièce<select name="identity_type"><option value="">—</option><option>CNI</option><option>Passeport</option><option>Carte consulaire</option><option>Registre / RCCM</option><option>Autre</option></select></label><label>N° de pièce<input name="identity_number"></label><label class="full">Pièce d’identité (PDF/JPG/PNG/WEBP, 8 Mo max)<input type="file" name="identity_document" accept="application/pdf,image/jpeg,image/png,image/webp"></label><label class="full">Observations propriétaire<textarea name="owner_notes"></textarea></label></div></fieldset>
+          <fieldset><legend>Droit de propriété sur ce lot</legend><div class="form-grid"><label>Qualité<select name="role"><option value="owner">Propriétaire</option><option value="coowner">Copropriétaire</option><option value="landowner">Propriétaire terrien</option><option value="acquirer">Acquéreur</option></select></label><label>Quote-part (%)<input type="number" min="0" max="100" step="0.01" name="share_percentage"></label><label>Début de propriété<input type="date" name="start_date"></label><label>Fin de propriété<input type="date" name="end_date"></label><label class="full">Référence acte / décision<input name="source_reference"></label><label class="full">Source<input name="source" value="Saisie Urbanisme"></label><label class="full">Observations sur la propriété<textarea name="ownership_notes"></textarea></label></div></fieldset>
+          <div class="registry-actions"><button type="button" class="add" id="add-owner">Ajouter comme copropriétaire</button><button type="button" class="replace" id="replace-owner">Changer de propriétaire</button><button type="button" class="save" id="save-owner" style="display:none">Enregistrer les modifications</button><button type="button" class="cancel" id="cancel-owner-edit" style="display:none">Annuler</button></div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
 <script>document.body.classList.add('urbanism-page');</script>
-{% endblock %}{% block scripts %}<script src="{% static 'portal/js/cadastre.js' %}"></script>{% endblock %}
+{% endblock %}
+{% block scripts %}<script src="{% static 'portal/js/cadastre.js' %}"></script>{% endblock %}
