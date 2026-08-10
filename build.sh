@@ -6,4 +6,5 @@ python manage.py ensure_database
 python manage.py migrate --noinput
 python manage.py collectstatic --noinput
 python manage.py seed_demo
+python manage.py seed_parcel_owners
 python manage.py create_admin_if_needed
