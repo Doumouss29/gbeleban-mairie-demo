@@ -1,0 +1,37 @@
+{% extends 'portal/base.html' %}
+{% block title %}{{ news_item.title }} - Gbéléban{% endblock %}
+{% block content %}
+<section class="news-detail-hero">
+  <div class="container news-detail-head">
+    <a class="news-back" href="{% url 'news' %}">← Toutes les actualités</a>
+    <span class="eyebrow">ACTUALITÉ MUNICIPALE</span>
+    <h1>{{ news_item.title }}</h1>
+    <p class="news-detail-date">Publié le {{ news_item.published_at|date:"d F Y" }}</p>
+  </div>
+</section>
+
+<section class="section news-detail-section">
+  <article class="container news-detail-article">
+    {% with images=news_item.gallery_images %}
+      {% if images %}
+        <div class="news-detail-gallery{% if images|length == 1 %} single{% endif %}">
+          {% for image in images %}
+            <figure class="news-detail-image">
+              <img src="{{ image }}" alt="{{ news_item.title }}{% if images|length > 1 %} - image {{ forloop.counter }}{% endif %}">
+            </figure>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+
+    <div class="news-detail-content">
+      {% if news_item.excerpt %}<p class="news-detail-lead">{{ news_item.excerpt }}</p>{% endif %}
+      {% if news_item.body %}<div class="news-detail-body">{{ news_item.body|linebreaks }}</div>{% endif %}
+    </div>
+
+    <div class="news-detail-footer">
+      <a class="btn news-return-btn" href="{% url 'news' %}">Retour aux actualités</a>
+    </div>
+  </article>
+</section>
+{% endblock %}
