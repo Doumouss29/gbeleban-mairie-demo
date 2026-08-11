@@ -1,1 +1,39 @@
-{% extends 'portal/base.html' %}{% block title %}Actualités - Gbéléban{% endblock %}{% block content %}<section class="pagehead"><div class="container"><span class="eyebrow">VIE MUNICIPALE</span><h1>Actualités</h1></div></section><section class="section"><div class="container cards">{% for n in news_items %}<article class="card media-card">{% with images=n.gallery_images %}{% if images %}<div class="media-slider" data-slider><div class="media-track">{% for image in images %}<div class="media-slide"><img src="{{ image }}" alt="{{ n.title }}"></div>{% endfor %}</div>{% if images|length > 1 %}<button type="button" class="media-prev" aria-label="Image précédente">‹</button><button type="button" class="media-next" aria-label="Image suivante">›</button><div class="media-dots">{% for image in images %}<button type="button" class="media-dot{% if forloop.first %} active{% endif %}" data-index="{{ forloop.counter0 }}" aria-label="Image {{ forloop.counter }}"></button>{% endfor %}</div>{% endif %}</div>{% endif %}{% endwith %}<div class="media-card-body"><small>{{ n.published_at }}</small><h3>{{ n.title }}</h3><p>{{ n.excerpt }}</p>{% if n.body %}<p>{{ n.body }}</p>{% endif %}</div></article>{% empty %}<p>Aucune actualité publiée.</p>{% endfor %}</div></section><script>document.querySelectorAll('[data-slider]').forEach(slider=>{const track=slider.querySelector('.media-track');const slides=[...slider.querySelectorAll('.media-slide')];if(slides.length<2)return;let index=0;const dots=[...slider.querySelectorAll('.media-dot')];function go(i){index=(i+slides.length)%slides.length;track.style.transform=`translateX(-${index*100}%)`;dots.forEach((d,j)=>d.classList.toggle('active',j===index));}slider.querySelector('.media-prev')?.addEventListener('click',()=>go(index-1));slider.querySelector('.media-next')?.addEventListener('click',()=>go(index+1));dots.forEach(d=>d.addEventListener('click',()=>go(Number(d.dataset.index))));});</script>{% endblock %}
+{% extends 'portal/base.html' %}
+{% block title %}Actualités - Gbéléban{% endblock %}
+{% block content %}
+<section class="pagehead">
+  <div class="container">
+    <span class="eyebrow">VIE MUNICIPALE</span>
+    <h1>Actualités</h1>
+    <p>Retrouvez les dernières informations et actions de la commune de Gbéléban.</p>
+  </div>
+</section>
+
+<section class="section news-section">
+  <div class="container news-grid">
+    {% for n in news_items %}
+      <article class="news-card">
+        {% with images=n.gallery_images %}
+          {% if images %}
+            <a class="news-card-media" href="{% url 'news_detail' n.id %}" aria-label="Lire {{ n.title }}">
+              <img src="{{ images.0 }}" alt="{{ n.title }}">
+            </a>
+          {% else %}
+            <a class="news-card-media news-card-media-empty" href="{% url 'news_detail' n.id %}" aria-label="Lire {{ n.title }}">
+              <span>Gbéléban</span>
+            </a>
+          {% endif %}
+        {% endwith %}
+        <div class="news-card-body">
+          <small class="news-date">{{ n.published_at|date:"d F Y" }}</small>
+          <h2><a href="{% url 'news_detail' n.id %}">{{ n.title }}</a></h2>
+          <p>{{ n.excerpt|default:n.body|striptags|truncatechars:180 }}</p>
+          <a class="news-more" href="{% url 'news_detail' n.id %}">Voir plus <span>→</span></a>
+        </div>
+      </article>
+    {% empty %}
+      <p>Aucune actualité publiée.</p>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}
