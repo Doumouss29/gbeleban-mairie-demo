@@ -5,34 +5,43 @@
   <div class="container">
     <span class="eyebrow">ESPACE SÉCURISÉ</span>
     <h1>Mon espace Gbéléban</h1>
-    <p>Bienvenue {{ user.get_full_name|default:user.username }}. Les services affichés ci-dessous dépendent des droits attribués à votre compte.</p>
+    <p>Bienvenue {{ user.get_full_name|default:user.username }}. Accédez rapidement aux services qui vous sont attribués.</p>
   </div>
 </section>
 
 <section class="section pale">
   <div class="container">
-    <div class="access-grid">
+    <div class="space-capsules">
       {% if can_urbanism %}
-      <a class="access-card" href="/urbanisme/">
-        <span class="access-icon">🗺️</span>
-        <div><h2>Urbanisme</h2><p>Accéder au plan cadastral, aux parcelles et aux outils de consultation urbanistique.</p></div>
-        <span class="access-arrow">→</span>
+      <a class="space-capsule" href="{% url 'urbanism' %}">
+        <span class="space-capsule-icon">🗺️</span>
+        <span class="space-capsule-content">
+          <strong>Urbanisme</strong>
+          <small>Plan cadastral, parcelles et consultation urbanistique</small>
+        </span>
+        <span class="space-capsule-arrow">→</span>
       </a>
       {% endif %}
 
       {% if can_collection %}
-      <a class="access-card" href="/collecte-municipale/">
-        <span class="access-icon">💰</span>
-        <div><h2>Collecte municipale</h2><p>Créer les thématiques de recettes, définir leur périodicité et enregistrer les montants collectés.</p></div>
-        <span class="access-arrow">→</span>
+      <a class="space-capsule" href="{% url 'municipal_collection' %}">
+        <span class="space-capsule-icon">💰</span>
+        <span class="space-capsule-content">
+          <strong>Collecte municipale</strong>
+          <small>Recettes, périodicités et montants collectés</small>
+        </span>
+        <span class="space-capsule-arrow">→</span>
       </a>
       {% endif %}
 
       {% if can_dashboard %}
-      <a class="access-card" href="/dashboard/">
-        <span class="access-icon">📊</span>
-        <div><h2>Dashboard</h2><p>Analyser les recettes municipales, les objectifs et les tendances par période et par thématique.</p></div>
-        <span class="access-arrow">→</span>
+      <a class="space-capsule" href="{% url 'dashboard' %}">
+        <span class="space-capsule-icon">📊</span>
+        <span class="space-capsule-content">
+          <strong>Dashboard</strong>
+          <small>Objectifs, recettes et tendances municipales</small>
+        </span>
+        <span class="space-capsule-arrow">→</span>
       </a>
       {% endif %}
     </div>
@@ -45,7 +54,7 @@
     {% endif %}
 
     <div class="space-footer-actions">
-      <form method="post" action="/deconnexion/">{% csrf_token %}<button type="submit" class="btn light">Se déconnecter</button></form>
+      <form method="post" action="{% url 'logout' %}">{% csrf_token %}<button type="submit" class="btn light">Se déconnecter</button></form>
     </div>
   </div>
 </section>
