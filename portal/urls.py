@@ -4,6 +4,7 @@ from . import views
 from . import pdf_reports
 from . import public_map_views
 from . import parcel_registry_views
+from . import news_views
 
 urlpatterns = [
     path("", views.home, name="home"),
@@ -12,6 +13,7 @@ urlpatterns = [
     path("mon-espace/", views.my_space, name="my_space"),
     path("projets/", views.projects, name="projects"),
     path("actualites/", views.news, name="news"),
+    path("actualites/<int:news_id>/", news_views.news_detail, name="news_detail"),
     path("pages/<slug:slug>/", views.page_detail, name="page_detail"),
     path("gbeleban-en-carte/", public_map_views.map_public, name="map_public"),
     path("api/gbeleban-carte.geojson", public_map_views.public_map_geojson, name="public_map_geojson"),
