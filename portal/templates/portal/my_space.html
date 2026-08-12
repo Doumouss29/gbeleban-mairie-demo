@@ -1,5 +1,18 @@
 {% extends 'portal/base.html' %}
+{% load static %}
 {% block title %}Mon espace Gbéléban{% endblock %}
+{% block head %}
+<style>
+.space-capsule{position:relative;overflow:hidden;padding:26px 28px 24px;min-height:320px}
+.space-capsule-visual{width:132px;height:96px;border-radius:22px;overflow:hidden;background:#f5f1ea;box-shadow:0 8px 22px rgba(5,57,39,.10);display:block}
+.space-capsule-visual img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .25s ease}
+.space-capsule:hover .space-capsule-visual img{transform:scale(1.035)}
+.space-capsule-content{margin-top:4px}
+.space-capsule-content strong{font-size:26px}
+.space-capsule-content small{font-size:17px;line-height:1.55}
+@media(max-width:700px){.space-capsule{min-height:285px}.space-capsule-visual{width:118px;height:86px}}
+</style>
+{% endblock %}
 {% block content %}
 <section class="pagehead secure">
   <div class="container">
@@ -14,7 +27,7 @@
     <div class="space-capsules">
       {% if can_urbanism %}
       <a class="space-capsule" href="{% url 'urbanism' %}">
-        <span class="space-capsule-icon">🗺️</span>
+        <span class="space-capsule-visual"><img src="{% static 'portal/img/espace-urbanisme.jpg' %}" alt="Vue aérienne urbaine"></span>
         <span class="space-capsule-content">
           <strong>Urbanisme</strong>
           <small>Plan cadastral, parcelles et consultation urbanistique</small>
@@ -25,7 +38,7 @@
 
       {% if can_collection %}
       <a class="space-capsule" href="{% url 'municipal_collection' %}">
-        <span class="space-capsule-icon">💰</span>
+        <span class="space-capsule-visual"><img src="{% static 'portal/img/espace-collecte.jpg' %}" alt="Gestion des recettes municipales"></span>
         <span class="space-capsule-content">
           <strong>Collecte municipale</strong>
           <small>Recettes, périodicités et montants collectés</small>
@@ -36,7 +49,7 @@
 
       {% if can_dashboard %}
       <a class="space-capsule" href="{% url 'dashboard' %}">
-        <span class="space-capsule-icon">📊</span>
+        <span class="space-capsule-visual"><img src="{% static 'portal/img/espace-dashboard.jpg' %}" alt="Tableau de bord analytique"></span>
         <span class="space-capsule-content">
           <strong>Dashboard</strong>
           <small>Objectifs, recettes et tendances municipales</small>
