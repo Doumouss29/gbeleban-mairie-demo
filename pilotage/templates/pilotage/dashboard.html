@@ -1,0 +1,135 @@
+{% extends 'portal/base.html' %}
+{% load static %}
+{% block title %}Pilotage projets - Gbéléban{% endblock %}
+{% block head %}<link rel="stylesheet" href="{% static 'pilotage/pilotage.css' %}">{% endblock %}
+{% block content %}
+<section class="pagehead secure pilotage-head">
+  <div class="container">
+    <span class="eyebrow">PILOTAGE MUNICIPAL</span>
+    <h1>Pilotage des projets</h1>
+    <p>Suivez l'avancement, le budget, le planning, les étapes et l'équipe de chaque projet de la mairie.</p>
+  </div>
+</section>
+
+<section class="section pale pilotage-section">
+  <div class="container pilotage-layout">
+    <aside class="pilotage-sidebar">
+      <div class="pilotage-panel">
+        <div class="pilotage-panel-head"><h2>Projets</h2><span>{{ projects|length }}</span></div>
+        <div class="pilotage-project-list">
+          {% for p in projects %}
+          <a href="?project={{ p.id }}" class="pilotage-project-link {% if selected and selected.id == p.id %}active{% endif %}">
+            <strong>{{ p.title }}</strong>
+            <small>{{ p.get_status_display }} · {{ p.progress }} %</small>
+          </a>
+          {% empty %}<p class="muted">Aucun projet accessible pour le moment.</p>{% endfor %}
+        </div>
+      </div>
+
+      {% if can_admin %}
+      <details class="pilotage-panel create-panel" {% if not selected %}open{% endif %}>
+        <summary>Nouveau projet</summary>
+        <form method="post" enctype="multipart/form-data" class="pilotage-form compact-form">
+          {% csrf_token %}<input type="hidden" name="action" value="create_project">
+          <label>Nom du projet<input name="title" required></label>
+          <label>Description<textarea name="description" rows="3"></textarea></label>
+          <div class="form-2"><label>Début<input type="date" name="start_date"></label><label>Fin prévue<input type="date" name="end_date"></label></div>
+          <div class="form-2"><label>Budget prévisionnel<input type="number" min="0" name="budget_planned"></label><label>Avancement %<input type="number" min="0" max="100" name="progress" value="0"></label></div>
+          <label>Image du projet<input type="file" name="image" accept="image/*"></label>
+          <label>Utilisateurs associés<select name="members" multiple size="6">{% for u in users %}<option value="{{ u.id }}">{{ u.get_full_name|default:u.username }} — {{ u.username }}</option>{% endfor %}</select></label>
+          <button class="btn orange" type="submit">Créer le projet</button>
+        </form>
+      </details>
+      {% endif %}
+    </aside>
+
+    <main class="pilotage-main">
+      {% if selected %}
+      <section class="project-hero-card">
+        {% if selected.image_src %}<div class="project-hero-image"><img src="{{ selected.image_src }}" alt="{{ selected.title }}"></div>{% endif %}
+        <div class="project-hero-content">
+          <div class="project-title-line"><div><span class="status-pill status-{{ selected.status }}">{{ selected.get_status_display }}</span><h2>{{ selected.title }}</h2></div><strong class="project-progress-big">{{ selected.progress }}%</strong></div>
+          <p>{{ selected.description|default:"Aucune description renseignée." }}</p>
+          <div class="progress pilotage-progress"><i style="width:{{ selected.progress }}%"></i></div>
+        </div>
+      </section>
+
+      <section class="pilotage-kpis">
+        <article><small>Budget prévisionnel</small><strong>{% if selected.budget_planned %}{{ selected.budget_planned|floatformat:0 }} FCFA{% else %}—{% endif %}</strong></article>
+        <article><small>Dépenses engagées</small><strong>{{ selected.budget_spent|floatformat:0 }} FCFA</strong></article>
+        <article><small>Planning</small><strong>{% if selected.start_date %}{{ selected.start_date|date:'d/m/Y' }}{% else %}—{% endif %} → {% if selected.end_date %}{{ selected.end_date|date:'d/m/Y' }}{% else %}—{% endif %}</strong></article>
+        <article><small>Équipe projet</small><strong>{{ selected.members.count }} utilisateur{{ selected.members.count|pluralize }}</strong></article>
+      </section>
+
+      <div class="pilotage-columns">
+        <section class="pilotage-panel wide-panel">
+          <div class="pilotage-panel-head"><h2>Planning & étapes</h2><span>{{ selected.steps.count }}</span></div>
+          <div class="steps-list">
+            {% for step in selected.steps.all %}
+            <details class="step-card">
+              <summary>
+                <span class="step-index">{{ forloop.counter }}</span>
+                <span class="step-summary-main"><strong>{{ step.title }}</strong><small>{{ step.get_status_display }}{% if step.responsible %} · {{ step.responsible.get_full_name|default:step.responsible.username }}{% endif %}</small></span>
+                <span class="step-progress">{{ step.progress }}%</span>
+              </summary>
+              <form method="post" class="pilotage-form step-form">
+                {% csrf_token %}<input type="hidden" name="action" value="update_step"><input type="hidden" name="project_id" value="{{ selected.id }}"><input type="hidden" name="step_id" value="{{ step.id }}">
+                <div class="form-2"><label>Étape<input name="title" value="{{ step.title }}"></label><label>Responsable<select name="responsible"><option value="">Non défini</option>{% for u in selected.members.all %}<option value="{{ u.id }}" {% if step.responsible_id == u.id %}selected{% endif %}>{{ u.get_full_name|default:u.username }}</option>{% endfor %}</select></label></div>
+                <label>Description<textarea name="description" rows="2">{{ step.description }}</textarea></label>
+                <div class="form-4"><label>Statut<select name="status">{% for value,label in step.STATUS_CHOICES %}<option value="{{ value }}" {% if step.status == value %}selected{% endif %}>{{ label }}</option>{% endfor %}</select></label><label>Avancement<input type="number" min="0" max="100" name="progress" value="{{ step.progress }}"></label><label>Début<input type="date" name="start_date" value="{{ step.start_date|date:'Y-m-d' }}"></label><label>Fin<input type="date" name="end_date" value="{{ step.end_date|date:'Y-m-d' }}"></label></div>
+                <div class="form-2"><label>Budget étape<input type="number" min="0" name="budget" value="{{ step.budget|default_if_none:'' }}"></label><label>Ordre<input type="number" min="0" name="order" value="{{ step.order }}"></label></div>
+                <div class="form-actions"><button class="btn small green-btn" type="submit">Enregistrer</button></div>
+              </form>
+            </details>
+            {% empty %}<p class="muted">Aucune étape. Ajoutez la première étape du planning ci-dessous.</p>{% endfor %}
+          </div>
+
+          <details class="add-step-box">
+            <summary>+ Ajouter une étape</summary>
+            <form method="post" class="pilotage-form">
+              {% csrf_token %}<input type="hidden" name="action" value="add_step"><input type="hidden" name="project_id" value="{{ selected.id }}">
+              <div class="form-2"><label>Nom de l'étape<input name="title" required></label><label>Responsable<select name="responsible"><option value="">Non défini</option>{% for u in selected.members.all %}<option value="{{ u.id }}">{{ u.get_full_name|default:u.username }}</option>{% endfor %}</select></label></div>
+              <label>Description<textarea name="description" rows="2"></textarea></label>
+              <div class="form-4"><label>Statut<select name="status"><option value="todo">À faire</option><option value="ongoing">En cours</option><option value="blocked">Bloqué</option><option value="done">Terminé</option></select></label><label>Avancement<input type="number" min="0" max="100" value="0" name="progress"></label><label>Début<input type="date" name="start_date"></label><label>Fin prévue<input type="date" name="end_date"></label></div>
+              <div class="form-2"><label>Budget étape<input type="number" min="0" name="budget"></label><label>Ordre<input type="number" min="0" name="order" value="100"></label></div>
+              <button class="btn orange small" type="submit">Ajouter l'étape</button>
+            </form>
+          </details>
+        </section>
+
+        <aside class="pilotage-right">
+          <details class="pilotage-panel" open>
+            <summary>Informations projet</summary>
+            <form method="post" enctype="multipart/form-data" class="pilotage-form compact-form">
+              {% csrf_token %}<input type="hidden" name="action" value="update_project"><input type="hidden" name="project_id" value="{{ selected.id }}">
+              <label>Nom<input name="title" value="{{ selected.title }}"></label>
+              <label>Description<textarea name="description" rows="3">{{ selected.description }}</textarea></label>
+              <div class="form-2"><label>Statut<select name="status"><option value="planned" {% if selected.status == 'planned' %}selected{% endif %}>Planifié</option><option value="ongoing" {% if selected.status == 'ongoing' %}selected{% endif %}>En cours</option><option value="paused" {% if selected.status == 'paused' %}selected{% endif %}>En pause</option><option value="done" {% if selected.status == 'done' %}selected{% endif %}>Terminé</option></select></label><label>Avancement<input type="number" name="progress" min="0" max="100" value="{{ selected.progress }}"></label></div>
+              <div class="form-2"><label>Budget prévu<input type="number" min="0" name="budget_planned" value="{{ selected.budget_planned|default_if_none:'' }}"></label><label>Dépenses<input type="number" min="0" name="budget_spent" value="{{ selected.budget_spent }}"></label></div>
+              <div class="form-2"><label>Début<input type="date" name="start_date" value="{{ selected.start_date|date:'Y-m-d' }}"></label><label>Fin<input type="date" name="end_date" value="{{ selected.end_date|date:'Y-m-d' }}"></label></div>
+              <label>Changer l'image<input type="file" name="image" accept="image/*"></label>
+              <button class="btn green-btn small" type="submit">Mettre à jour</button>
+            </form>
+          </details>
+
+          <details class="pilotage-panel" open>
+            <summary>Équipe projet</summary>
+            {% if can_admin or selected.created_by_id == user.id %}
+            <form method="post" class="members-form">
+              {% csrf_token %}<input type="hidden" name="action" value="update_members"><input type="hidden" name="project_id" value="{{ selected.id }}">
+              <div class="user-list">{% for u in users %}<label class="user-row"><input type="checkbox" name="members" value="{{ u.id }}" {% if u in selected.members.all %}checked{% endif %}><span><strong>{{ u.get_full_name|default:u.username }}</strong><small>{{ u.username }}{% if u.email %} · {{ u.email }}{% endif %}</small></span></label>{% endfor %}</div>
+              <button class="btn green-btn small" type="submit">Enregistrer l'équipe</button>
+            </form>
+            {% else %}
+            <div class="user-list">{% for u in selected.members.all %}<div class="user-row"><span><strong>{{ u.get_full_name|default:u.username }}</strong><small>{{ u.username }}</small></span></div>{% endfor %}</div>
+            {% endif %}
+          </details>
+        </aside>
+      </div>
+      {% else %}
+      <div class="pilotage-empty"><h2>Aucun projet à afficher</h2><p>{% if can_admin %}Créez votre premier projet depuis le panneau de gauche.{% else %}Aucun projet ne vous a encore été attribué.{% endif %}</p></div>
+      {% endif %}
+    </main>
+  </div>
+</section>
+{% endblock %}
