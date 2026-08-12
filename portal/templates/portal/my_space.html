@@ -7,7 +7,7 @@
 .space-capsule{position:relative;overflow:hidden;padding:22px 20px 20px;min-height:270px;border-radius:24px}
 .space-capsule-visual{width:112px;height:82px;border-radius:18px;overflow:hidden;background:#fff;box-shadow:0 7px 18px rgba(5,57,39,.09);display:block}
 .space-capsule-visual img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .25s ease}
-.space-capsule-visual.dashboard img{object-fit:contain;background:#fff;padding:5px}
+.space-capsule-visual.dashboard img{object-fit:contain;background:#fff;padding:2px}
 .space-capsule-visual.project-pilotage{display:grid;place-items:center;background:#fff7ed}
 .space-capsule-visual.project-pilotage svg{width:70px;height:70px}
 .space-capsule:hover .space-capsule-visual img{transform:scale(1.03)}
@@ -55,7 +55,7 @@
 
       {% if can_dashboard %}
       <a class="space-capsule" href="{% url 'dashboard' %}">
-        <span class="space-capsule-visual dashboard"><img src="{% static 'portal/img/espace-dashboard.jpg' %}" alt="Tableau de bord analytique"></span>
+        <span class="space-capsule-visual dashboard"><img src="{% static 'portal/img/espace-dashboard-white.svg' %}" alt="Tableau de bord analytique"></span>
         <span class="space-capsule-content">
           <strong>Dashboard</strong>
           <small>Objectifs, recettes et tendances municipales</small>
