@@ -33,9 +33,49 @@
   <div class="container home-top-grid">
     <div class="quickgrid home-quickgrid">
       {% for q in quick_links %}
-      <a class="quickcard home-quickcard" href="{{ q.url }}">
-        <span class="quick-icon">{{ q.icon }}</span>
-        <div><b>{{ q.title }}</b><small>{{ q.description }}</small></div>
+      <a class="quickcard home-quickcard {% if '/projets/' in q.url %}home-feature-project{% elif '/gbeleban-en-carte/' in q.url %}home-feature-map{% endif %}" href="{{ q.url }}">
+        {% if '/projets/' in q.url %}
+          <div class="home-feature-media home-project-media">
+            {% with featured_project=projects.0 %}
+              {% if featured_project %}
+                {% with project_images=featured_project.gallery_images %}
+                  {% if project_images %}
+                    <img src="{{ project_images.0 }}" alt="Projet municipal à Gbéléban">
+                  {% else %}
+                    <div class="home-project-fallback" aria-hidden="true">
+                      <span class="home-project-building">🏗️</span>
+                      <span class="home-project-plan">▱</span>
+                    </div>
+                  {% endif %}
+                {% endwith %}
+              {% else %}
+                <div class="home-project-fallback" aria-hidden="true">
+                  <span class="home-project-building">🏗️</span>
+                  <span class="home-project-plan">▱</span>
+                </div>
+              {% endif %}
+            {% endwith %}
+            <span class="home-feature-badge">🏗️</span>
+          </div>
+          <div class="home-feature-copy">
+            <b>{{ q.title }}</b>
+            <small>{{ q.description }}</small>
+            <span class="home-feature-link">Découvrir les projets →</span>
+          </div>
+        {% elif '/gbeleban-en-carte/' in q.url %}
+          <div class="home-feature-media home-map-media">
+            <div id="home-map-preview" aria-label="Aperçu cartographique de Gbéléban"></div>
+            <span class="home-feature-badge map-badge">📍</span>
+          </div>
+          <div class="home-feature-copy">
+            <b>{{ q.title }}</b>
+            <small>{{ q.description }}</small>
+            <span class="home-feature-link">Explorer la carte →</span>
+          </div>
+        {% else %}
+          <span class="quick-icon">{{ q.icon }}</span>
+          <div><b>{{ q.title }}</b><small>{{ q.description }}</small></div>
+        {% endif %}
       </a>
       {% endfor %}
     </div>
@@ -50,7 +90,7 @@
       </div>
       <div class="home-news-list">
         {% for n in news_items|slice:":2" %}
-        <a class="home-news-card" href="/actualites/">
+        <a class="home-news-card" href="/actualites/{{ n.id }}/">
           <small>{{ n.published_at|date:'j F Y' }}</small>
           <h3>{{ n.title }}</h3>
           <p>{{ n.excerpt|truncatechars:115 }}</p>
@@ -100,4 +140,19 @@
     </div>
   </div>
 </section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+(function(){
+  const el=document.getElementById('home-map-preview');
+  if(!el || typeof L==='undefined') return;
+  const gbeleban=[9.584607,-8.131833];
+  const map=L.map(el,{zoomControl:false,scrollWheelZoom:false,dragging:false,doubleClickZoom:false,boxZoom:false,keyboard:false,touchZoom:false,attributionControl:false}).setView(gbeleban,13);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:18}).addTo(map);
+  L.circleMarker(gbeleban,{radius:8,color:'#fff',weight:3,fillColor:'#ef7d00',fillOpacity:1}).addTo(map);
+  L.circle(gbeleban,{radius:900,color:'#056b3c',weight:2,fillColor:'#056b3c',fillOpacity:.08}).addTo(map);
+  setTimeout(()=>map.invalidateSize(),100);
+})();
+</script>
 {% endblock %}
