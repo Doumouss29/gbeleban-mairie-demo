@@ -3,14 +3,20 @@
 {% block title %}Mon espace Gbéléban{% endblock %}
 {% block head %}
 <style>
-.space-capsule{position:relative;overflow:hidden;padding:26px 28px 24px;min-height:320px}
-.space-capsule-visual{width:132px;height:96px;border-radius:22px;overflow:hidden;background:#f5f1ea;box-shadow:0 8px 22px rgba(5,57,39,.10);display:block}
+.space-capsules{grid-template-columns:repeat(4,minmax(0,1fr));gap:18px}
+.space-capsule{position:relative;overflow:hidden;padding:22px 20px 20px;min-height:270px;border-radius:24px}
+.space-capsule-visual{width:112px;height:82px;border-radius:18px;overflow:hidden;background:#fff;box-shadow:0 7px 18px rgba(5,57,39,.09);display:block}
 .space-capsule-visual img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .25s ease}
-.space-capsule:hover .space-capsule-visual img{transform:scale(1.035)}
-.space-capsule-content{margin-top:4px}
-.space-capsule-content strong{font-size:26px}
-.space-capsule-content small{font-size:17px;line-height:1.55}
-@media(max-width:700px){.space-capsule{min-height:285px}.space-capsule-visual{width:118px;height:86px}}
+.space-capsule-visual.dashboard img{object-fit:contain;background:#fff;padding:5px}
+.space-capsule-visual.project-pilotage{display:grid;place-items:center;background:#fff7ed}
+.space-capsule-visual.project-pilotage svg{width:70px;height:70px}
+.space-capsule:hover .space-capsule-visual img{transform:scale(1.03)}
+.space-capsule-content{margin-top:2px}
+.space-capsule-content strong{font-size:22px;line-height:1.15}
+.space-capsule-content small{font-size:14px;line-height:1.45}
+.space-capsule-arrow{width:38px;height:38px;font-size:20px}
+@media(max-width:1150px){.space-capsules{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:700px){.space-capsules{grid-template-columns:1fr}.space-capsule{min-height:245px}.space-capsule-visual{width:104px;height:76px}}
 </style>
 {% endblock %}
 {% block content %}
@@ -49,7 +55,7 @@
 
       {% if can_dashboard %}
       <a class="space-capsule" href="{% url 'dashboard' %}">
-        <span class="space-capsule-visual"><img src="{% static 'portal/img/espace-dashboard.jpg' %}" alt="Tableau de bord analytique"></span>
+        <span class="space-capsule-visual dashboard"><img src="{% static 'portal/img/espace-dashboard.jpg' %}" alt="Tableau de bord analytique"></span>
         <span class="space-capsule-content">
           <strong>Dashboard</strong>
           <small>Objectifs, recettes et tendances municipales</small>
@@ -57,14 +63,24 @@
         <span class="space-capsule-arrow">→</span>
       </a>
       {% endif %}
-    </div>
 
-    {% if not can_urbanism and not can_dashboard and not can_collection %}
-      <div class="no-access-card">
-        <h2>Aucun service attribué</h2>
-        <p>Votre compte est actif, mais aucun service ne lui a encore été attribué. Contactez l’administrateur du portail.</p>
-      </div>
-    {% endif %}
+      <a class="space-capsule" href="{% url 'pilotage:dashboard' %}">
+        <span class="space-capsule-visual project-pilotage" aria-hidden="true">
+          <svg viewBox="0 0 96 96" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="18" y="15" width="60" height="66" rx="10" fill="#FFFFFF" stroke="#0B6C41" stroke-width="4"/>
+            <rect x="34" y="9" width="28" height="12" rx="5" fill="#EF7D00"/>
+            <path d="M30 38H66M30 51H58M30 64H52" stroke="#0B6C41" stroke-width="5" stroke-linecap="round"/>
+            <circle cx="69" cy="63" r="12" fill="#EF7D00"/>
+            <path d="M64 63L68 67L75 58" stroke="white" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </span>
+        <span class="space-capsule-content">
+          <strong>Pilotage projets</strong>
+          <small>Équipe, étapes, budget, planning et avancement des projets municipaux</small>
+        </span>
+        <span class="space-capsule-arrow">→</span>
+      </a>
+    </div>
 
     <div class="space-footer-actions">
       <form method="post" action="{% url 'logout' %}">{% csrf_token %}<button type="submit" class="btn light">Se déconnecter</button></form>
