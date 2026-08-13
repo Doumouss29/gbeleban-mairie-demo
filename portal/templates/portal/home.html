@@ -1,11 +1,18 @@
 {% extends 'portal/base.html' %}
 {% load static %}
-{% block title %}Mairie de Gbéléban | Commune du Kabadougou, Côte d’Ivoire{% endblock %}
-{% block meta_description %}Site officiel de la Mairie de Gbéléban, commune du Kabadougou dans le District du Denguélé en Côte d’Ivoire. Retrouvez les actualités, projets, services municipaux et la carte de Gbéléban{% if site_settings and site_settings.mayor_name %}, avec {{ site_settings.mayor_name }}, Maire de Gbéléban{% endif %}.{% endblock %}
-{% block og_title %}Mairie de Gbéléban | Commune du Kabadougou{% endblock %}
-{% block og_description %}Portail officiel de Gbéléban : informations municipales, actualités, projets, cartographie et services aux citoyens.{% endblock %}
-{% block twitter_title %}Mairie de Gbéléban | Kabadougou{% endblock %}
-{% block twitter_description %}Portail officiel de la Commune de Gbéléban, région du Kabadougou, Côte d’Ivoire.{% endblock %}
+{% block title %}Mairie de Gbéléban - Côte d'Ivoire | Site Officiel{% endblock %}
+{% block meta_description %}Site officiel de la ville de Gbéléban, un portail moderne pour informer les citoyens, valoriser le territoire, suivre les projets de la commune et faciliter l'accès aux services municipaux.{% endblock %}
+{% block og_title %}Mairie de Gbéléban - Côte d'Ivoire | Site Officiel{% endblock %}
+{% block og_description %}Site officiel de la ville de Gbéléban, un portail moderne pour informer les citoyens, valoriser le territoire, suivre les projets de la commune et faciliter l'accès aux services municipaux.{% endblock %}
+{% block twitter_title %}Mairie de Gbéléban - Côte d'Ivoire | Site Officiel{% endblock %}
+{% block twitter_description %}Site officiel de la ville de Gbéléban, un portail moderne pour informer les citoyens, valoriser le territoire, suivre les projets de la commune et faciliter l'accès aux services municipaux.{% endblock %}
+{% block head %}
+<link rel="apple-touch-icon" sizes="180x180" href="{% static 'portal/favicon/apple-touch-icon.png' %}">
+<link rel="icon" type="image/png" sizes="32x32" href="{% static 'portal/favicon/favicon-32x32.png' %}">
+<link rel="icon" type="image/png" sizes="16x16" href="{% static 'portal/favicon/favicon-16x16.png' %}">
+<link rel="manifest" href="{% static 'portal/favicon/site.webmanifest' %}">
+<meta name="keywords" content="Mairie Gbéléban, Gbeleban, Ville de Gbéléban, Gbéléban, Commune de Gbéléban, Sita Ouattara, Badji Festival, Côte d'Ivoire">
+{% endblock %}
 {% block content %}
 <section class="hero hero-home">
   <div class="container hero-grid">
