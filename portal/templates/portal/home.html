@@ -28,7 +28,7 @@
         {% endif %}
       </div>
       <div class="mayor-hero-text">
-        <h2>Le mot de Madame le Maire</h2>
+        <h2>Le mot de {% if site_settings and site_settings.mayor_name %}{{ site_settings.mayor_name }}{% else %}Madame le Maire{% endif %}</h2>
         <p>{{ site_settings.mayor_message|default:"Une municipalité proche des habitants, engagée pour le développement local et la modernisation des services publics." }}</p>
       </div>
     </aside>
