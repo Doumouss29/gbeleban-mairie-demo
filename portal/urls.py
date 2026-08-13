@@ -5,8 +5,11 @@ from . import pdf_reports
 from . import public_map_views
 from . import parcel_registry_views
 from . import news_views
+from . import seo_views
 
 urlpatterns = [
+    path("robots.txt", seo_views.robots_txt, name="robots_txt"),
+    path("sitemap.xml", seo_views.sitemap_xml, name="sitemap_xml"),
     path("", views.home, name="home"),
     path("connexion/", LoginView.as_view(template_name="portal/login.html"), name="login"),
     path("deconnexion/", LogoutView.as_view(), name="logout"),
