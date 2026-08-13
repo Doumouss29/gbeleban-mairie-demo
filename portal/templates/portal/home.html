@@ -1,5 +1,11 @@
 {% extends 'portal/base.html' %}
 {% load static %}
+{% block title %}Mairie de Gbéléban | Commune du Kabadougou, Côte d’Ivoire{% endblock %}
+{% block meta_description %}Site officiel de la Mairie de Gbéléban, commune du Kabadougou dans le District du Denguélé en Côte d’Ivoire. Retrouvez les actualités, projets, services municipaux et la carte de Gbéléban{% if site_settings and site_settings.mayor_name %}, avec {{ site_settings.mayor_name }}, Maire de Gbéléban{% endif %}.{% endblock %}
+{% block og_title %}Mairie de Gbéléban | Commune du Kabadougou{% endblock %}
+{% block og_description %}Portail officiel de Gbéléban : informations municipales, actualités, projets, cartographie et services aux citoyens.{% endblock %}
+{% block twitter_title %}Mairie de Gbéléban | Kabadougou{% endblock %}
+{% block twitter_description %}Portail officiel de la Commune de Gbéléban, région du Kabadougou, Côte d’Ivoire.{% endblock %}
 {% block content %}
 <section class="hero hero-home">
   <div class="container hero-grid">
@@ -16,7 +22,7 @@
     <aside class="mayor-hero-card">
       <div class="mayor-hero-photo">
         {% if site_settings and site_settings.mayor_hero_image_url %}
-          <img src="{{ site_settings.mayor_hero_image_url }}" alt="Madame le Maire">
+          <img src="{{ site_settings.mayor_hero_image_url }}" alt="{% if site_settings.mayor_name %}{{ site_settings.mayor_name }}, Maire de Gbéléban{% else %}Madame le Maire de Gbéléban{% endif %}">
         {% else %}
           <div class="photo-placeholder">Photo du maire - accueil<br><small>À renseigner depuis l’administration</small></div>
         {% endif %}
@@ -42,117 +48,44 @@
                   {% if project_images %}
                     <img src="{{ project_images.0 }}" alt="Projet municipal à Gbéléban">
                   {% else %}
-                    <div class="home-project-fallback" aria-hidden="true">
-                      <span class="home-project-building">🏗️</span>
-                      <span class="home-project-plan">▱</span>
-                    </div>
+                    <div class="home-project-fallback" aria-hidden="true"><span class="home-project-building">🏗️</span><span class="home-project-plan">▱</span></div>
                   {% endif %}
                 {% endwith %}
               {% else %}
-                <div class="home-project-fallback" aria-hidden="true">
-                  <span class="home-project-building">🏗️</span>
-                  <span class="home-project-plan">▱</span>
-                </div>
+                <div class="home-project-fallback" aria-hidden="true"><span class="home-project-building">🏗️</span><span class="home-project-plan">▱</span></div>
               {% endif %}
             {% endwith %}
             <span class="home-feature-badge">🏗️</span>
           </div>
-          <div class="home-feature-copy">
-            <b>{{ q.title }}</b>
-            <small>{{ q.description }}</small>
-            <span class="home-feature-link">Découvrir les projets →</span>
-          </div>
+          <div class="home-feature-copy"><b>{{ q.title }}</b><small>{{ q.description }}</small><span class="home-feature-link">Découvrir les projets →</span></div>
         {% elif '/gbeleban-en-carte/' in q.url %}
-          <div class="home-feature-media home-map-media">
-            <div id="home-map-preview" aria-label="Aperçu cartographique de Gbéléban"></div>
-            <span class="home-feature-badge map-badge">📍</span>
-          </div>
-          <div class="home-feature-copy">
-            <b>{{ q.title }}</b>
-            <small>{{ q.description }}</small>
-            <span class="home-feature-link">Explorer la carte →</span>
-          </div>
+          <div class="home-feature-media home-map-media"><div id="home-map-preview" aria-label="Aperçu cartographique de Gbéléban"></div><span class="home-feature-badge map-badge">📍</span></div>
+          <div class="home-feature-copy"><b>{{ q.title }}</b><small>{{ q.description }}</small><span class="home-feature-link">Explorer la carte →</span></div>
         {% else %}
-          <span class="quick-icon">{{ q.icon }}</span>
-          <div><b>{{ q.title }}</b><small>{{ q.description }}</small></div>
+          <span class="quick-icon">{{ q.icon }}</span><div><b>{{ q.title }}</b><small>{{ q.description }}</small></div>
         {% endif %}
       </a>
       {% endfor %}
     </div>
 
     <aside class="home-news-panel">
-      <div class="home-news-head">
-        <div>
-          <span class="eyebrow green">ACTUALITÉS</span>
-          <h2>À la une</h2>
-        </div>
-        <a href="/actualites/">Tout voir →</a>
-      </div>
+      <div class="home-news-head"><div><span class="eyebrow green">ACTUALITÉS</span><h2>À la une</h2></div><a href="/actualites/">Tout voir →</a></div>
       <div class="home-news-list">
         {% for n in news_items|slice:":2" %}
-        <a class="home-news-card" href="/actualites/{{ n.id }}/">
-          <small>{{ n.published_at|date:'j F Y' }}</small>
-          <h3>{{ n.title }}</h3>
-          <p>{{ n.excerpt|truncatechars:115 }}</p>
-          <span>Lire l’actualité →</span>
-        </a>
-        {% empty %}
-        <div class="home-news-empty">Aucune actualité publiée pour le moment.</div>
-        {% endfor %}
+        <a class="home-news-card" href="/actualites/{{ n.id }}/"><small>{{ n.published_at|date:'j F Y' }}</small><h3>{{ n.title }}</h3><p>{{ n.excerpt|truncatechars:115 }}</p><span>Lire l’actualité →</span></a>
+        {% empty %}<div class="home-news-empty">Aucune actualité publiée pour le moment.</div>{% endfor %}
       </div>
     </aside>
   </div>
 </section>
 
-<section class="section pale">
-  <div class="container mayor">
-    <div class="mayor-photo">
-      {% if site_settings and site_settings.mayor_section_image_url %}
-        <img src="{{ site_settings.mayor_section_image_url }}" alt="Vision municipale de Gbéléban">
-      {% else %}
-        <div class="photo-placeholder">Image - vision de la commune</div>
-      {% endif %}
-    </div>
-    <div>
-      <span class="eyebrow green">CAP SUR DEMAIN</span>
-      <h2>Notre vision pour Gbéléban</h2>
-      <p>Faire de Gbéléban une commune plus attractive, mieux aménagée et plus proche de ses habitants, en valorisant son territoire, ses talents, son identité et les opportunités de développement local.</p>
-      <a class="textlink" href="/pages/la-commune/">Découvrir notre ambition →</a>
-    </div>
-  </div>
-</section>
+<section class="section pale"><div class="container mayor"><div class="mayor-photo">{% if site_settings and site_settings.mayor_section_image_url %}<img src="{{ site_settings.mayor_section_image_url }}" alt="Vision municipale de Gbéléban">{% else %}<div class="photo-placeholder">Image - vision de la commune</div>{% endif %}</div><div><span class="eyebrow green">CAP SUR DEMAIN</span><h2>Notre vision pour Gbéléban</h2><p>Faire de Gbéléban une commune plus attractive, mieux aménagée et plus proche de ses habitants, en valorisant son territoire, ses talents, son identité et les opportunités de développement local.</p><a class="textlink" href="/pages/la-commune/">Découvrir notre ambition →</a></div></div></section>
 
-<section class="section">
-  <div class="container">
-    <div class="section-title">
-      <div><span class="eyebrow">ACTION MUNICIPALE</span><h2>Projets & réalisations</h2></div>
-      <a href="/projets/">Voir tous les projets →</a>
-    </div>
-    <div class="cards">
-      {% for p in projects %}
-      <article class="card">
-        <span class="status {{ p.status }}">{{ p.get_status_display }}</span>
-        <h3>{{ p.title }}</h3>
-        <p>{{ p.description }}</p>
-        {% if p.status == 'ongoing' %}<div class="progress"><i style="width:{{ p.progress }}%"></i></div><small>{{ p.progress }} % d'avancement</small>{% endif %}
-      </article>
-      {% endfor %}
-    </div>
-  </div>
-</section>
+<section class="section"><div class="container"><div class="section-title"><div><span class="eyebrow">ACTION MUNICIPALE</span><h2>Projets & réalisations</h2></div><a href="/projets/">Voir tous les projets →</a></div><div class="cards">{% for p in projects %}<article class="card"><span class="status {{ p.status }}">{{ p.get_status_display }}</span><h3>{{ p.title }}</h3><p>{{ p.description }}</p>{% if p.status == 'ongoing' %}<div class="progress"><i style="width:{{ p.progress }}%"></i></div><small>{{ p.progress }} % d'avancement</small>{% endif %}</article>{% endfor %}</div></div></section>
 {% endblock %}
 
 {% block scripts %}
 <script>
-(function(){
-  const el=document.getElementById('home-map-preview');
-  if(!el || typeof L==='undefined') return;
-  const gbeleban=[9.584607,-8.131833];
-  const map=L.map(el,{zoomControl:false,scrollWheelZoom:false,dragging:false,doubleClickZoom:false,boxZoom:false,keyboard:false,touchZoom:false,attributionControl:false}).setView(gbeleban,13);
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:18}).addTo(map);
-  L.circleMarker(gbeleban,{radius:8,color:'#fff',weight:3,fillColor:'#ef7d00',fillOpacity:1}).addTo(map);
-  L.circle(gbeleban,{radius:900,color:'#056b3c',weight:2,fillColor:'#056b3c',fillOpacity:.08}).addTo(map);
-  setTimeout(()=>map.invalidateSize(),100);
-})();
+(function(){const el=document.getElementById('home-map-preview');if(!el || typeof L==='undefined') return;const gbeleban=[9.584607,-8.131833];const map=L.map(el,{zoomControl:false,scrollWheelZoom:false,dragging:false,doubleClickZoom:false,boxZoom:false,keyboard:false,touchZoom:false,attributionControl:false}).setView(gbeleban,13);L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:18}).addTo(map);L.circleMarker(gbeleban,{radius:8,color:'#fff',weight:3,fillColor:'#ef7d00',fillOpacity:1}).addTo(map);L.circle(gbeleban,{radius:900,color:'#056b3c',weight:2,fillColor:'#056b3c',fillOpacity:.08}).addTo(map);setTimeout(()=>map.invalidateSize(),100);})();
 </script>
 {% endblock %}
