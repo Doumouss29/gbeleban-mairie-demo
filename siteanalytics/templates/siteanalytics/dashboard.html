@@ -1,0 +1,47 @@
+{% extends 'portal/base.html' %}
+{% block title %}Statistiques du site - Gbéléban{% endblock %}
+{% block head %}
+<style>
+.analytics-wrap{display:grid;gap:22px}.analytics-filter{display:flex;gap:10px;align-items:end;flex-wrap:wrap;padding:18px;background:#fff;border:1px solid #e7e6df;border-radius:18px}.analytics-filter label{display:grid;gap:6px;font-size:12px;font-weight:800;color:#355046}.analytics-filter select,.analytics-filter input{border:1px solid #d7ddd8;border-radius:10px;padding:10px 12px;background:#fff;min-height:42px}.analytics-kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}.analytics-kpi{padding:20px;border-radius:20px;background:#fff;border:1px solid #e8e6de;box-shadow:0 8px 24px #173d2f0c}.analytics-kpi small{display:block;color:#718078;font-weight:800;margin-bottom:8px}.analytics-kpi b{font-size:32px;color:#173d2f}.analytics-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}.analytics-card{background:#fff;border:1px solid #e7e6df;border-radius:20px;padding:20px;overflow:hidden}.analytics-card h2{font-size:20px;margin:0 0 4px}.analytics-card>p{margin:0 0 16px;color:#77827c;font-size:13px}.analytics-table{width:100%;border-collapse:collapse}.analytics-table th,.analytics-table td{text-align:left;padding:10px 8px;border-bottom:1px solid #efeee9;font-size:13px}.analytics-table th{color:#617069;font-size:11px;text-transform:uppercase;letter-spacing:.04em}.analytics-table td:last-child,.analytics-table th:last-child{text-align:right;font-weight:800}.analytics-bars{display:grid;gap:11px}.analytics-bar-row{display:grid;grid-template-columns:92px 1fr 70px;gap:10px;align-items:center;font-size:12px}.analytics-bar-track{height:12px;border-radius:999px;background:#edf1ee;overflow:hidden}.analytics-bar-fill{display:block;height:100%;background:#ef7d00;border-radius:999px}.analytics-subgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}.analytics-geo{background:#fbfaf7;border-radius:16px;padding:15px}.analytics-geo h3{font-size:15px;margin:0 0 10px}.analytics-empty{color:#849087;font-size:13px;padding:14px 0}.analytics-note{font-size:12px;color:#748078;background:#f7f8f6;padding:12px 14px;border-radius:12px}.analytics-back{display:inline-flex;margin-bottom:16px;font-weight:800;color:#056b3c;text-decoration:none}.custom-dates{display:flex;gap:10px}.hidden-date{display:none!important}@media(max-width:1000px){.analytics-kpis{grid-template-columns:repeat(2,1fr)}.analytics-grid{grid-template-columns:1fr}.analytics-subgrid{grid-template-columns:1fr}}@media(max-width:600px){.analytics-kpis{grid-template-columns:1fr}.analytics-filter{display:grid}.custom-dates{display:grid}.analytics-bar-row{grid-template-columns:74px 1fr 54px}}
+</style>
+{% endblock %}
+{% block content %}
+<section class="pagehead secure"><div class="container"><span class="eyebrow">GESTION DU PORTAIL</span><h1>Statistiques du site</h1><p>Suivez la fréquentation, les pages consultées, les clics et l'origine géographique des visiteurs.</p></div></section>
+<section class="section pale"><div class="container analytics-wrap">
+  <div><a class="analytics-back" href="/gestion/">← Retour au module Gestion</a>
+    <form method="get" class="analytics-filter" id="analytics-filter">
+      <label>Période<select name="period" id="period-select"><option value="day" {% if period == 'day' %}selected{% endif %}>Aujourd'hui</option><option value="week" {% if period == 'week' %}selected{% endif %}>7 derniers jours</option><option value="month" {% if period == 'month' %}selected{% endif %}>Ce mois</option><option value="year" {% if period == 'year' %}selected{% endif %}>Cette année</option><option value="custom" {% if period == 'custom' %}selected{% endif %}>Dates personnalisées</option></select></label>
+      <div id="custom-dates" class="custom-dates {% if period != 'custom' %}hidden-date{% endif %}"><label>Du<input type="date" name="start" value="{{ start|date:'Y-m-d' }}"></label><label>Au<input type="date" name="end" value="{{ end|date:'Y-m-d' }}"></label></div>
+      <button class="btn orange" type="submit">Appliquer</button>
+    </form>
+  </div>
+
+  <div class="analytics-kpis">
+    <div class="analytics-kpi"><small>Pages vues</small><b>{{ page_views }}</b></div>
+    <div class="analytics-kpi"><small>Visiteurs uniques</small><b>{{ unique_visitors }}</b></div>
+    <div class="analytics-kpi"><small>Clics internes</small><b>{{ clicks_count }}</b></div>
+    <div class="analytics-kpi"><small>Pages / visiteur</small><b>{{ avg_pages }}</b></div>
+  </div>
+
+  <div class="analytics-card"><h2>Évolution de la fréquentation</h2><p>Pages vues et visiteurs uniques entre le {{ start|date:'d/m/Y' }} et le {{ end|date:'d/m/Y' }}.</p>
+    <div class="analytics-bars">{% for row in daily_rows %}<div class="analytics-bar-row"><span>{{ row.day|date:'d/m' }}</span><div class="analytics-bar-track"><i class="analytics-bar-fill" style="width:{{ row.width }}%"></i></div><b>{{ row.total }} vues</b></div>{% empty %}<div class="analytics-empty">Aucune visite enregistrée sur cette période.</div>{% endfor %}</div>
+  </div>
+
+  <div class="analytics-grid">
+    <div class="analytics-card"><h2>Pages les plus consultées</h2><p>Classement par nombre de chargements de pages.</p><table class="analytics-table"><thead><tr><th>Page</th><th>Vues</th></tr></thead><tbody>{% for row in top_pages %}<tr><td>{{ row.path }}</td><td>{{ row.total }}</td></tr>{% empty %}<tr><td colspan="2">Aucune donnée</td></tr>{% endfor %}</tbody></table></div>
+    <div class="analytics-card"><h2>Liens les plus cliqués</h2><p>Navigation interne réellement déclenchée par les visiteurs.</p><table class="analytics-table"><thead><tr><th>Destination</th><th>Clics</th></tr></thead><tbody>{% for row in top_clicks %}<tr><td>{% if row.label %}<b>{{ row.label }}</b><br><small>{{ row.target_path }}</small>{% else %}{{ row.target_path }}{% endif %}</td><td>{{ row.total }}</td></tr>{% empty %}<tr><td colspan="2">Aucun clic enregistré</td></tr>{% endfor %}</tbody></table></div>
+  </div>
+
+  <div class="analytics-card"><h2>Situation géographique des visiteurs</h2><p>Localisation approximative déduite de l'adresse IP au niveau pays, région et ville. L'adresse IP brute n'est pas conservée.</p><div class="analytics-subgrid">
+    <div class="analytics-geo"><h3>Pays</h3><table class="analytics-table">{% for row in countries %}<tr><td>{{ row.country }}</td><td>{{ row.total }}</td></tr>{% empty %}<tr><td>Non disponible</td><td>—</td></tr>{% endfor %}</table></div>
+    <div class="analytics-geo"><h3>Régions</h3><table class="analytics-table">{% for row in regions %}<tr><td>{{ row.region }}{% if row.country %}<br><small>{{ row.country }}</small>{% endif %}</td><td>{{ row.total }}</td></tr>{% empty %}<tr><td>Non disponible</td><td>—</td></tr>{% endfor %}</table></div>
+    <div class="analytics-geo"><h3>Villes</h3><table class="analytics-table">{% for row in cities %}<tr><td>{{ row.city }}{% if row.country %}<br><small>{{ row.country }}</small>{% endif %}</td><td>{{ row.total }}</td></tr>{% empty %}<tr><td>Non disponible</td><td>—</td></tr>{% endfor %}</table></div>
+  </div></div>
+
+  <div class="analytics-grid">
+    <div class="analytics-card"><h2>Appareils utilisés</h2><p>Répartition approximative selon le navigateur.</p><table class="analytics-table">{% for row in devices %}<tr><td>{{ row.device }}</td><td>{{ row.total }}</td></tr>{% empty %}<tr><td>Aucune donnée</td><td>—</td></tr>{% endfor %}</table></div>
+    <div class="analytics-card"><h2>À propos du comptage</h2><p>Le suivi est réalisé directement par le serveur de la mairie.</p><div class="analytics-note">Les robots connus, les fichiers statiques, les API et les espaces privés ne sont pas comptés. Un visiteur unique est estimé à partir d'une empreinte irréversible de l'IP et du navigateur. Aucun mot de passe, formulaire, contenu de message ou adresse IP brute n'est enregistré.</div></div>
+  </div>
+</div></section>
+<script>document.addEventListener('DOMContentLoaded',function(){const s=document.getElementById('period-select'),d=document.getElementById('custom-dates');if(!s||!d)return;s.addEventListener('change',()=>d.classList.toggle('hidden-date',s.value!=='custom'));});</script>
+{% endblock %}
