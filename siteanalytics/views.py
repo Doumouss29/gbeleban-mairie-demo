@@ -3,7 +3,7 @@ from datetime import date, datetime, timedelta
 
 from django.contrib.admin.views.decorators import staff_member_required
 from django.db.models import Count
-from django.db.models.functions import TruncDate
+from django.db.models.functions import TruncDate, ExtractHour
 from django.http import JsonResponse
 from django.shortcuts import render
 from django.utils import timezone
@@ -82,6 +82,33 @@ def dashboard(request):
     for row in daily_rows:
         row["width"] = round(row["total"] / max_daily * 100, 1)
 
+    hourly_rows = list(
+        visits.annotate(hour=ExtractHour("created_at"))
+        .values("hour")
+        .annotate(total=Count("id"), visitors=Count("visitor_hash", distinct=True))
+        .order_by("hour")
+    )
+    hourly_map = {row["hour"]: row for row in hourly_rows}
+    hourly_rows = [
+        {
+            "hour": hour,
+            "label": f"{hour:02d}h–{(hour + 1) % 24:02d}h",
+            "total": hourly_map.get(hour, {}).get("total", 0),
+            "visitors": hourly_map.get(hour, {}).get("visitors", 0),
+        }
+        for hour in range(24)
+    ]
+    max_hourly = max([row["total"] for row in hourly_rows] or [1])
+    if max_hourly <= 0:
+        max_hourly = 1
+    for row in hourly_rows:
+        row["width"] = round(row["total"] / max_hourly * 100, 1)
+
+    recent_visits = list(
+        visits.order_by("-created_at")
+        .values("created_at", "path", "country", "region", "city", "device")[:100]
+    )
+
     context = {
         "period": period,
         "start": start,
@@ -97,6 +124,8 @@ def dashboard(request):
         "cities": cities,
         "devices": devices,
         "daily_rows": daily_rows,
+        "hourly_rows": hourly_rows,
+        "recent_visits": recent_visits,
     }
     return render(request, "siteanalytics/dashboard.html", context)
 
