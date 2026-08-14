@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>{% block title %}Mairie de Gbéléban | Commune du Kabadougou, Côte d’Ivoire{% endblock %}</title>
   <meta name="description" content="{% block meta_description %}{{ seo_description }}{% endblock %}">
-  {% if request.path == '/connexion/' or '/mon-espace/' in request.path or '/urbanisme/' in request.path or '/dashboard/' in request.path or '/collecte-municipale/' in request.path or '/pilotage-projets/' in request.path or '/gestion/' in request.path %}
+  {% if request.path == '/connexion/' or '/mon-espace/' in request.path or '/urbanisme/' in request.path or '/dashboard/' in request.path or '/collecte-municipale/' in request.path or '/pilotage-projets/' in request.path or '/gestion/' in request.path or '/analytics/' in request.path %}
   <meta name="robots" content="noindex,nofollow">
   {% else %}
   <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1">
@@ -22,6 +22,10 @@
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="{% block twitter_title %}Mairie de Gbéléban{% endblock %}">
   <meta name="twitter:description" content="{% block twitter_description %}{{ seo_description }}{% endblock %}">
+  <link rel="apple-touch-icon" sizes="180x180" href="{% static 'portal/favicon/apple-touch-icon.png' %}">
+  <link rel="icon" type="image/png" sizes="32x32" href="{% static 'portal/favicon/favicon-32x32.png' %}">
+  <link rel="icon" type="image/png" sizes="16x16" href="{% static 'portal/favicon/favicon-16x16.png' %}">
+  <link rel="manifest" href="{% static 'portal/favicon/site.webmanifest' %}">
 
   {% if request.path == '/' %}
   <script type="application/ld+json">
@@ -149,6 +153,7 @@
   </div>
 </footer>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="{% static 'siteanalytics/tracker.js' %}" defer></script>
 <script>
 (function(){
   const btn = document.getElementById('menuToggle');
