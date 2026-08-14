@@ -58,8 +58,45 @@ def _datetime_bounds(start, end):
 def dashboard(request):
     period, start, end = _range_from_request(request)
     start_dt, end_dt = _datetime_bounds(start, end)
-    visits = PageVisit.objects.filter(created_at__gte=start_dt, created_at__lt=end_dt)
+
+    date_visits = PageVisit.objects.filter(created_at__gte=start_dt, created_at__lt=end_dt)
+
+    selected_country = request.GET.get("country", "").strip()
+    selected_region = request.GET.get("region", "").strip()
+    selected_city = request.GET.get("city", "").strip()
+
+    # Les listes sont construites sur la période avant d'appliquer le filtre
+    # géographique, afin de pouvoir changer de localisation sans perdre les choix.
+    country_options = list(
+        date_visits.exclude(country="")
+        .values_list("country", flat=True).distinct().order_by("country")
+    )
+    region_source = date_visits.exclude(region="")
+    if selected_country:
+        region_source = region_source.filter(country=selected_country)
+    region_options = list(region_source.values_list("region", flat=True).distinct().order_by("region"))
+
+    city_source = date_visits.exclude(city="")
+    if selected_country:
+        city_source = city_source.filter(country=selected_country)
+    if selected_region:
+        city_source = city_source.filter(region=selected_region)
+    city_options = list(city_source.values_list("city", flat=True).distinct().order_by("city"))
+
+    visits = date_visits
+    if selected_country:
+        visits = visits.filter(country=selected_country)
+    if selected_region:
+        visits = visits.filter(region=selected_region)
+    if selected_city:
+        visits = visits.filter(city=selected_city)
+
+    # Les clics ne stockent pas de localisation séparément. On les rattache aux
+    # visiteurs présents dans le sous-ensemble géographique sélectionné.
     clicks = ClickEvent.objects.filter(created_at__gte=start_dt, created_at__lt=end_dt)
+    if selected_country or selected_region or selected_city:
+        filtered_hashes = visits.values_list("visitor_hash", flat=True).distinct()
+        clicks = clicks.filter(visitor_hash__in=filtered_hashes)
 
     page_views = visits.count()
     unique_visitors = visits.values("visitor_hash").distinct().count()
@@ -113,6 +150,13 @@ def dashboard(request):
         "period": period,
         "start": start,
         "end": end,
+        "selected_country": selected_country,
+        "selected_region": selected_region,
+        "selected_city": selected_city,
+        "country_options": country_options,
+        "region_options": region_options,
+        "city_options": city_options,
+        "location_filter_active": bool(selected_country or selected_region or selected_city),
         "page_views": page_views,
         "unique_visitors": unique_visitors,
         "clicks_count": clicks_count,
