@@ -67,10 +67,10 @@ def dashboard(request):
 
     top_pages = list(visits.values("path").annotate(total=Count("id")).order_by("-total", "path")[:12])
     top_clicks = list(clicks.values("target_path", "label").annotate(total=Count("id")).order_by("-total")[:12])
-    countries = list(visits.exclude(country="").values("country").annotate(total=Count("id")).order_by("-total")[:12])
-    regions = list(visits.exclude(region="").values("country", "region").annotate(total=Count("id")).order_by("-total")[:12])
-    cities = list(visits.exclude(city="").values("country", "city").annotate(total=Count("id")).order_by("-total")[:12])
-    devices = list(visits.exclude(device="").values("device").annotate(total=Count("id")).order_by("-total"))
+    countries = list(visits.exclude(country="").values("country").annotate(total=Count("visitor_hash", distinct=True)).order_by("-total")[:12])
+    regions = list(visits.exclude(region="").values("country", "region").annotate(total=Count("visitor_hash", distinct=True)).order_by("-total")[:12])
+    cities = list(visits.exclude(city="").values("country", "city").annotate(total=Count("visitor_hash", distinct=True)).order_by("-total")[:12])
+    devices = list(visits.exclude(device="").values("device").annotate(total=Count("visitor_hash", distinct=True)).order_by("-total"))
 
     daily_rows = list(
         visits.annotate(day=TruncDate("created_at"))
