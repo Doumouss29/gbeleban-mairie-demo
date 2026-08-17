@@ -1,35 +1,31 @@
 {% extends 'portal/base.html' %}
 {% load static %}
-{% block title %}Mairie de Gbéléban - Côte d'Ivoire | Site Officiel{% endblock %}
-{% block meta_description %}Site officiel de la ville de Gbéléban, un portail moderne pour informer les citoyens, valoriser le territoire, suivre les projets de la commune et faciliter l'accès aux services municipaux.{% endblock %}
-{% block og_title %}Mairie de Gbéléban - Côte d'Ivoire | Site Officiel{% endblock %}
-{% block og_description %}Site officiel de la ville de Gbéléban, un portail moderne pour informer les citoyens, valoriser le territoire, suivre les projets de la commune et faciliter l'accès aux services municipaux.{% endblock %}
-{% block twitter_title %}Mairie de Gbéléban - Côte d'Ivoire | Site Officiel{% endblock %}
-{% block twitter_description %}Site officiel de la ville de Gbéléban, un portail moderne pour informer les citoyens, valoriser le territoire, suivre les projets de la commune et faciliter l'accès aux services municipaux.{% endblock %}
+{% block title %}Gbéléban | Site officiel de la commune et de la mairie{% endblock %}
+{% block meta_description %}Découvrez Gbéléban, commune du Kabadougou dans le District du Denguélé en Côte d'Ivoire : mairie, actualités, projets, territoire, cartographie et services municipaux.{% endblock %}
+{% block og_title %}Gbéléban | Site officiel de la commune{% endblock %}
+{% block og_description %}Portail officiel de Gbéléban : informations sur la commune, la mairie, les projets, les actualités, le territoire et les services municipaux.{% endblock %}
+{% block twitter_title %}Gbéléban | Site officiel de la commune{% endblock %}
+{% block twitter_description %}Découvrez Gbéléban, commune du Kabadougou en Côte d'Ivoire, son territoire, sa mairie, ses projets et ses actualités.{% endblock %}
 {% block head %}
-<link rel="apple-touch-icon" sizes="180x180" href="{% static 'portal/favicon/apple-touch-icon.png' %}">
-<link rel="icon" type="image/png" sizes="32x32" href="{% static 'portal/favicon/favicon-32x32.png' %}">
-<link rel="icon" type="image/png" sizes="16x16" href="{% static 'portal/favicon/favicon-16x16.png' %}">
-<link rel="manifest" href="{% static 'portal/favicon/site.webmanifest' %}">
-<meta name="keywords" content="Mairie Gbéléban, Gbeleban, Ville de Gbéléban, Gbéléban, Commune de Gbéléban, Sita Ouattara, Badji Festival, Côte d'Ivoire">
+<meta name="keywords" content="Gbéléban, Gbeleban, Commune de Gbéléban, Ville de Gbéléban, Mairie Gbéléban, Mairie de Gbéléban, Kabadougou, Denguélé, Sita Ouattara, Badji Festival, Côte d'Ivoire">
 {% endblock %}
 {% block content %}
 <section class="hero hero-home">
   <div class="container hero-grid">
     <div class="hero-copy">
-      <span class="eyebrow">COMMUNE DE GBÉLÉBAN</span>
-      <h1>{{ site_settings.hero_title|default:'Bienvenue à Gbéléban' }}</h1>
-      <p>{{ site_settings.hero_text|default:"Un portail municipal moderne pour informer les citoyens, valoriser le territoire, suivre les projets de la commune et faciliter l’accès aux services municipaux." }}</p>
+      <span class="eyebrow">GBÉLÉBAN • KABADOUGOU • CÔTE D’IVOIRE</span>
+      <h1>Gbéléban - Site officiel de la commune</h1>
+      <p>Gbéléban est une commune de la région du Kabadougou, dans le District du Denguélé en Côte d’Ivoire. Retrouvez sur le portail officiel de Gbéléban les informations sur la commune, son administration municipale, ses projets, son territoire, ses actualités et ses services.</p>
       <div class="actions">
-        <a class="btn orange" href="/pages/la-commune/">Découvrir la commune</a>
-        <a class="btn outline" href="/gbeleban-en-carte/">Explorer la carte</a>
+        <a class="btn orange" href="/pages/la-commune/">Découvrir Gbéléban</a>
+        <a class="btn outline" href="/gbeleban-en-carte/">Explorer Gbéléban en carte</a>
       </div>
     </div>
 
     <aside class="mayor-hero-card">
       <div class="mayor-hero-photo">
         {% if site_settings and site_settings.mayor_hero_image_url %}
-          <img src="{{ site_settings.mayor_hero_image_url }}" alt="{% if site_settings.mayor_name %}{{ site_settings.mayor_name }}, Maire de Gbéléban{% else %}Madame le Maire de Gbéléban{% endif %}">
+          <img src="{{ site_settings.mayor_hero_image_url }}" alt="{% if site_settings.mayor_name %}{{ site_settings.mayor_name }}, Maire de Gbéléban{% else %}Maire de Gbéléban{% endif %}">
         {% else %}
           <div class="photo-placeholder">Photo du maire - accueil<br><small>À renseigner depuis l’administration</small></div>
         {% endif %}
@@ -39,6 +35,14 @@
         <p>{{ site_settings.mayor_message|default:"Une municipalité proche des habitants, engagée pour le développement local et la modernisation des services publics." }}</p>
       </div>
     </aside>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="section-title"><div><span class="eyebrow green">DÉCOUVRIR GBÉLÉBAN</span><h2>Gbéléban, commune du Kabadougou</h2></div></div>
+    <p>Située dans le nord-ouest de la Côte d’Ivoire, Gbéléban fait partie de la région du Kabadougou et du District du Denguélé. Ce portail municipal rassemble les informations utiles sur Gbéléban : présentation de la commune, action municipale, projets de développement, actualités locales, cartographie et services aux citoyens.</p>
+    <p>Pour mieux connaître le territoire, consultez <a class="textlink" href="/pages/la-commune/">la commune de Gbéléban</a>, explorez <a class="textlink" href="/gbeleban-en-carte/">Gbéléban en carte</a> et suivez les <a class="textlink" href="/actualites/">actualités de Gbéléban</a>.</p>
   </div>
 </section>
 
@@ -76,7 +80,7 @@
     </div>
 
     <aside class="home-news-panel">
-      <div class="home-news-head"><div><span class="eyebrow green">ACTUALITÉS</span><h2>À la une</h2></div><a href="/actualites/">Tout voir →</a></div>
+      <div class="home-news-head"><div><span class="eyebrow green">ACTUALITÉS DE GBÉLÉBAN</span><h2>À la une</h2></div><a href="/actualites/">Tout voir →</a></div>
       <div class="home-news-list">
         {% for n in news_items|slice:":2" %}
         <a class="home-news-card" href="/actualites/{{ n.id }}/"><small>{{ n.published_at|date:'j F Y' }}</small><h3>{{ n.title }}</h3><p>{{ n.excerpt|truncatechars:115 }}</p><span>Lire l’actualité →</span></a>
@@ -88,7 +92,7 @@
 
 <section class="section pale"><div class="container mayor"><div class="mayor-photo">{% if site_settings and site_settings.mayor_section_image_url %}<img src="{{ site_settings.mayor_section_image_url }}" alt="Vision municipale de Gbéléban">{% else %}<div class="photo-placeholder">Image - vision de la commune</div>{% endif %}</div><div><span class="eyebrow green">CAP SUR DEMAIN</span><h2>Notre vision pour Gbéléban</h2><p>Faire de Gbéléban une commune plus attractive, mieux aménagée et plus proche de ses habitants, en valorisant son territoire, ses talents, son identité et les opportunités de développement local.</p><a class="textlink" href="/pages/la-commune/">Découvrir notre ambition →</a></div></div></section>
 
-<section class="section"><div class="container"><div class="section-title"><div><span class="eyebrow">ACTION MUNICIPALE</span><h2>Projets & réalisations</h2></div><a href="/projets/">Voir tous les projets →</a></div><div class="cards">{% for p in projects %}<article class="card"><span class="status {{ p.status }}">{{ p.get_status_display }}</span><h3>{{ p.title }}</h3><p>{{ p.description }}</p>{% if p.status == 'ongoing' %}<div class="progress"><i style="width:{{ p.progress }}%"></i></div><small>{{ p.progress }} % d'avancement</small>{% endif %}</article>{% endfor %}</div></div></section>
+<section class="section"><div class="container"><div class="section-title"><div><span class="eyebrow">ACTION MUNICIPALE À GBÉLÉBAN</span><h2>Projets & réalisations</h2></div><a href="/projets/">Voir tous les projets →</a></div><div class="cards">{% for p in projects %}<article class="card"><span class="status {{ p.status }}">{{ p.get_status_display }}</span><h3>{{ p.title }}</h3><p>{{ p.description }}</p>{% if p.status == 'ongoing' %}<div class="progress"><i style="width:{{ p.progress }}%"></i></div><small>{{ p.progress }} % d'avancement</small>{% endif %}</article>{% endfor %}</div></div></section>
 {% endblock %}
 
 {% block scripts %}
