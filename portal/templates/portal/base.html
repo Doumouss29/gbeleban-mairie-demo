@@ -4,7 +4,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>{% block title %}Mairie de Gbéléban | Commune du Kabadougou, Côte d’Ivoire{% endblock %}</title>
+  <title>{% block title %}Gbéléban | Site officiel de la commune et de la mairie{% endblock %}</title>
   <meta name="description" content="{% block meta_description %}{{ seo_description }}{% endblock %}">
   {% if request.path == '/connexion/' or '/mon-espace/' in request.path or '/urbanisme/' in request.path or '/dashboard/' in request.path or '/collecte-municipale/' in request.path or '/pilotage-projets/' in request.path or '/gestion/' in request.path or '/analytics/' in request.path %}
   <meta name="robots" content="noindex,nofollow">
@@ -14,13 +14,13 @@
   {% endif %}
   <meta property="og:locale" content="fr_FR">
   <meta property="og:type" content="{% block og_type %}website{% endblock %}">
-  <meta property="og:site_name" content="Mairie de Gbéléban">
-  <meta property="og:title" content="{% block og_title %}Mairie de Gbéléban | Commune du Kabadougou{% endblock %}">
+  <meta property="og:site_name" content="Gbéléban">
+  <meta property="og:title" content="{% block og_title %}Gbéléban | Site officiel de la commune{% endblock %}">
   <meta property="og:description" content="{% block og_description %}{{ seo_description }}{% endblock %}">
   <meta property="og:url" content="https://mairie-gbeleban.ci{{ request.path }}">
   {% if site_settings and site_settings.municipality_logo_src %}<meta property="og:image" content="{{ site_settings.municipality_logo_src }}">{% endif %}
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="{% block twitter_title %}Mairie de Gbéléban{% endblock %}">
+  <meta name="twitter:title" content="{% block twitter_title %}Gbéléban | Site officiel{% endblock %}">
   <meta name="twitter:description" content="{% block twitter_description %}{{ seo_description }}{% endblock %}">
   <link rel="apple-touch-icon" sizes="180x180" href="{% static 'portal/favicon/apple-touch-icon.png' %}">
   <link rel="icon" type="image/png" sizes="32x32" href="{% static 'portal/favicon/favicon-32x32.png' %}">
@@ -36,8 +36,8 @@
         "@type": "WebSite",
         "@id": "https://mairie-gbeleban.ci/#website",
         "url": "https://mairie-gbeleban.ci/",
-        "name": "Mairie de Gbéléban",
-        "alternateName": "Commune de Gbéléban",
+        "name": "Gbéléban",
+        "alternateName": ["Mairie de Gbéléban", "Commune de Gbéléban", "Ville de Gbéléban"],
         "inLanguage": "fr"
       },
       {
