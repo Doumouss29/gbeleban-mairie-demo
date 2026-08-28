@@ -189,7 +189,8 @@
         window.GbelebanAddressSearch.attachLeaflet(instance,{
           position:'topleft',
           width:elId==='cadastre-map'?'400px':'420px',
-          placeholder:'Rechercher une adresse à Gbéléban ou OSM…'
+          placeholder:'Rechercher une adresse à Gbéléban ou OSM…',
+          includeUnpublished:elId==='addressingManagementMap'
         });
       },0);
     }
