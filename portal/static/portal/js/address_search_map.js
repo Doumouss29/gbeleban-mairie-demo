@@ -35,21 +35,20 @@
   }
 
   function renderResults(data){
-    const items=Array.isArray(data.results)?data.results:[];if(!items.length){showStatus('Aucune adresse trouvée.');return;}
+    const items=Array.isArray(data.results)?data.results:[];if(!items.length){showStatus(data.osm_message||'Aucune adresse trouvée.');return;}
     resultsBox.innerHTML=items.map((item,index)=>{const detail=item.source==='gbeleban'?[item.code,item.ilot?`Îlot ${item.ilot}`:'',item.lot?`Lot ${item.lot}`:''].filter(Boolean).join(' · '):'Résultat OpenStreetMap';return `<div class="websig-address-item" data-result-index="${index}" role="button" tabindex="0"><span class="websig-address-source">${escapeHtml(sourceIcon(item))}</span><span><b>${escapeHtml(item.label)}</b><small>${escapeHtml(detail)}</small></span><span class="websig-address-badge ${item.source==='osm'?'osm':''}">${escapeHtml(sourceLabel(item))}</span></div>`;}).join('');
     resultsBox.classList.add('open');
     resultsBox.querySelectorAll('.websig-address-item').forEach(el=>{const choose=()=>selectResult(items[Number(el.dataset.resultIndex)]);el.addEventListener('click',choose);el.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();choose();}});});
   }
 
-  async function runSearch(external){
+  async function runSearch(){
     const q=input.value.trim();if(q.length<2){clearResults();return;}
     const requestId=++activeRequest;showStatus('Recherche…');
-    try{const response=await fetch(`/api/recherche-adresse/?q=${encodeURIComponent(q)}&external=${external?'1':'0'}`,{headers:{Accept:'application/json'}});if(!response.ok)throw new Error('HTTP '+response.status);const data=await response.json();if(requestId!==activeRequest)return;renderResults(data);}catch(err){if(requestId===activeRequest)showStatus('La recherche est temporairement indisponible.');}
+    try{const response=await fetch(`/api/recherche-adresse/?q=${encodeURIComponent(q)}&external=1`,{headers:{Accept:'application/json'}});if(!response.ok)throw new Error('HTTP '+response.status);const data=await response.json();if(requestId!==activeRequest)return;renderResults(data);}catch(err){if(requestId===activeRequest)showStatus('La recherche est temporairement indisponible.');}
   }
 
-  input.addEventListener('input',()=>{clearTimeout(timer);if(destinationCard)destinationCard.classList.remove('open');const q=input.value.trim();if(q.length<2){clearResults();return;}timer=setTimeout(()=>runSearch(false),180);});
-  input.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();clearTimeout(timer);runSearch(true);}});
-  input.addEventListener('blur',()=>{clearTimeout(timer);if(input.value.trim().length>=2)timer=setTimeout(()=>runSearch(true),280);});
-  if(clearButton)clearButton.addEventListener('click',()=>{input.value='';if(destinationCard)destinationCard.classList.remove('open');clearResults();if(searchMarker){searchMarker.remove();searchMarker=null;}input.focus();});
+  input.addEventListener('input',()=>{clearTimeout(timer);if(destinationCard)destinationCard.classList.remove('open');const q=input.value.trim();if(q.length<2){clearResults();return;}timer=setTimeout(runSearch,700);});
+  input.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();clearTimeout(timer);runSearch();}});
+  if(clearButton)clearButton.addEventListener('click',()=>{clearTimeout(timer);activeRequest++;input.value='';if(destinationCard)destinationCard.classList.remove('open');clearResults();if(searchMarker){searchMarker.remove();searchMarker=null;}input.focus();});
   document.addEventListener('click',e=>{if(!resultsBox.contains(e.target)&&e.target!==input&&e.target!==clearButton)clearResults();});
 })();
