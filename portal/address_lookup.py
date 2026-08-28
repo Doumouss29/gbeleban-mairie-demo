@@ -10,11 +10,11 @@ from .addressing import ADDRESS_LAYER
 from .models import Parcel
 
 
-def _internal_results(query):
-    qs = Parcel.objects.filter(
-        source_layer=ADDRESS_LAYER,
-        properties__STATUT_ADR="PUBLIEE",
-    ).filter(
+def _internal_results(query, include_unpublished=False):
+    qs = Parcel.objects.filter(source_layer=ADDRESS_LAYER)
+    if not include_unpublished:
+        qs = qs.filter(properties__STATUT_ADR="PUBLIEE")
+    qs = qs.filter(
         Q(properties__CODE_ADRESSE__icontains=query)
         | Q(properties__LIBELLE_ADR__icontains=query)
         | Q(properties__CODE_VOIE__icontains=query)
@@ -42,6 +42,8 @@ def _internal_results(query):
             "latitude": lat,
             "ilot": parcel.ilot,
             "lot": parcel.lot,
+            "statut": props.get("STATUT_ADR", ""),
+            "parcel_id": parcel.id,
         })
     return results
 
@@ -96,6 +98,7 @@ def _osm_results(query):
 def combined_address_search(request):
     query = request.GET.get("q", "").strip()
     external = request.GET.get("external", "1") == "1"
+    include_unpublished = request.GET.get("all", "0") == "1" and request.user.is_authenticated and request.user.is_staff
     if len(query) < 2:
         return JsonResponse({
             "query": query,
@@ -103,7 +106,7 @@ def combined_address_search(request):
             "osm_enabled": True,
         })
 
-    internal = _internal_results(query)
+    internal = _internal_results(query, include_unpublished=include_unpublished)
     osm = []
     osm_message = ""
     if external:
