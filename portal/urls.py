@@ -8,6 +8,7 @@ from . import news_views
 from . import seo_views
 from . import addressing
 from . import addressing_delete
+from . import address_lookup
 
 urlpatterns = [
     path("robots.txt", seo_views.robots_txt, name="robots_txt"),
@@ -23,6 +24,7 @@ urlpatterns = [
     path("gbeleban-en-carte/", public_map_views.map_public, name="map_public"),
     path("api/gbeleban-carte.geojson", public_map_views.public_map_geojson, name="public_map_geojson"),
     path("api/couches/<int:layer_id>.geojson", views.layer_geojson, name="layer_geojson"),
+    path("api/recherche-adresse/", address_lookup.combined_address_search, name="combined_address_search"),
     path("adresses/", addressing.address_search, name="address_search"),
     path("adresses/<str:code>/", addressing.address_detail, name="address_detail"),
     path("api/adresses.geojson", addressing.address_points_geojson, name="address_points_geojson"),
