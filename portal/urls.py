@@ -41,6 +41,7 @@ urlpatterns = [
     path("gestion/sig/import/", views.import_geojson_view, name="import_geojson"),
     path("gestion/cadastre/import/", views.import_cadastre_view, name="import_cadastre"),
     path("gestion/adressage/", addressing.addressing_management, name="addressing_management"),
+    path("gestion/adressage/carte.geojson", addressing.addressing_management_geojson, name="addressing_management_geojson"),
     path("gestion/adressage/import/", addressing.addressing_import, name="addressing_import"),
     path("gestion/adressage/statut/", addressing.addressing_bulk_status, name="addressing_bulk_status"),
     path("gestion/adressage/supprimer-selection/", addressing_delete.delete_selected_addresses, name="addressing_delete_selected"),
