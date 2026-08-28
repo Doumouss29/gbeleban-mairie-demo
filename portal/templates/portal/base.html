@@ -175,6 +175,29 @@
   });
 })();
 </script>
+<script src="{% static 'portal/js/leaflet_address_search.js' %}"></script>
+<script>
+(function(){
+  if(typeof L==='undefined' || !L.map || !window.GbelebanAddressSearch) return;
+  const originalMap=L.map;
+  L.map=function(id,options){
+    const instance=originalMap.call(L,id,options);
+    const el=typeof id==='string'?document.getElementById(id):id;
+    const elId=el&&el.id;
+    if(elId==='cadastre-map' || elId==='addressingManagementMap'){
+      setTimeout(function(){
+        window.GbelebanAddressSearch.attachLeaflet(instance,{
+          position:'topleft',
+          width:elId==='cadastre-map'?'400px':'420px',
+          placeholder:'Rechercher une adresse à Gbéléban ou OSM…'
+        });
+      },0);
+    }
+    return instance;
+  };
+  Object.keys(originalMap).forEach(function(k){try{L.map[k]=originalMap[k];}catch(e){}});
+})();
+</script>
 {% block scripts %}{% endblock %}
 {% if '/gbeleban-en-carte/' in request.path %}
 <script src="{% static 'portal/js/map-rotation.js' %}"></script>
