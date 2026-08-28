@@ -8,10 +8,10 @@
 </style>
 {% endblock %}
 {% block content %}
-<section class="pagehead"><div class="container"><span class="eyebrow">ADRESSE OFFICIELLE</span><h1>{{ address.label }}</h1><p>{{ address.code }} · Îlot {{ address.ilot|default:'—' }} · Lot {{ address.lot|default:'—' }}</p></div></section>
+<section class="pagehead"><div class="container"><span class="eyebrow">ADRESSE OFFICIELLE</span><h1>{{ address.label }}</h1></div></section>
 <section class="section"><div class="container address-detail-grid">
   <div class="card address-map-card"><div class="address-map-shell"><div id="address-map"></div></div></div>
-  <aside class="card address-detail-side"><span class="eyebrow green">LOCALISATION</span><h2>{{ address.label }}</h2><p><strong>Code :</strong> {{ address.code }}</p><p><strong>Voie :</strong> {{ address.code_voie }}</p><p><strong>Îlot :</strong> {{ address.ilot|default:'—' }}</p><p><strong>Lot :</strong> {{ address.lot|default:'—' }}</p>{% if address.latitude and address.longitude %}<a class="btn orange address-route" target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&destination={{ address.latitude }},{{ address.longitude }}">➜ Démarrer l’itinéraire</a>{% endif %}<p style="margin-top:14px;"><a href="/adresses/">← Nouvelle recherche</a></p></aside>
+  <aside class="card address-detail-side"><span class="eyebrow green">LOCALISATION</span><h2>{{ address.label }}</h2>{% if address.latitude and address.longitude %}<a class="btn orange address-route" target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&destination={{ address.latitude }},{{ address.longitude }}">➜ Démarrer l’itinéraire</a>{% endif %}<p style="margin-top:14px;"><a href="/adresses/">← Nouvelle recherche</a></p></aside>
 </div></section>
 {% endblock %}
 {% block scripts %}
