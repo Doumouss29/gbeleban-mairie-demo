@@ -1,12 +1,34 @@
 {% extends 'portal/base.html' %}
 {% block title %}{{ address.label }} | Gbéléban{% endblock %}
+{% block head %}
+<style>
+.address-detail-grid{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(280px,.65fr);gap:22px;align-items:start}.address-map-card{padding:10px}.address-map-shell{position:relative;height:480px;min-height:360px;border-radius:12px;overflow:hidden;background:#eef1ee}.address-map-shell #address-map{position:absolute;inset:0;width:100%;height:100%}.address-detail-side{min-width:0}.address-detail-side h2,.address-detail-side p{overflow-wrap:anywhere}.address-route{display:inline-flex;align-items:center;gap:8px}
+@media(max-width:800px){.address-detail-grid{grid-template-columns:1fr}.address-map-shell{height:54vh;min-height:330px}.address-detail-side{order:-1}.address-detail-side .btn{width:100%;box-sizing:border-box;justify-content:center;text-align:center}}
+@media(max-width:480px){.address-map-card{padding:6px}.address-map-shell{height:48vh;min-height:300px}.address-detail-grid{gap:12px}.pagehead h1{font-size:clamp(26px,9vw,40px);overflow-wrap:anywhere}}
+</style>
+{% endblock %}
 {% block content %}
 <section class="pagehead"><div class="container"><span class="eyebrow">ADRESSE OFFICIELLE</span><h1>{{ address.label }}</h1><p>{{ address.code }} · Îlot {{ address.ilot|default:'—' }} · Lot {{ address.lot|default:'—' }}</p></div></section>
-<section class="section"><div class="container" style="display:grid;grid-template-columns:minmax(0,1.3fr) minmax(280px,.7fr);gap:24px;align-items:start;">
-  <div class="card"><div id="address-map" style="height:460px;border-radius:12px;"></div></div>
-  <aside class="card"><span class="eyebrow green">LOCALISATION</span><h2>{{ address.label }}</h2><p><strong>Code :</strong> {{ address.code }}</p><p><strong>Voie :</strong> {{ address.code_voie }}</p><p><strong>Îlot :</strong> {{ address.ilot|default:'—' }}</p><p><strong>Lot :</strong> {{ address.lot|default:'—' }}</p>{% if address.latitude and address.longitude %}<a class="btn orange" target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&destination={{ address.latitude }},{{ address.longitude }}">Démarrer l’itinéraire</a>{% endif %}<p style="margin-top:14px;"><a href="/adresses/">← Nouvelle recherche</a></p></aside>
+<section class="section"><div class="container address-detail-grid">
+  <div class="card address-map-card"><div class="address-map-shell"><div id="address-map"></div></div></div>
+  <aside class="card address-detail-side"><span class="eyebrow green">LOCALISATION</span><h2>{{ address.label }}</h2><p><strong>Code :</strong> {{ address.code }}</p><p><strong>Voie :</strong> {{ address.code_voie }}</p><p><strong>Îlot :</strong> {{ address.ilot|default:'—' }}</p><p><strong>Lot :</strong> {{ address.lot|default:'—' }}</p>{% if address.latitude and address.longitude %}<a class="btn orange address-route" target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&destination={{ address.latitude }},{{ address.longitude }}">➜ Démarrer l’itinéraire</a>{% endif %}<p style="margin-top:14px;"><a href="/adresses/">← Nouvelle recherche</a></p></aside>
 </div></section>
 {% endblock %}
 {% block scripts %}
-{% if address.latitude and address.longitude %}<script>(function(){const p=[{{ address.latitude }},{{ address.longitude }}];const map=L.map('address-map').setView(p,18);L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:20}).addTo(map);L.marker(p).addTo(map).bindPopup('{{ address.label|escapejs }}').openPopup();})();</script>{% endif %}
+{{ block.super }}
+{% if address.latitude and address.longitude %}
+<script>
+(function(){
+  const lat=Number('{{ address.latitude|escapejs }}'.replace(',','.'));
+  const lon=Number('{{ address.longitude|escapejs }}'.replace(',','.'));
+  const el=document.getElementById('address-map');
+  if(!el||typeof L==='undefined'||!Number.isFinite(lat)||!Number.isFinite(lon))return;
+  const map=L.map(el,{zoomControl:true}).setView([lat,lon],18);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:20,attribution:'&copy; OpenStreetMap'}).addTo(map);
+  L.marker([lat,lon]).addTo(map).bindPopup('{{ address.label|escapejs }}').openPopup();
+  setTimeout(()=>map.invalidateSize(true),120);
+  window.addEventListener('resize',()=>map.invalidateSize(false));
+})();
+</script>
+{% endif %}
 {% endblock %}
