@@ -3,7 +3,7 @@ from django.contrib.admin.views.decorators import staff_member_required
 from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect
 
-from .addressing import ADDRESS_LAYER
+from .addressing import ADDRESS_LAYER, _filtered_address_queryset
 from .models import Parcel
 
 
@@ -16,12 +16,19 @@ def delete_selected_addresses(request):
     if request.method != "POST":
         raise Http404
 
-    ids = [int(value) for value in request.POST.getlist("address_ids") if value.isdigit()]
-    if not ids:
-        messages.warning(request, "Aucune adresse sélectionnée.")
-        return redirect("addressing_management")
+    if request.POST.get("all_filtered") == "1":
+        qs = _filtered_address_queryset(
+            request.POST.get("q", "").strip(),
+            request.POST.get("status", "").strip(),
+            request.POST.get("quality", "").strip(),
+        )
+    else:
+        ids = [int(value) for value in request.POST.getlist("address_ids") if value.isdigit()]
+        if not ids:
+            messages.warning(request, "Aucune adresse sélectionnée.")
+            return redirect("addressing_management")
+        qs = _address_queryset().filter(id__in=ids)
 
-    qs = _address_queryset().filter(id__in=ids)
     count = qs.count()
     qs.delete()
     messages.success(request, f"{count} adresse(s) supprimée(s).")
