@@ -6,6 +6,7 @@ from . import public_map_views
 from . import parcel_registry_views
 from . import news_views
 from . import seo_views
+from . import addressing
 
 urlpatterns = [
     path("robots.txt", seo_views.robots_txt, name="robots_txt"),
@@ -21,6 +22,9 @@ urlpatterns = [
     path("gbeleban-en-carte/", public_map_views.map_public, name="map_public"),
     path("api/gbeleban-carte.geojson", public_map_views.public_map_geojson, name="public_map_geojson"),
     path("api/couches/<int:layer_id>.geojson", views.layer_geojson, name="layer_geojson"),
+    path("adresses/", addressing.address_search, name="address_search"),
+    path("adresses/<str:code>/", addressing.address_detail, name="address_detail"),
+    path("api/adresses.geojson", addressing.address_points_geojson, name="address_points_geojson"),
     path("urbanisme/", views.urbanism, name="urbanism"),
     path("api/cadastre.geojson", views.parcels_geojson, name="parcels_geojson"),
     path("api/cadastre/recherche/", views.parcel_search, name="parcel_search"),
@@ -35,4 +39,8 @@ urlpatterns = [
     path("gestion/", views.management_home, name="management_home"),
     path("gestion/sig/import/", views.import_geojson_view, name="import_geojson"),
     path("gestion/cadastre/import/", views.import_cadastre_view, name="import_cadastre"),
+    path("gestion/adressage/", addressing.addressing_management, name="addressing_management"),
+    path("gestion/adressage/import/", addressing.addressing_import, name="addressing_import"),
+    path("gestion/adressage/statut/", addressing.addressing_bulk_status, name="addressing_bulk_status"),
+    path("gestion/adressage/<int:parcel_id>/modifier/", addressing.addressing_edit, name="addressing_edit"),
 ]
