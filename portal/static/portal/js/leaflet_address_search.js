@@ -56,7 +56,7 @@
           const q=input.value.trim();if(q.length<2){closeResults();return;}
           const requestId=++activeRequest;status('Recherche…');
           try{
-            const response=await fetch(`/api/recherche-adresse/?q=${encodeURIComponent(q)}&external=${external?'1':'0'}`,{headers:{Accept:'application/json'}});
+            const response=await fetch(`/api/recherche-adresse/?q=${encodeURIComponent(q)}&external=${external?'1':'0'}&all=${options.includeUnpublished?'1':'0'}`,{headers:{Accept:'application/json'}});
             if(!response.ok) throw new Error(String(response.status));
             const data=await response.json();if(requestId!==activeRequest)return;render(data);
           }catch(e){if(requestId===activeRequest)status('Recherche temporairement indisponible.');}
