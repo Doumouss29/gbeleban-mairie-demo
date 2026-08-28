@@ -1,5 +1,4 @@
 import json
-import os
 from urllib.parse import urlencode
 from urllib.request import Request, urlopen
 
@@ -47,61 +46,74 @@ def _internal_results(query):
     return results
 
 
-def _google_results(query):
-    api_key = os.environ.get("GOOGLE_MAPS_API_KEY", "").strip()
-    if not api_key:
-        return [], False, "Clé Google Maps non configurée"
-
+def _osm_results(query):
     params = urlencode({
-        "address": query,
-        "key": api_key,
-        "language": "fr",
-        "region": "ci",
+        "q": query,
+        "format": "jsonv2",
+        "addressdetails": 1,
+        "limit": 8,
+        "accept-language": "fr",
+        "countrycodes": "ci",
     })
-    url = f"https://maps.googleapis.com/maps/api/geocode/json?{params}"
-    req = Request(url, headers={"User-Agent": "Mairie-Gbeleban/1.0"})
+    url = f"https://nominatim.openstreetmap.org/search?{params}"
+    req = Request(
+        url,
+        headers={
+            "User-Agent": "Mairie-Gbeleban-AddressSearch/1.0 (https://mairie-gbeleban.ci)",
+            "Accept": "application/json",
+        },
+    )
 
     try:
-        with urlopen(req, timeout=6) as response:
+        with urlopen(req, timeout=7) as response:
             data = json.loads(response.read().decode("utf-8"))
     except Exception:
-        return [], True, "Recherche Google temporairement indisponible"
-
-    status = data.get("status")
-    if status not in {"OK", "ZERO_RESULTS"}:
-        return [], True, f"Google Maps : {status or 'erreur'}"
+        return [], "Recherche OpenStreetMap temporairement indisponible"
 
     results = []
-    for item in data.get("results", [])[:8]:
-        loc = ((item.get("geometry") or {}).get("location") or {})
-        lat = loc.get("lat")
-        lon = loc.get("lng")
+    for item in data[:8]:
+        lat = item.get("lat")
+        lon = item.get("lon")
         if lat is None or lon is None:
             continue
+        try:
+            lat = float(lat)
+            lon = float(lon)
+        except (TypeError, ValueError):
+            continue
         results.append({
-            "source": "google",
-            "label": item.get("formatted_address") or query,
-            "place_id": item.get("place_id", ""),
-            "longitude": float(lon),
-            "latitude": float(lat),
+            "source": "osm",
+            "label": item.get("display_name") or query,
+            "osm_type": item.get("osm_type", ""),
+            "osm_id": item.get("osm_id"),
+            "longitude": lon,
+            "latitude": lat,
         })
-    return results, True, ""
+    return results, ""
 
 
 @require_GET
 def combined_address_search(request):
     query = request.GET.get("q", "").strip()
+    external = request.GET.get("external", "1") == "1"
     if len(query) < 2:
-        return JsonResponse({"query": query, "results": [], "google_enabled": bool(os.environ.get("GOOGLE_MAPS_API_KEY"))})
+        return JsonResponse({
+            "query": query,
+            "results": [],
+            "osm_enabled": True,
+        })
 
     internal = _internal_results(query)
-    google, google_enabled, google_message = _google_results(query)
+    osm = []
+    osm_message = ""
+    if external:
+        osm, osm_message = _osm_results(query)
 
     return JsonResponse({
         "query": query,
-        "results": internal + google,
+        "results": internal + osm,
         "internal_count": len(internal),
-        "google_count": len(google),
-        "google_enabled": google_enabled,
-        "google_message": google_message,
+        "osm_count": len(osm),
+        "osm_enabled": True,
+        "osm_message": osm_message,
     })
