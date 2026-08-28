@@ -7,9 +7,38 @@
 
   <div class="card" style="margin-bottom:24px;"><h2>Importer les données d'adressage</h2><p>Utilisez les deux GeoJSON corrigés : axes de voirie et parcelles d'adressage.</p><form action="/gestion/adressage/import/" method="post" enctype="multipart/form-data" style="display:grid;gap:12px;max-width:760px;">{% csrf_token %}<label><strong>Axes de voirie</strong><br><input type="file" name="roads_file" accept=".geojson,.json" required></label><label><strong>Parcelles d'adressage</strong><br><input type="file" name="parcels_file" accept=".geojson,.json" required></label><button class="btn orange" type="submit">Importer / remplacer les données</button></form></div>
 
-  <form method="get" style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:18px;"><input name="q" value="{{ query }}" placeholder="Code, rue, îlot, lot..." style="padding:11px 12px;min-width:280px;"><select name="status"><option value="">Tous les statuts</option><option value="PROPOSEE" {% if status == 'PROPOSEE' %}selected{% endif %}>Proposée</option><option value="VALIDEE" {% if status == 'VALIDEE' %}selected{% endif %}>Validée</option><option value="PUBLIEE" {% if status == 'PUBLIEE' %}selected{% endif %}>Publiée</option><option value="A_RATTACHER" {% if status == 'A_RATTACHER' %}selected{% endif %}>À rattacher</option></select><select name="quality"><option value="">Toutes les qualités</option><option value="BONNE" {% if quality == 'BONNE' %}selected{% endif %}>Bonne</option><option value="A_CONTROLER" {% if quality == 'A_CONTROLER' %}selected{% endif %}>À contrôler</option><option value="A_CONTROLER_PRIORITAIRE" {% if quality == 'A_CONTROLER_PRIORITAIRE' %}selected{% endif %}>À contrôler prioritaire</option></select><button class="btn outline" type="submit">Filtrer</button></form>
+  <form id="addressFilterForm" method="get" style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:18px;align-items:center;">
+    <input name="q" value="{{ query }}" placeholder="Code, rue, îlot, lot..." style="padding:11px 12px;min-width:280px;">
+    <select name="status"><option value="">Tous les statuts</option><option value="PROPOSEE" {% if status == 'PROPOSEE' %}selected{% endif %}>Proposée</option><option value="VALIDEE" {% if status == 'VALIDEE' %}selected{% endif %}>Validée</option><option value="PUBLIEE" {% if status == 'PUBLIEE' %}selected{% endif %}>Publiée</option><option value="A_RATTACHER" {% if status == 'A_RATTACHER' %}selected{% endif %}>À rattacher</option></select>
+    <select name="quality"><option value="">Toutes les qualités</option><option value="BONNE" {% if quality == 'BONNE' %}selected{% endif %}>Bonne</option><option value="A_CONTROLER" {% if quality == 'A_CONTROLER' %}selected{% endif %}>À contrôler</option><option value="A_CONTROLER_PRIORITAIRE" {% if quality == 'A_CONTROLER_PRIORITAIRE' %}selected{% endif %}>À contrôler prioritaire</option></select>
+    <select name="page_size" id="pageSizeSelect" title="Nombre de lignes par page"><option value="50" {% if page_size == 50 %}selected{% endif %}>50 / page</option><option value="100" {% if page_size == 100 %}selected{% endif %}>100 / page</option><option value="250" {% if page_size == 250 %}selected{% endif %}>250 / page</option><option value="500" {% if page_size == 500 %}selected{% endif %}>500 / page</option></select>
+    <button class="btn outline" type="submit">Filtrer</button>
+    <a class="btn outline" href="/gestion/adressage/">Réinitialiser</a>
+  </form>
+
+  <div class="card" style="margin-bottom:24px;padding:16px;">
+    <div style="display:flex;justify-content:space-between;gap:16px;align-items:flex-start;flex-wrap:wrap;margin-bottom:12px;">
+      <div><span class="eyebrow green">CARTE DE CONTRÔLE</span><h2 style="margin:4px 0 2px;">Qualité de l'adressage</h2><p style="margin:0;">Cliquez sur une parcelle pour consulter son adresse et ouvrir sa fiche de modification.</p></div>
+      <div style="display:flex;gap:14px;flex-wrap:wrap;font-size:14px;"><span><i style="display:inline-block;width:12px;height:12px;border-radius:3px;background:#16803c;margin-right:5px;"></i>Bonne</span><span><i style="display:inline-block;width:12px;height:12px;border-radius:3px;background:#ef7d00;margin-right:5px;"></i>À contrôler</span><span><i style="display:inline-block;width:12px;height:12px;border-radius:3px;background:#d7261e;margin-right:5px;"></i>Prioritaire</span></div>
+    </div>
+    <div id="addressingManagementMap" style="height:520px;border-radius:14px;overflow:hidden;border:1px solid #d9dde2;background:#eef1f3;"></div>
+  </div>
 
   <form id="addressBulkForm" action="/gestion/adressage/statut/" method="post">{% csrf_token %}
+    <input type="hidden" name="q" value="{{ query }}">
+    <input type="hidden" name="status" value="{{ status }}">
+    <input type="hidden" name="quality" value="{{ quality }}">
+    <input type="hidden" name="all_filtered" id="allFilteredInput" value="0">
+
+    <div style="display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:12px;">
+      <div><strong>{{ filtered_count }}</strong> résultat{{ filtered_count|pluralize }} — page {{ page_obj.number }} / {{ paginator.num_pages }}</div>
+      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+        <button type="button" class="btn outline" id="selectAllBtn">Tout sélectionner sur cette page</button>
+        <button type="button" class="btn outline" id="deselectAllBtn">Tout désélectionner</button>
+        <label style="display:flex;align-items:center;gap:7px;font-weight:700;"><input type="checkbox" id="selectAllFiltered"> Tous les {{ filtered_count }} résultats filtrés</label>
+      </div>
+    </div>
+
     <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px;align-items:center;">
       <button class="btn outline bulk-status-btn" name="target" value="VALIDEE" type="submit">Valider la sélection</button>
       <button class="btn orange bulk-status-btn" name="target" value="PUBLIEE" type="submit">Publier la sélection</button>
@@ -18,14 +47,20 @@
       <span id="selectedCount" style="font-weight:700;margin-left:6px;">0 sélectionnée</span>
     </div>
 
-    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px;">
-      <button type="button" class="btn outline" id="selectAllBtn">Tout sélectionner</button>
-      <button type="button" class="btn outline" id="deselectAllBtn">Tout désélectionner</button>
-    </div>
-
     <div style="overflow:auto;"><table style="width:100%;border-collapse:collapse;background:#fff;"><thead><tr><th style="padding:10px;text-align:left;"><input type="checkbox" id="masterCheckbox" aria-label="Tout sélectionner"></th><th style="padding:10px;text-align:left;">Adresse</th><th style="padding:10px;text-align:left;">Îlot / lot</th><th style="padding:10px;text-align:left;">Statut</th><th style="padding:10px;text-align:left;">Qualité</th><th style="padding:10px;text-align:left;">Action</th></tr></thead><tbody>{% for a in rows %}<tr style="border-top:1px solid #e6e8ea;"><td style="padding:10px;"><input class="address-checkbox" type="checkbox" name="address_ids" value="{{ a.id }}"></td><td style="padding:10px;"><strong>{{ a.label|default:'—' }}</strong>{% if a.code %}<br><small>{{ a.code }}</small>{% endif %}</td><td style="padding:10px;">Îlot {{ a.ilot|default:'—' }} / Lot {{ a.lot|default:'—' }}</td><td style="padding:10px;">{{ a.statut }}</td><td style="padding:10px;">{{ a.qualite }}</td><td style="padding:10px;white-space:nowrap;"><a href="/gestion/adressage/{{ a.id }}/modifier/">Modifier</a><button type="submit" class="individual-delete-btn" formaction="/gestion/adressage/{{ a.id }}/supprimer/" formmethod="post" style="border:0;background:transparent;color:#b42318;cursor:pointer;padding:0;margin-left:12px;text-decoration:underline;">Supprimer</button></td></tr>{% empty %}<tr><td colspan="6" style="padding:18px;">Aucune adresse disponible.</td></tr>{% endfor %}</tbody></table></div>
   </form>
-  {% if rows|length == 250 %}<p><small>Affichage limité aux 250 premiers résultats. « Tout sélectionner » sélectionne les 250 lignes actuellement affichées. Utilisez les filtres pour cibler un ensemble précis.</small></p>{% endif %}
+
+  {% if paginator.num_pages > 1 %}
+  <nav aria-label="Pagination de l'adressage" style="display:flex;justify-content:center;align-items:center;gap:7px;flex-wrap:wrap;margin-top:24px;">
+    {% if page_obj.has_previous %}<a class="btn outline" href="?{% if querystring %}{{ querystring }}&{% endif %}page={{ page_obj.previous_page_number }}">← Précédent</a>{% endif %}
+    {% for n in paginator.page_range %}
+      {% if n == page_obj.number %}<span class="btn orange" style="pointer-events:none;">{{ n }}</span>
+      {% elif n == 1 or n == paginator.num_pages or n >= page_obj.number|add:'-2' and n <= page_obj.number|add:'2' %}<a class="btn outline" href="?{% if querystring %}{{ querystring }}&{% endif %}page={{ n }}">{{ n }}</a>
+      {% elif n == 2 or n == paginator.num_pages|add:'-1' %}<span>…</span>{% endif %}
+    {% endfor %}
+    {% if page_obj.has_next %}<a class="btn outline" href="?{% if querystring %}{{ querystring }}&{% endif %}page={{ page_obj.next_page_number }}">Suivant →</a>{% endif %}
+  </nav>
+  {% endif %}
 </div></section>
 {% endblock %}
 
@@ -33,58 +68,110 @@
 {{ block.super }}
 <script>
 (function(){
+  const filterForm = document.getElementById('addressFilterForm');
+  const pageSize = document.getElementById('pageSizeSelect');
+  if(pageSize && filterForm) pageSize.addEventListener('change', () => filterForm.submit());
+
   const bulkForm = document.getElementById('addressBulkForm');
-  if(!bulkForm) return;
-  const boxes = Array.from(document.querySelectorAll('.address-checkbox'));
-  const master = document.getElementById('masterCheckbox');
-  const selectAll = document.getElementById('selectAllBtn');
-  const deselectAll = document.getElementById('deselectAllBtn');
-  const deleteBtn = document.getElementById('deleteSelectedBtn');
-  const countEl = document.getElementById('selectedCount');
+  if(bulkForm){
+    const boxes = Array.from(document.querySelectorAll('.address-checkbox'));
+    const master = document.getElementById('masterCheckbox');
+    const selectAll = document.getElementById('selectAllBtn');
+    const deselectAll = document.getElementById('deselectAllBtn');
+    const selectAllFiltered = document.getElementById('selectAllFiltered');
+    const allFilteredInput = document.getElementById('allFilteredInput');
+    const deleteBtn = document.getElementById('deleteSelectedBtn');
+    const countEl = document.getElementById('selectedCount');
 
-  function refresh(){
-    const selected = boxes.filter(b => b.checked).length;
-    if(countEl) countEl.textContent = selected + (selected > 1 ? ' sélectionnées' : ' sélectionnée');
-    if(master){
-      master.checked = boxes.length > 0 && selected === boxes.length;
-      master.indeterminate = selected > 0 && selected < boxes.length;
-    }
-  }
-
-  function setAll(value){ boxes.forEach(b => b.checked = value); refresh(); }
-
-  boxes.forEach(b => b.addEventListener('change', refresh));
-  if(master) master.addEventListener('change', () => setAll(master.checked));
-  if(selectAll) selectAll.addEventListener('click', () => setAll(true));
-  if(deselectAll) deselectAll.addEventListener('click', () => setAll(false));
-
-  document.querySelectorAll('.individual-delete-btn').forEach(function(btn){
-    btn.addEventListener('click', function(e){
-      if(!confirm('Supprimer définitivement cette adresse ?')) e.preventDefault();
-    });
-  });
-
-  document.querySelectorAll('.bulk-status-btn').forEach(function(btn){
-    btn.addEventListener('click', function(e){
+    function refresh(){
       const selected = boxes.filter(b => b.checked).length;
-      if(!selected){
-        e.preventDefault();
-        alert('Sélectionnez au moins une adresse.');
+      const allFiltered = selectAllFiltered && selectAllFiltered.checked;
+      if(allFilteredInput) allFilteredInput.value = allFiltered ? '1' : '0';
+      if(countEl) countEl.textContent = allFiltered ? '{{ filtered_count }} résultats filtrés' : selected + (selected > 1 ? ' sélectionnées' : ' sélectionnée');
+      if(master){
+        master.checked = boxes.length > 0 && selected === boxes.length;
+        master.indeterminate = selected > 0 && selected < boxes.length;
       }
-    });
-  });
+    }
+    function setAll(value){ boxes.forEach(b => b.checked = value); if(selectAllFiltered) selectAllFiltered.checked = false; refresh(); }
 
-  if(deleteBtn){
-    deleteBtn.addEventListener('click', function(){
-      const selected = boxes.filter(b => b.checked).length;
-      if(!selected){ alert('Sélectionnez au moins une adresse.'); return; }
-      if(!confirm('Supprimer définitivement ' + selected + ' adresse(s) sélectionnée(s) ?')) return;
-      bulkForm.action = '/gestion/adressage/supprimer-selection/';
-      bulkForm.submit();
+    boxes.forEach(b => b.addEventListener('change', function(){ if(selectAllFiltered) selectAllFiltered.checked = false; refresh(); }));
+    if(master) master.addEventListener('change', () => setAll(master.checked));
+    if(selectAll) selectAll.addEventListener('click', () => setAll(true));
+    if(deselectAll) deselectAll.addEventListener('click', () => setAll(false));
+    if(selectAllFiltered) selectAllFiltered.addEventListener('change', function(){ if(this.checked) boxes.forEach(b => b.checked = false); refresh(); });
+
+    document.querySelectorAll('.individual-delete-btn').forEach(function(btn){
+      btn.addEventListener('click', function(e){ if(!confirm('Supprimer définitivement cette adresse ?')) e.preventDefault(); });
     });
+
+    document.querySelectorAll('.bulk-status-btn').forEach(function(btn){
+      btn.addEventListener('click', function(e){
+        const allFiltered = selectAllFiltered && selectAllFiltered.checked;
+        const selected = boxes.filter(b => b.checked).length;
+        if(!allFiltered && !selected){ e.preventDefault(); alert('Sélectionnez au moins une adresse.'); }
+      });
+    });
+
+    if(deleteBtn){
+      deleteBtn.addEventListener('click', function(){
+        const allFiltered = selectAllFiltered && selectAllFiltered.checked;
+        const selected = boxes.filter(b => b.checked).length;
+        if(!allFiltered && !selected){ alert('Sélectionnez au moins une adresse.'); return; }
+        const count = allFiltered ? {{ filtered_count }} : selected;
+        if(!confirm('Supprimer définitivement ' + count + ' adresse(s) ?')) return;
+        bulkForm.action = '/gestion/adressage/supprimer-selection/';
+        bulkForm.submit();
+      });
+    }
+    refresh();
   }
 
-  refresh();
+  const mapEl = document.getElementById('addressingManagementMap');
+  if(!mapEl || typeof L === 'undefined') return;
+  const map = L.map(mapEl, {preferCanvas:true}).setView([9.584607,-8.131833], 14);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {maxZoom:20, attribution:'&copy; OpenStreetMap'}).addTo(map);
+
+  function qualityColor(q){
+    if(q === 'BONNE') return '#16803c';
+    if(q === 'A_CONTROLER_PRIORITAIRE') return '#d7261e';
+    if(q === 'A_CONTROLER') return '#ef7d00';
+    return '#7b2cbf';
+  }
+  function esc(v){ return String(v == null ? '' : v).replace(/[&<>'\"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','\"':'&quot;'}[c])); }
+
+  const params = new URLSearchParams();
+  {% if query %}params.set('q', '{{ query|escapejs }}');{% endif %}
+  {% if status %}params.set('status', '{{ status|escapejs }}');{% endif %}
+  {% if quality %}params.set('quality', '{{ quality|escapejs }}');{% endif %}
+
+  fetch('/gestion/adressage/carte.geojson?' + params.toString(), {credentials:'same-origin'})
+    .then(r => { if(!r.ok) throw new Error('Erreur carte ' + r.status); return r.json(); })
+    .then(data => {
+      const layer = L.geoJSON(data, {
+        style: feature => {
+          const c = qualityColor(feature.properties && feature.properties.qualite);
+          return {color:'#20242a', weight:1.2, fillColor:c, fillOpacity:.58};
+        },
+        onEachFeature: (feature, lyr) => {
+          const p = feature.properties || {};
+          const label = p.label || p.code || 'Adresse à rattacher';
+          lyr.bindPopup(
+            '<div style="min-width:220px">' +
+            '<strong style="font-size:15px">' + esc(label) + '</strong><br>' +
+            '<span>Îlot ' + esc(p.ilot || '—') + ' / Lot ' + esc(p.lot || '—') + '</span><br>' +
+            '<span>Qualité : <b>' + esc(p.qualite || '—') + '</b></span><br>' +
+            '<span>Statut : ' + esc(p.statut || '—') + '</span><br><br>' +
+            '<a class="btn orange" style="display:inline-block;padding:7px 12px" href="/gestion/adressage/' + encodeURIComponent(p.id) + '/modifier/">Modifier les attributs</a>' +
+            '</div>'
+          );
+          lyr.on('mouseover', () => lyr.setStyle({weight:3, fillOpacity:.75}));
+          lyr.on('mouseout', () => lyr.setStyle({weight:1.2, fillOpacity:.58}));
+        }
+      }).addTo(map);
+      if(layer.getBounds && layer.getBounds().isValid()) map.fitBounds(layer.getBounds(), {padding:[18,18], maxZoom:17});
+    })
+    .catch(err => { mapEl.innerHTML = '<div style="padding:24px">Impossible de charger la carte de contrôle.</div>'; console.error(err); });
 })();
 </script>
 {% endblock %}
