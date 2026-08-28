@@ -7,6 +7,7 @@ from . import parcel_registry_views
 from . import news_views
 from . import seo_views
 from . import addressing
+from . import addressing_delete
 
 urlpatterns = [
     path("robots.txt", seo_views.robots_txt, name="robots_txt"),
@@ -42,5 +43,7 @@ urlpatterns = [
     path("gestion/adressage/", addressing.addressing_management, name="addressing_management"),
     path("gestion/adressage/import/", addressing.addressing_import, name="addressing_import"),
     path("gestion/adressage/statut/", addressing.addressing_bulk_status, name="addressing_bulk_status"),
+    path("gestion/adressage/supprimer-selection/", addressing_delete.delete_selected_addresses, name="addressing_delete_selected"),
     path("gestion/adressage/<int:parcel_id>/modifier/", addressing.addressing_edit, name="addressing_edit"),
+    path("gestion/adressage/<int:parcel_id>/supprimer/", addressing_delete.delete_address, name="addressing_delete"),
 ]
