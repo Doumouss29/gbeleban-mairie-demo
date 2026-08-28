@@ -4,6 +4,7 @@ from decimal import Decimal, InvalidOperation
 
 from django.contrib import messages
 from django.contrib.admin.views.decorators import staff_member_required
+from django.core.paginator import Paginator
 from django.db.models import Q
 from django.http import JsonResponse, Http404
 from django.shortcuts import get_object_or_404, redirect, render
@@ -17,6 +18,23 @@ MANUAL_KEYS = ["NUM_ADRESSE", "SUFFIXE", "CODE_VOIE", "NOM_OFFICIEL", "LIBELLE_A
 
 def _address_queryset():
     return Parcel.objects.filter(source_layer=ADDRESS_LAYER)
+
+
+def _filtered_address_queryset(q="", status="", quality=""):
+    qs = _address_queryset()
+    if q:
+        qs = qs.filter(
+            Q(properties__CODE_ADRESSE__icontains=q)
+            | Q(properties__LIBELLE_ADR__icontains=q)
+            | Q(properties__CODE_VOIE__icontains=q)
+            | Q(ilot__icontains=q)
+            | Q(lot__icontains=q)
+        )
+    if status:
+        qs = qs.filter(properties__STATUT_ADR=status)
+    if quality:
+        qs = qs.filter(properties__QUALITE_ADR=quality)
+    return qs
 
 
 def _address_props(parcel):
@@ -89,21 +107,18 @@ def addressing_management(request):
     q = request.GET.get("q", "").strip()
     status = request.GET.get("status", "").strip()
     quality = request.GET.get("quality", "").strip()
-    qs = _address_queryset()
-    if q:
-        qs = qs.filter(
-            Q(properties__CODE_ADRESSE__icontains=q)
-            | Q(properties__LIBELLE_ADR__icontains=q)
-            | Q(properties__CODE_VOIE__icontains=q)
-            | Q(ilot__icontains=q)
-            | Q(lot__icontains=q)
-        )
-    if status:
-        qs = qs.filter(properties__STATUT_ADR=status)
-    if quality:
-        qs = qs.filter(properties__QUALITE_ADR=quality)
+    try:
+        page_size = int(request.GET.get("page_size", "100"))
+    except (TypeError, ValueError):
+        page_size = 100
+    if page_size not in {50, 100, 250, 500}:
+        page_size = 100
 
-    rows = [_address_payload(p) for p in qs.order_by("properties__CODE_VOIE", "properties__NUM_ADRESSE")[:250]]
+    qs = _filtered_address_queryset(q, status, quality).order_by("properties__CODE_VOIE", "properties__NUM_ADRESSE", "id")
+    paginator = Paginator(qs, page_size)
+    page_obj = paginator.get_page(request.GET.get("page", 1))
+    rows = [_address_payload(p) for p in page_obj.object_list]
+
     counts = {
         "total": _address_queryset().count(),
         "proposed": _address_queryset().filter(properties__STATUT_ADR="PROPOSEE").count(),
@@ -111,9 +126,37 @@ def addressing_management(request):
         "published": _address_queryset().filter(properties__STATUT_ADR="PUBLIEE").count(),
         "control": _address_queryset().filter(properties__QUALITE_ADR__in=["A_CONTROLER", "A_CONTROLER_PRIORITAIRE"]).count(),
     }
+    querystring = request.GET.copy()
+    querystring.pop("page", None)
     return render(request, "portal/addressing_management.html", {
-        "rows": rows, "counts": counts, "query": q, "status": status, "quality": quality,
+        "rows": rows,
+        "page_obj": page_obj,
+        "paginator": paginator,
+        "page_size": page_size,
+        "querystring": querystring.urlencode(),
+        "filtered_count": paginator.count,
+        "counts": counts,
+        "query": q,
+        "status": status,
+        "quality": quality,
     })
+
+
+@staff_member_required
+def addressing_management_geojson(request):
+    q = request.GET.get("q", "").strip()
+    status = request.GET.get("status", "").strip()
+    quality = request.GET.get("quality", "").strip()
+    features = []
+    for parcel in _filtered_address_queryset(q, status, quality).only("id", "reference", "ilot", "lot", "properties", "geometry"):
+        props = _address_payload(parcel)
+        props["reference"] = parcel.reference
+        features.append({
+            "type": "Feature",
+            "geometry": parcel.geometry,
+            "properties": props,
+        })
+    return JsonResponse({"type": "FeatureCollection", "features": features})
 
 
 @staff_member_required
@@ -167,9 +210,6 @@ def addressing_import(request):
         seen.add(reference)
         obj = existing.get(reference)
 
-        # Une correction municipale déjà effectuée ne doit jamais être écrasée
-        # par une régénération QGIS. Les valeurs calculées restent conservées
-        # dans CALCUL_AUTO pour comparaison/audit.
         if obj:
             current = _address_props(obj)
             has_manual_history = bool(current.get("HISTORIQUE_ADR"))
@@ -285,9 +325,19 @@ def addressing_bulk_status(request):
     if target not in {"VALIDEE", "PUBLIEE", "PROPOSEE"}:
         messages.error(request, "Statut invalide.")
         return redirect("addressing_management")
-    ids = [int(x) for x in request.POST.getlist("address_ids") if x.isdigit()]
+
+    if request.POST.get("all_filtered") == "1":
+        qs = _filtered_address_queryset(
+            request.POST.get("q", "").strip(),
+            request.POST.get("status", "").strip(),
+            request.POST.get("quality", "").strip(),
+        )
+    else:
+        ids = [int(x) for x in request.POST.getlist("address_ids") if x.isdigit()]
+        qs = _address_queryset().filter(id__in=ids)
+
     updated = 0
-    for parcel in _address_queryset().filter(id__in=ids):
+    for parcel in qs.iterator():
         props = _address_props(parcel)
         props["STATUT_ADR"] = target
         history = list(props.get("HISTORIQUE_ADR") or [])
