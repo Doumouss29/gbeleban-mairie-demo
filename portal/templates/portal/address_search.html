@@ -1,0 +1,30 @@
+{% extends 'portal/base.html' %}
+{% block title %}Adresses de Gbéléban | Recherche et localisation{% endblock %}
+{% block meta_description %}Recherchez une adresse, une rue, un îlot ou un lot à Gbéléban et localisez-la sur la carte.{% endblock %}
+{% block content %}
+<section class="pagehead"><div class="container"><span class="eyebrow">ADRESSAGE COMMUNAL</span><h1>Trouver une adresse à Gbéléban</h1><p>Recherchez par numéro, rue, code adresse, îlot ou lot.</p></div></section>
+<section class="section"><div class="container">
+  <form method="get" class="address-search-form" style="display:flex;gap:10px;max-width:900px;margin-bottom:28px;">
+    <input name="q" value="{{ query }}" placeholder="Ex. RUE101, GBL-RUE101-126, îlot 50, lot 434..." style="flex:1;padding:15px 16px;border:1px solid #ccd3d9;border-radius:10px;font-size:16px;">
+    <button class="btn orange" type="submit">Rechercher</button>
+  </form>
+  {% if query %}
+    <div style="margin-bottom:18px;"><strong>{{ results|length }}</strong> résultat(s) pour « {{ query }} »</div>
+    <div class="cards">
+      {% for a in results %}
+      <article class="card">
+        <span class="eyebrow green">{{ a.code }}</span>
+        <h3>{{ a.label }}</h3>
+        <p>Îlot {{ a.ilot|default:'—' }} · Lot {{ a.lot|default:'—' }}</p>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;">
+          <a class="btn orange" href="/adresses/{{ a.code }}/">Voir sur la carte</a>
+          {% if a.latitude and a.longitude %}<a class="btn outline" target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&destination={{ a.latitude }},{{ a.longitude }}">Itinéraire</a>{% endif %}
+        </div>
+      </article>
+      {% empty %}<div class="card"><h3>Aucune adresse trouvée</h3><p>Essayez un code de voie, un numéro, un îlot ou un lot.</p></div>{% endfor %}
+    </div>
+  {% else %}
+    <div class="card"><h2>Comment rechercher ?</h2><p>Vous pouvez saisir une adresse comme « 126 Rue RUE101 », un code comme « GBL-RUE101-126 », une voie comme « RUE101 », ou simplement un numéro d’îlot ou de lot.</p></div>
+  {% endif %}
+</div></section>
+{% endblock %}
