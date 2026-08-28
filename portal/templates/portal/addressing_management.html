@@ -11,9 +11,9 @@
 
   <form id="addressBulkForm" action="/gestion/adressage/statut/" method="post">{% csrf_token %}
     <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px;align-items:center;">
-      <button class="btn outline" name="target" value="VALIDEE" type="submit">Valider la sélection</button>
-      <button class="btn orange" name="target" value="PUBLIEE" type="submit">Publier la sélection</button>
-      <button class="btn outline" name="target" value="PROPOSEE" type="submit">Remettre en proposée</button>
+      <button class="btn outline bulk-status-btn" name="target" value="VALIDEE" type="submit">Valider la sélection</button>
+      <button class="btn orange bulk-status-btn" name="target" value="PUBLIEE" type="submit">Publier la sélection</button>
+      <button class="btn outline bulk-status-btn" name="target" value="PROPOSEE" type="submit">Remettre en proposée</button>
       <button class="btn" id="deleteSelectedBtn" type="button" style="background:#b42318;color:#fff;border-color:#b42318;">Supprimer la sélection</button>
       <span id="selectedCount" style="font-weight:700;margin-left:6px;">0 sélectionnée</span>
     </div>
@@ -23,7 +23,7 @@
       <button type="button" class="btn outline" id="deselectAllBtn">Tout désélectionner</button>
     </div>
 
-    <div style="overflow:auto;"><table style="width:100%;border-collapse:collapse;background:#fff;"><thead><tr><th style="padding:10px;text-align:left;"><input type="checkbox" id="masterCheckbox" aria-label="Tout sélectionner"></th><th style="padding:10px;text-align:left;">Adresse</th><th style="padding:10px;text-align:left;">Îlot / lot</th><th style="padding:10px;text-align:left;">Statut</th><th style="padding:10px;text-align:left;">Qualité</th><th style="padding:10px;text-align:left;">Action</th></tr></thead><tbody>{% for a in rows %}<tr style="border-top:1px solid #e6e8ea;"><td style="padding:10px;"><input class="address-checkbox" type="checkbox" name="address_ids" value="{{ a.id }}"></td><td style="padding:10px;"><strong>{{ a.label|default:'—' }}</strong>{% if a.code %}<br><small>{{ a.code }}</small>{% endif %}</td><td style="padding:10px;">Îlot {{ a.ilot|default:'—' }} / Lot {{ a.lot|default:'—' }}</td><td style="padding:10px;">{{ a.statut }}</td><td style="padding:10px;">{{ a.qualite }}</td><td style="padding:10px;white-space:nowrap;"><a href="/gestion/adressage/{{ a.id }}/modifier/">Modifier</a><form action="/gestion/adressage/{{ a.id }}/supprimer/" method="post" style="display:inline;margin-left:12px;" onsubmit="return confirm('Supprimer définitivement cette adresse ?');">{% csrf_token %}<button type="submit" style="border:0;background:transparent;color:#b42318;cursor:pointer;padding:0;text-decoration:underline;">Supprimer</button></form></td></tr>{% empty %}<tr><td colspan="6" style="padding:18px;">Aucune adresse disponible.</td></tr>{% endfor %}</tbody></table></div>
+    <div style="overflow:auto;"><table style="width:100%;border-collapse:collapse;background:#fff;"><thead><tr><th style="padding:10px;text-align:left;"><input type="checkbox" id="masterCheckbox" aria-label="Tout sélectionner"></th><th style="padding:10px;text-align:left;">Adresse</th><th style="padding:10px;text-align:left;">Îlot / lot</th><th style="padding:10px;text-align:left;">Statut</th><th style="padding:10px;text-align:left;">Qualité</th><th style="padding:10px;text-align:left;">Action</th></tr></thead><tbody>{% for a in rows %}<tr style="border-top:1px solid #e6e8ea;"><td style="padding:10px;"><input class="address-checkbox" type="checkbox" name="address_ids" value="{{ a.id }}"></td><td style="padding:10px;"><strong>{{ a.label|default:'—' }}</strong>{% if a.code %}<br><small>{{ a.code }}</small>{% endif %}</td><td style="padding:10px;">Îlot {{ a.ilot|default:'—' }} / Lot {{ a.lot|default:'—' }}</td><td style="padding:10px;">{{ a.statut }}</td><td style="padding:10px;">{{ a.qualite }}</td><td style="padding:10px;white-space:nowrap;"><a href="/gestion/adressage/{{ a.id }}/modifier/">Modifier</a><button type="submit" class="individual-delete-btn" formaction="/gestion/adressage/{{ a.id }}/supprimer/" formmethod="post" style="border:0;background:transparent;color:#b42318;cursor:pointer;padding:0;margin-left:12px;text-decoration:underline;">Supprimer</button></td></tr>{% empty %}<tr><td colspan="6" style="padding:18px;">Aucune adresse disponible.</td></tr>{% endfor %}</tbody></table></div>
   </form>
   {% if rows|length == 250 %}<p><small>Affichage limité aux 250 premiers résultats. « Tout sélectionner » sélectionne les 250 lignes actuellement affichées. Utilisez les filtres pour cibler un ensemble précis.</small></p>{% endif %}
 </div></section>
@@ -58,6 +58,22 @@
   if(selectAll) selectAll.addEventListener('click', () => setAll(true));
   if(deselectAll) deselectAll.addEventListener('click', () => setAll(false));
 
+  document.querySelectorAll('.individual-delete-btn').forEach(function(btn){
+    btn.addEventListener('click', function(e){
+      if(!confirm('Supprimer définitivement cette adresse ?')) e.preventDefault();
+    });
+  });
+
+  document.querySelectorAll('.bulk-status-btn').forEach(function(btn){
+    btn.addEventListener('click', function(e){
+      const selected = boxes.filter(b => b.checked).length;
+      if(!selected){
+        e.preventDefault();
+        alert('Sélectionnez au moins une adresse.');
+      }
+    });
+  });
+
   if(deleteBtn){
     deleteBtn.addEventListener('click', function(){
       const selected = boxes.filter(b => b.checked).length;
@@ -68,15 +84,6 @@
     });
   }
 
-  bulkForm.addEventListener('submit', function(){
-    if(bulkForm.action.includes('/statut/')){
-      const selected = boxes.filter(b => b.checked).length;
-      if(!selected){
-        event.preventDefault();
-        alert('Sélectionnez au moins une adresse.');
-      }
-    }
-  });
   refresh();
 })();
 </script>
