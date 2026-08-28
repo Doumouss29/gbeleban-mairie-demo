@@ -46,57 +46,57 @@
   </div>
 </section>
 
-<section class="quick-section home-services-news">
-  <div class="container home-top-grid">
-    <div class="quickgrid home-quickgrid">
-      {% for q in quick_links %}
-      <a class="quickcard home-quickcard {% if '/projets/' in q.url %}home-feature-project{% elif '/gbeleban-en-carte/' in q.url %}home-feature-map{% endif %}" href="{{ q.url }}">
-        {% if '/projets/' in q.url %}
-          <div class="home-feature-media home-project-media">
-            {% with featured_project=projects.0 %}
-              {% if featured_project %}
-                {% with project_images=featured_project.gallery_images %}
-                  {% if project_images %}
-                    <img src="{{ project_images.0 }}" alt="Projet municipal à Gbéléban">
-                  {% else %}
-                    <div class="home-project-fallback" aria-hidden="true"><span class="home-project-building">🏗️</span><span class="home-project-plan">▱</span></div>
-                  {% endif %}
-                {% endwith %}
+<section class="quick-section home-feature-section">
+  <div class="container home-feature-grid">
+    <a class="home-bubble home-bubble-project" href="/projets/">
+      <div class="home-bubble-media">
+        {% with featured_project=projects.0 %}
+          {% if featured_project %}
+            {% with project_images=featured_project.gallery_images %}
+              {% if project_images %}
+                <img src="{{ project_images.0 }}" alt="Projet municipal à Gbéléban">
               {% else %}
                 <div class="home-project-fallback" aria-hidden="true"><span class="home-project-building">🏗️</span><span class="home-project-plan">▱</span></div>
               {% endif %}
             {% endwith %}
-            <span class="home-feature-badge">🏗️</span>
-          </div>
-          <div class="home-feature-copy"><b>{{ q.title }}</b><small>{{ q.description }}</small><span class="home-feature-link">Découvrir les projets →</span></div>
-        {% elif '/gbeleban-en-carte/' in q.url %}
-          <div class="home-feature-media home-map-media"><div id="home-map-preview" aria-label="Aperçu cartographique de Gbéléban"></div><span class="home-feature-badge map-badge">📍</span></div>
-          <div class="home-feature-copy"><b>{{ q.title }}</b><small>{{ q.description }}</small><span class="home-feature-link">Explorer la carte →</span></div>
-        {% else %}
-          <span class="quick-icon">{{ q.icon }}</span><div><b>{{ q.title }}</b><small>{{ q.description }}</small></div>
-        {% endif %}
-      </a>
-      {% endfor %}
-    </div>
-
-    <aside class="home-news-panel">
-      <div class="home-news-head"><div><span class="eyebrow green">ACTUALITÉS DE GBÉLÉBAN</span><h2>À la une</h2></div><a href="/actualites/">Tout voir →</a></div>
-      <div class="home-news-list">
-        {% for n in news_items|slice:":2" %}
-        <a class="home-news-card" href="/actualites/{{ n.id }}/"><small>{{ n.published_at|date:'j F Y' }}</small><h3>{{ n.title }}</h3><p>{{ n.excerpt|truncatechars:115 }}</p><span>Lire l’actualité →</span></a>
-        {% empty %}<div class="home-news-empty">Aucune actualité publiée pour le moment.</div>{% endfor %}
+          {% else %}
+            <div class="home-project-fallback" aria-hidden="true"><span class="home-project-building">🏗️</span><span class="home-project-plan">▱</span></div>
+          {% endif %}
+        {% endwith %}
+        <span class="home-bubble-badge">🏗️</span>
       </div>
-    </aside>
+      <div class="home-bubble-body">
+        <span class="eyebrow green">ACTION MUNICIPALE</span>
+        <h2>Nos projets</h2>
+        <p>Réalisés, en cours et à venir.</p>
+        <span class="home-bubble-link">Découvrir les projets →</span>
+      </div>
+    </a>
+
+    <a class="home-bubble home-bubble-address" href="/adresses/">
+      <div class="home-address-icon" aria-hidden="true">📍</div>
+      <div class="home-bubble-body">
+        <span class="eyebrow green">ADRESSAGE COMMUNAL</span>
+        <h2>Trouver une adresse</h2>
+        <p>Rechercher une rue, un numéro, un îlot ou un lot à Gbéléban.</p>
+        <span class="home-bubble-link">Rechercher une adresse →</span>
+      </div>
+    </a>
+
+    {% with n=news_items.0 %}
+    <a class="home-bubble home-bubble-news" href="{% if n %}/actualites/{{ n.id }}/{% else %}/actualites/{% endif %}">
+      <div class="home-bubble-body">
+        <div class="home-news-topline"><span class="eyebrow green">ACTUALITÉS DE GBÉLÉBAN</span>{% if n %}<small>{{ n.published_at|date:'j F Y' }}</small>{% endif %}</div>
+        <h2>{% if n %}{{ n.title }}{% else %}À la une{% endif %}</h2>
+        <p>{% if n %}{{ n.excerpt|truncatechars:145 }}{% else %}Retrouvez les dernières informations de la commune de Gbéléban.{% endif %}</p>
+        <span class="home-bubble-link">{% if n %}Lire l’actualité{% else %}Voir les actualités{% endif %} →</span>
+      </div>
+    </a>
+    {% endwith %}
   </div>
 </section>
 
 <section class="section pale"><div class="container mayor"><div class="mayor-photo">{% if site_settings and site_settings.mayor_section_image_url %}<img src="{{ site_settings.mayor_section_image_url }}" alt="Vision municipale de Gbéléban">{% else %}<div class="photo-placeholder">Image - vision de la commune</div>{% endif %}</div><div><span class="eyebrow green">CAP SUR DEMAIN</span><h2>Notre vision pour Gbéléban</h2><p>Faire de Gbéléban une commune plus attractive, mieux aménagée et plus proche de ses habitants, en valorisant son territoire, ses talents, son identité et les opportunités de développement local.</p><a class="textlink" href="/pages/la-commune/">Découvrir notre ambition →</a></div></div></section>
 
 <section class="section"><div class="container"><div class="section-title"><div><span class="eyebrow">ACTION MUNICIPALE À GBÉLÉBAN</span><h2>Projets & réalisations</h2></div><a href="/projets/">Voir tous les projets →</a></div><div class="cards">{% for p in projects %}<article class="card"><span class="status {{ p.status }}">{{ p.get_status_display }}</span><h3>{{ p.title }}</h3><p>{{ p.description }}</p>{% if p.status == 'ongoing' %}<div class="progress"><i style="width:{{ p.progress }}%"></i></div><small>{{ p.progress }} % d'avancement</small>{% endif %}</article>{% endfor %}</div></div></section>
-{% endblock %}
-
-{% block scripts %}
-<script>
-(function(){const el=document.getElementById('home-map-preview');if(!el || typeof L==='undefined') return;const gbeleban=[9.584607,-8.131833];const map=L.map(el,{zoomControl:false,scrollWheelZoom:false,dragging:false,doubleClickZoom:false,boxZoom:false,keyboard:false,touchZoom:false,attributionControl:false}).setView(gbeleban,13);L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:18}).addTo(map);L.circleMarker(gbeleban,{radius:8,color:'#fff',weight:3,fillColor:'#ef7d00',fillOpacity:1}).addTo(map);L.circle(gbeleban,{radius:900,color:'#056b3c',weight:2,fillColor:'#056b3c',fillOpacity:.08}).addTo(map);setTimeout(()=>map.invalidateSize(),100);})();
-</script>
 {% endblock %}
