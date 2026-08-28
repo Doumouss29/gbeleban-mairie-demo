@@ -8,6 +8,7 @@ from . import news_views
 from . import seo_views
 from . import addressing
 from . import addressing_delete
+from . import addressing_enhancements
 from . import address_lookup
 
 urlpatterns = [
@@ -42,11 +43,12 @@ urlpatterns = [
     path("gestion/", views.management_home, name="management_home"),
     path("gestion/sig/import/", views.import_geojson_view, name="import_geojson"),
     path("gestion/cadastre/import/", views.import_cadastre_view, name="import_cadastre"),
-    path("gestion/adressage/", addressing.addressing_management, name="addressing_management"),
-    path("gestion/adressage/carte.geojson", addressing.addressing_management_geojson, name="addressing_management_geojson"),
+    path("gestion/adressage/", addressing_enhancements.addressing_management_v2, name="addressing_management"),
+    path("gestion/adressage/carte.geojson", addressing_enhancements.addressing_management_geojson_v2, name="addressing_management_geojson"),
     path("gestion/adressage/import/", addressing.addressing_import, name="addressing_import"),
-    path("gestion/adressage/statut/", addressing.addressing_bulk_status, name="addressing_bulk_status"),
-    path("gestion/adressage/supprimer-selection/", addressing_delete.delete_selected_addresses, name="addressing_delete_selected"),
+    path("gestion/adressage/statut/", addressing_enhancements.addressing_bulk_status_v2, name="addressing_bulk_status"),
+    path("gestion/adressage/nom-rue-selection/", addressing_enhancements.addressing_bulk_street_name, name="addressing_bulk_street_name"),
+    path("gestion/adressage/supprimer-selection/", addressing_enhancements.addressing_delete_selected_v2, name="addressing_delete_selected"),
     path("gestion/adressage/<int:parcel_id>/modifier/", addressing.addressing_edit, name="addressing_edit"),
     path("gestion/adressage/<int:parcel_id>/supprimer/", addressing_delete.delete_address, name="addressing_delete"),
 ]
