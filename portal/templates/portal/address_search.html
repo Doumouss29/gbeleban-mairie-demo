@@ -12,7 +12,7 @@
 <section class="section"><div class="container address-public-wrap">
   <div class="address-autocomplete">
     <form method="get" class="address-search-form" id="public-address-form">
-      <input id="public-address-input" class="address-search-input" name="q" value="{{ query }}" autocomplete="off" placeholder="Ex. Marché, AV07, GBL-AV07-3, îlot 42, lot 351...">
+      <input id="public-address-input" class="address-search-input" name="q" value="{{ query }}" autocomplete="off" placeholder="Ex. 1 Boulevard Sita Ouattara, Marché municipal, îlot 42, lot 351...">
       <button class="btn orange" type="submit">Rechercher</button>
     </form>
     <div id="public-address-suggestions" class="address-suggestions" aria-live="polite"></div>
@@ -30,10 +30,10 @@
           {% if a.latitude and a.longitude %}<a class="btn outline" target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&destination={{ a.latitude }},{{ a.longitude }}">Itinéraire</a>{% endif %}
         </div>
       </article>
-      {% empty %}<div class="card"><h3>Aucune adresse trouvée</h3><p>Essayez un code de voie, un nom de parcelle, un numéro, un îlot ou un lot.</p></div>{% endfor %}
+      {% empty %}<div class="card"><h3>Aucune adresse trouvée</h3><p>Essayez un nom de rue, un nom de parcelle, un numéro, un îlot ou un lot.</p></div>{% endfor %}
     </div>
   {% else %}
-    <div class="card"><h2>Comment rechercher ?</h2><p>Commencez à saisir une adresse, un nom de parcelle, une voie, un îlot ou un lot : les suggestions apparaissent automatiquement.</p></div>
+    <div class="card"><h2>Comment rechercher ?</h2><p>Commencez à saisir une adresse comme « 1 Boulevard Sita Ouattara », un nom de parcelle, un îlot ou un lot : les suggestions apparaissent automatiquement.</p></div>
   {% endif %}
 </div></section>
 {% endblock %}
