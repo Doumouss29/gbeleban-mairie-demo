@@ -1,0 +1,12 @@
+{% extends 'portal/base.html' %}
+{% block title %}{{ address.label }} | Gbéléban{% endblock %}
+{% block content %}
+<section class="pagehead"><div class="container"><span class="eyebrow">ADRESSE OFFICIELLE</span><h1>{{ address.label }}</h1><p>{{ address.code }} · Îlot {{ address.ilot|default:'—' }} · Lot {{ address.lot|default:'—' }}</p></div></section>
+<section class="section"><div class="container" style="display:grid;grid-template-columns:minmax(0,1.3fr) minmax(280px,.7fr);gap:24px;align-items:start;">
+  <div class="card"><div id="address-map" style="height:460px;border-radius:12px;"></div></div>
+  <aside class="card"><span class="eyebrow green">LOCALISATION</span><h2>{{ address.label }}</h2><p><strong>Code :</strong> {{ address.code }}</p><p><strong>Voie :</strong> {{ address.code_voie }}</p><p><strong>Îlot :</strong> {{ address.ilot|default:'—' }}</p><p><strong>Lot :</strong> {{ address.lot|default:'—' }}</p>{% if address.latitude and address.longitude %}<a class="btn orange" target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&destination={{ address.latitude }},{{ address.longitude }}">Démarrer l’itinéraire</a>{% endif %}<p style="margin-top:14px;"><a href="/adresses/">← Nouvelle recherche</a></p></aside>
+</div></section>
+{% endblock %}
+{% block scripts %}
+{% if address.latitude and address.longitude %}<script>(function(){const p=[{{ address.latitude }},{{ address.longitude }}];const map=L.map('address-map').setView(p,18);L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:20}).addTo(map);L.marker(p).addTo(map).bindPopup('{{ address.label|escapejs }}').openPopup();})();</script>{% endif %}
+{% endblock %}
