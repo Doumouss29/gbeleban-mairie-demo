@@ -1,0 +1,18 @@
+{% extends 'portal/base.html' %}
+{% block title %}Modifier une adresse - Gbéléban{% endblock %}
+{% block content %}
+<section class="pagehead"><div class="container"><span class="eyebrow">GESTION ADRESSAGE</span><h1>Modifier {{ address.code }}</h1><p>Correction municipale avec conservation de l'historique.</p></div></section>
+<section class="section"><div class="container"><div class="card" style="max-width:850px;">
+<form method="post" style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;">{% csrf_token %}
+<label>Numéro<input name="numero" value="{{ address.numero }}" style="width:100%;padding:11px;"></label>
+<label>Suffixe<input name="suffixe" value="{{ address.suffixe }}" style="width:100%;padding:11px;"></label>
+<label>Code voie<input name="code_voie" value="{{ address.code_voie }}" style="width:100%;padding:11px;"></label>
+<label>Nom officiel de la voie<input name="nom_officiel" value="{{ address.nom_officiel }}" style="width:100%;padding:11px;"></label>
+<label>Latitude<input name="latitude" value="{{ address.latitude }}" style="width:100%;padding:11px;"></label>
+<label>Longitude<input name="longitude" value="{{ address.longitude }}" style="width:100%;padding:11px;"></label>
+<label>Statut<select name="statut" style="width:100%;padding:11px;"><option value="PROPOSEE" {% if address.statut == 'PROPOSEE' %}selected{% endif %}>Proposée</option><option value="VALIDEE" {% if address.statut == 'VALIDEE' %}selected{% endif %}>Validée</option><option value="PUBLIEE" {% if address.statut == 'PUBLIEE' %}selected{% endif %}>Publiée</option></select></label>
+<div><strong>Référence parcelle</strong><p>{{ parcel.reference }} · Îlot {{ parcel.ilot }} · Lot {{ parcel.lot }}</p></div>
+<div style="grid-column:1/-1;display:flex;gap:10px;"><button class="btn orange" type="submit">Enregistrer</button><a class="btn outline" href="/gestion/adressage/">Annuler</a></div>
+</form>
+</div></div></section>
+{% endblock %}
