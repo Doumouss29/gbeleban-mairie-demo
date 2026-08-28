@@ -17,7 +17,9 @@ def _filtered(q="", status="", quality="", street=""):
             Q(properties__CODE_ADRESSE__icontains=q)
             | Q(properties__LIBELLE_ADR__icontains=q)
             | Q(properties__CODE_VOIE__icontains=q)
+            | Q(properties__NOM_VOIE__icontains=q)
             | Q(properties__NOM_OFFICIEL__icontains=q)
+            | Q(properties__TYPE_VOIE__icontains=q)
             | Q(properties__AFFECTATION__icontains=q)
             | Q(ilot__icontains=q)
             | Q(lot__icontains=q)
@@ -29,6 +31,36 @@ def _filtered(q="", status="", quality="", street=""):
     if street:
         qs = qs.filter(properties__CODE_VOIE=street)
     return qs
+
+
+def _street_options():
+    """Return one normalized street record per technical street code."""
+    options = {}
+    rows = (
+        _address_queryset()
+        .exclude(properties__CODE_VOIE__isnull=True)
+        .exclude(properties__CODE_VOIE="")
+        .values_list("properties", flat=True)
+    )
+    for props in rows.iterator():
+        props = dict(props or {})
+        code = str(props.get("CODE_VOIE") or "").strip()
+        if not code:
+            continue
+        official = str(props.get("NOM_OFFICIEL") or "").strip()
+        road_type = str(props.get("TYPE_VOIE") or "").strip()
+        current = options.get(code)
+        # Prefer the record that already has an official name.
+        if current is None or (official and not current["official_name"]):
+            label_parts = [road_type, official] if official else [road_type, code]
+            label = " ".join(x for x in label_parts if x).strip() or code
+            options[code] = {
+                "code": code,
+                "official_name": official,
+                "type": road_type,
+                "label": label,
+            }
+    return sorted(options.values(), key=lambda x: x["code"])
 
 
 def _post_queryset(request):
@@ -70,14 +102,8 @@ def addressing_management_v2(request):
     page_obj = paginator.get_page(request.GET.get("page", 1))
     rows = [_address_payload(p) for p in page_obj.object_list]
 
-    streets = list(
-        _address_queryset()
-        .exclude(properties__CODE_VOIE__isnull=True)
-        .exclude(properties__CODE_VOIE="")
-        .values_list("properties__CODE_VOIE", flat=True)
-        .distinct()
-        .order_by("properties__CODE_VOIE")
-    )
+    street_options = _street_options()
+    streets = [item["code"] for item in street_options]
     counts = {
         "total": _address_queryset().count(),
         "proposed": _address_queryset().filter(properties__STATUT_ADR="PROPOSEE").count(),
@@ -103,6 +129,7 @@ def addressing_management_v2(request):
         "quality": quality,
         "street": street,
         "streets": streets,
+        "street_options": street_options,
     })
 
 
