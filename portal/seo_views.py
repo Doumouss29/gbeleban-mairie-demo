@@ -28,6 +28,7 @@ def sitemap_xml(request):
         ("/", "1.0", "weekly"),
         ("/pages/la-commune/", "0.9", "monthly"),
         ("/gbeleban-en-carte/", "0.9", "monthly"),
+        ("/adresses/", "0.9", "monthly"),
         ("/projets/", "0.9", "weekly"),
         ("/actualites/", "0.9", "daily"),
         ("/pages/contact/", "0.7", "monthly"),
