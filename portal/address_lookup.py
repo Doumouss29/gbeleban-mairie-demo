@@ -1,4 +1,6 @@
 import json
+import re
+import unicodedata
 from urllib.parse import urlencode
 from urllib.request import Request, urlopen
 
@@ -10,12 +12,17 @@ from .addressing import ADDRESS_LAYER
 from .models import Parcel
 
 
+def _normalize(value):
+    text = unicodedata.normalize("NFD", str(value or ""))
+    text = "".join(ch for ch in text if unicodedata.category(ch) != "Mn")
+    return re.sub(r"[^a-z0-9]+", " ", text.lower()).strip()
+
+
 def _internal_results(query, include_unpublished=False):
     qs = Parcel.objects.filter(source_layer=ADDRESS_LAYER)
     if not include_unpublished:
         qs = qs.filter(properties__STATUT_ADR="PUBLIEE")
 
-    # Recherche municipale : adresse, code, voie, îlot/lot et nom/affectation de la parcelle.
     qs = qs.filter(
         Q(properties__CODE_ADRESSE__icontains=query)
         | Q(properties__LIBELLE_ADR__icontains=query)
@@ -62,8 +69,6 @@ def _internal_results(query, include_unpublished=False):
 
 
 def _osm_results(query):
-    # Nominatim / OpenStreetMap : recherche mondiale. Le paramètre countrycodes
-    # n'est volontairement pas utilisé afin de permettre une adresse hors Côte d'Ivoire.
     params = urlencode({
         "q": query,
         "format": "jsonv2",
@@ -76,7 +81,7 @@ def _osm_results(query):
     req = Request(
         url,
         headers={
-            "User-Agent": "Mairie-Gbeleban-AddressSearch/1.1 (https://mairie-gbeleban.ci)",
+            "User-Agent": "Mairie-Gbeleban-AddressSearch/1.2 (https://mairie-gbeleban.ci)",
             "Accept": "application/json",
             "Referer": "https://mairie-gbeleban.ci/",
         },
@@ -89,7 +94,8 @@ def _osm_results(query):
         return [], "Recherche OpenStreetMap temporairement indisponible"
 
     results = []
-    for item in data[:10]:
+    seen = set()
+    for item in data:
         lat = item.get("lat")
         lon = item.get("lon")
         if lat is None or lon is None:
@@ -99,14 +105,26 @@ def _osm_results(query):
             lon = float(lon)
         except (TypeError, ValueError):
             continue
+
+        label = item.get("display_name") or query
+        first_name = _normalize(label.split(",", 1)[0])
+        # Nominatim peut renvoyer plusieurs objets administratifs pour une même ville.
+        # On fusionne les résultats de même nom situés pratiquement au même endroit.
+        geo_key = (first_name, round(lat, 2), round(lon, 2))
+        if geo_key in seen:
+            continue
+        seen.add(geo_key)
+
         results.append({
             "source": "osm",
-            "label": item.get("display_name") or query,
+            "label": label,
             "osm_type": item.get("osm_type", ""),
             "osm_id": item.get("osm_id"),
             "longitude": lon,
             "latitude": lat,
         })
+        if len(results) >= 6:
+            break
     return results, ""
 
 
@@ -116,11 +134,7 @@ def combined_address_search(request):
     external = request.GET.get("external", "1") == "1"
     include_unpublished = request.GET.get("all", "0") == "1" and request.user.is_authenticated and request.user.is_staff
     if len(query) < 2:
-        return JsonResponse({
-            "query": query,
-            "results": [],
-            "osm_enabled": True,
-        })
+        return JsonResponse({"query": query, "results": [], "osm_enabled": True})
 
     internal = _internal_results(query, include_unpublished=include_unpublished)
     osm = []
