@@ -47,52 +47,43 @@
 </section>
 
 <section class="quick-section home-feature-section">
-  <div class="container home-feature-grid">
+  <div class="container home-feature-grid home-feature-grid-five">
     <a class="home-bubble home-bubble-project" href="/projets/">
       <div class="home-bubble-media">
         {% with featured_project=projects.0 %}
           {% if featured_project %}
             {% with project_images=featured_project.gallery_images %}
-              {% if project_images %}
-                <img src="{{ project_images.0 }}" alt="Projet municipal à Gbéléban">
-              {% else %}
-                <div class="home-project-fallback" aria-hidden="true"><span class="home-project-building">🏗️</span><span class="home-project-plan">▱</span></div>
-              {% endif %}
+              {% if project_images %}<img src="{{ project_images.0 }}" alt="Projet municipal à Gbéléban">{% else %}<div class="home-project-fallback" aria-hidden="true"><span class="home-project-building">🏗️</span><span class="home-project-plan">▱</span></div>{% endif %}
             {% endwith %}
-          {% else %}
-            <div class="home-project-fallback" aria-hidden="true"><span class="home-project-building">🏗️</span><span class="home-project-plan">▱</span></div>
-          {% endif %}
+          {% else %}<div class="home-project-fallback" aria-hidden="true"><span class="home-project-building">🏗️</span><span class="home-project-plan">▱</span></div>{% endif %}
         {% endwith %}
         <span class="home-bubble-badge">🏗️</span>
       </div>
-      <div class="home-bubble-body">
-        <span class="eyebrow green">ACTION MUNICIPALE</span>
-        <h2>Nos projets</h2>
-        <p>Réalisés, en cours et à venir.</p>
-        <span class="home-bubble-link">Découvrir les projets →</span>
-      </div>
+      <div class="home-bubble-body"><span class="eyebrow green">ACTION MUNICIPALE</span><h2>Nos projets</h2><p>Réalisés, en cours et à venir.</p><span class="home-bubble-link">Découvrir →</span></div>
     </a>
 
-    <a class="home-bubble home-bubble-address" href="/gbeleban-en-carte/">
+    <a class="home-bubble home-bubble-map" href="/gbeleban-en-carte/">
       <div class="home-address-icon" aria-hidden="true">🗺️</div>
-      <div class="home-bubble-body">
-        <span class="eyebrow green">WEB SIG CITOYEN</span>
-        <h2>Gbéléban en carte</h2>
-        <p>Explorer les équipements, services et points d’intérêt de la commune.</p>
-        <span class="home-bubble-link">Explorer la carte →</span>
-      </div>
+      <div class="home-bubble-body"><span class="eyebrow green">WEB SIG CITOYEN</span><h2>Gbéléban en carte</h2><p>Équipements, services et points d’intérêt.</p><span class="home-bubble-link">Explorer →</span></div>
     </a>
 
-    {% with n=news_items.0 %}
-    <a class="home-bubble home-bubble-news" href="{% if n %}/actualites/{{ n.id }}/{% else %}/actualites/{% endif %}">
+    <a class="home-bubble home-bubble-address" href="/adresses/">
+      <div class="home-address-icon" aria-hidden="true">📍</div>
+      <div class="home-bubble-body"><span class="eyebrow green">ADRESSAGE GBÉLÉBAN</span><h2>Trouver une adresse</h2><p>Rue, numéro, îlot, lot ou lieu de Gbéléban.</p><span class="home-bubble-link">Rechercher →</span></div>
+    </a>
+
+    {% for n in news_items|slice:":2" %}
+    <a class="home-bubble home-bubble-news" href="/actualites/{{ n.id }}/">
       <div class="home-bubble-body">
-        <div class="home-news-topline"><span class="eyebrow green">ACTUALITÉS DE GBÉLÉBAN</span>{% if n %}<small>{{ n.published_at|date:'j F Y' }}</small>{% endif %}</div>
-        <h2>{% if n %}{{ n.title }}{% else %}À la une{% endif %}</h2>
-        <p>{% if n %}{{ n.excerpt|truncatechars:145 }}{% else %}Retrouvez les dernières informations de la commune de Gbéléban.{% endif %}</p>
-        <span class="home-bubble-link">{% if n %}Lire l’actualité{% else %}Voir les actualités{% endif %} →</span>
+        <div class="home-news-topline"><span class="eyebrow green">ACTUALITÉ</span><small>{{ n.published_at|date:'j F Y' }}</small></div>
+        <h2>{{ n.title }}</h2>
+        <p>{{ n.excerpt|truncatechars:95 }}</p>
+        <span class="home-bubble-link">Lire →</span>
       </div>
     </a>
-    {% endwith %}
+    {% empty %}
+    <a class="home-bubble home-bubble-news" href="/actualites/"><div class="home-bubble-body"><span class="eyebrow green">ACTUALITÉS</span><h2>Les nouvelles de Gbéléban</h2><p>Retrouvez les dernières informations de la commune.</p><span class="home-bubble-link">Voir →</span></div></a>
+    {% endfor %}
   </div>
 </section>
 
