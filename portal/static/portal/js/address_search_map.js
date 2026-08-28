@@ -9,7 +9,6 @@
   if(!input||!button||!resultsBox||typeof map==='undefined') return;
 
   let searchMarker=null;
-  let searchTimer=null;
   let activeRequest=0;
 
   function escapeHtml(value){
@@ -27,11 +26,11 @@
   }
 
   function sourceLabel(item){
-    return item.source==='gbeleban'?'Adressage Gbéléban':'Google Maps';
+    return item.source==='gbeleban'?'Adressage Gbéléban':'OpenStreetMap';
   }
 
   function sourceIcon(item){
-    return item.source==='gbeleban'?'📍':'G';
+    return item.source==='gbeleban'?'📍':'🗺️';
   }
 
   function selectResult(item){
@@ -66,15 +65,14 @@
   function renderResults(data){
     const items=Array.isArray(data.results)?data.results:[];
     if(!items.length){
-      const suffix=data.google_enabled===false?' Recherche Google non activée sur le serveur.':'';
-      showStatus(`Aucune adresse trouvée.${suffix}`);
+      showStatus('Aucune adresse trouvée.');
       return;
     }
     resultsBox.innerHTML=items.map((item,index)=>{
       const detail=item.source==='gbeleban'
         ? [item.code,item.ilot?`Îlot ${item.ilot}`:'',item.lot?`Lot ${item.lot}`:''].filter(Boolean).join(' · ')
-        : 'Résultat Google Maps';
-      return `<div class="websig-address-item" data-result-index="${index}" role="button" tabindex="0"><span class="websig-address-source">${escapeHtml(sourceIcon(item))}</span><span><b>${escapeHtml(item.label)}</b><small>${escapeHtml(detail)}</small></span><span class="websig-address-badge ${item.source==='google'?'google':''}">${escapeHtml(sourceLabel(item))}</span></div>`;
+        : 'Résultat OpenStreetMap';
+      return `<div class="websig-address-item" data-result-index="${index}" role="button" tabindex="0"><span class="websig-address-source">${escapeHtml(sourceIcon(item))}</span><span><b>${escapeHtml(item.label)}</b><small>${escapeHtml(detail)}</small></span><span class="websig-address-badge ${item.source==='osm'?'osm':''}">${escapeHtml(sourceLabel(item))}</span></div>`;
     }).join('');
     resultsBox.classList.add('open');
     resultsBox.querySelectorAll('.websig-address-item').forEach(el=>{
@@ -90,7 +88,7 @@
     const requestId=++activeRequest;
     showStatus('Recherche en cours...');
     try{
-      const response=await fetch(`/api/recherche-adresse/?q=${encodeURIComponent(q)}`,{headers:{'Accept':'application/json'}});
+      const response=await fetch(`/api/recherche-adresse/?q=${encodeURIComponent(q)}&external=1`,{headers:{'Accept':'application/json'}});
       if(!response.ok) throw new Error('HTTP '+response.status);
       const data=await response.json();
       if(requestId!==activeRequest) return;
@@ -103,11 +101,6 @@
 
   button.addEventListener('click',runSearch);
   input.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();runSearch();}});
-  input.addEventListener('input',()=>{
-    clearTimeout(searchTimer);
-    if(input.value.trim().length<3){clearResults();return;}
-    searchTimer=setTimeout(runSearch,350);
-  });
   document.addEventListener('click',e=>{
     if(!resultsBox.contains(e.target)&&e.target!==input&&e.target!==button) clearResults();
   });
