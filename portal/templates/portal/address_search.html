@@ -1,30 +1,66 @@
 {% extends 'portal/base.html' %}
 {% block title %}Adresses de Gbéléban | Recherche et localisation{% endblock %}
-{% block meta_description %}Recherchez une adresse, une rue, un îlot ou un lot à Gbéléban et localisez-la sur la carte.{% endblock %}
+{% block meta_description %}Recherchez une adresse, une rue, un îlot, un lot ou un lieu à Gbéléban et localisez-le sur la carte.{% endblock %}
+{% block head %}
+<style>
+.address-public-wrap{max-width:980px}.address-autocomplete{position:relative;max-width:760px}.address-search-form{display:flex;gap:10px;margin-bottom:22px}.address-search-input{flex:1;min-width:0;padding:14px 15px;border:1px solid #ccd3d9;border-radius:10px;font-size:15px}.address-suggestions{display:none;position:absolute;left:0;right:0;top:calc(100% - 16px);z-index:50;background:#fff;border:1px solid #d8ddd9;border-radius:11px;box-shadow:0 10px 30px #0003;max-height:330px;overflow:auto}.address-suggestions.open{display:block}.address-suggestion{display:grid;grid-template-columns:28px 1fr;gap:8px;width:100%;border:0;border-bottom:1px solid #edf0ed;background:#fff;text-align:left;padding:10px;cursor:pointer}.address-suggestion:hover{background:#f7faf8}.address-suggestion b{display:block;color:#173d2f;font-size:12px}.address-suggestion small{display:block;color:#6c7771;font-size:10px;margin-top:2px}.address-result-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}.address-result-grid .card{min-width:0}.address-result-actions{display:flex;gap:8px;flex-wrap:wrap}.address-result-actions .btn{white-space:nowrap}
+@media(max-width:700px){.address-public-wrap{width:100%}.address-search-form{display:grid;grid-template-columns:1fr;gap:8px}.address-search-input{width:100%;box-sizing:border-box;font-size:14px}.address-search-form .btn{width:100%}.address-suggestions{top:52px;max-height:45vh}.address-result-grid{grid-template-columns:1fr}.address-result-actions{display:grid;grid-template-columns:1fr}.address-result-actions .btn{text-align:center}.pagehead h1{overflow-wrap:anywhere}}
+</style>
+{% endblock %}
 {% block content %}
-<section class="pagehead"><div class="container"><span class="eyebrow">ADRESSAGE COMMUNAL</span><h1>Trouver une adresse à Gbéléban</h1><p>Recherchez par numéro, rue, code adresse, îlot ou lot.</p></div></section>
-<section class="section"><div class="container">
-  <form method="get" class="address-search-form" style="display:flex;gap:10px;max-width:900px;margin-bottom:28px;">
-    <input name="q" value="{{ query }}" placeholder="Ex. RUE101, GBL-RUE101-126, îlot 50, lot 434..." style="flex:1;padding:15px 16px;border:1px solid #ccd3d9;border-radius:10px;font-size:16px;">
-    <button class="btn orange" type="submit">Rechercher</button>
-  </form>
+<section class="pagehead"><div class="container"><span class="eyebrow">ADRESSAGE COMMUNAL</span><h1>Trouver une adresse à Gbéléban</h1><p>Recherchez par adresse, voie, nom de parcelle, îlot ou lot.</p></div></section>
+<section class="section"><div class="container address-public-wrap">
+  <div class="address-autocomplete">
+    <form method="get" class="address-search-form" id="public-address-form">
+      <input id="public-address-input" class="address-search-input" name="q" value="{{ query }}" autocomplete="off" placeholder="Ex. Marché, AV07, GBL-AV07-3, îlot 42, lot 351...">
+      <button class="btn orange" type="submit">Rechercher</button>
+    </form>
+    <div id="public-address-suggestions" class="address-suggestions" aria-live="polite"></div>
+  </div>
   {% if query %}
     <div style="margin-bottom:18px;"><strong>{{ results|length }}</strong> résultat(s) pour « {{ query }} »</div>
-    <div class="cards">
+    <div class="address-result-grid">
       {% for a in results %}
       <article class="card">
         <span class="eyebrow green">{{ a.code }}</span>
         <h3>{{ a.label }}</h3>
         <p>Îlot {{ a.ilot|default:'—' }} · Lot {{ a.lot|default:'—' }}</p>
-        <div style="display:flex;gap:10px;flex-wrap:wrap;">
+        <div class="address-result-actions">
           <a class="btn orange" href="/adresses/{{ a.code }}/">Voir sur la carte</a>
           {% if a.latitude and a.longitude %}<a class="btn outline" target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&destination={{ a.latitude }},{{ a.longitude }}">Itinéraire</a>{% endif %}
         </div>
       </article>
-      {% empty %}<div class="card"><h3>Aucune adresse trouvée</h3><p>Essayez un code de voie, un numéro, un îlot ou un lot.</p></div>{% endfor %}
+      {% empty %}<div class="card"><h3>Aucune adresse trouvée</h3><p>Essayez un code de voie, un nom de parcelle, un numéro, un îlot ou un lot.</p></div>{% endfor %}
     </div>
   {% else %}
-    <div class="card"><h2>Comment rechercher ?</h2><p>Vous pouvez saisir une adresse comme « 126 Rue RUE101 », un code comme « GBL-RUE101-126 », une voie comme « RUE101 », ou simplement un numéro d’îlot ou de lot.</p></div>
+    <div class="card"><h2>Comment rechercher ?</h2><p>Commencez à saisir une adresse, un nom de parcelle, une voie, un îlot ou un lot : les suggestions apparaissent automatiquement.</p></div>
   {% endif %}
 </div></section>
+{% endblock %}
+{% block scripts %}
+{{ block.super }}
+<script>
+(function(){
+  const input=document.getElementById('public-address-input');
+  const box=document.getElementById('public-address-suggestions');
+  if(!input||!box)return;
+  let timer=null,requestId=0;
+  const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  function close(){box.innerHTML='';box.classList.remove('open');}
+  function render(items){
+    if(!items.length){close();return;}
+    box.innerHTML=items.map((x,i)=>`<button type="button" class="address-suggestion" data-i="${i}"><span>📍</span><span><b>${esc(x.label)}</b><small>${esc(x.code||'Adressage Gbéléban')}${x.ilot?' · Îlot '+esc(x.ilot):''}${x.lot?' · Lot '+esc(x.lot):''}</small></span></button>`).join('');
+    box.classList.add('open');
+    box.querySelectorAll('.address-suggestion').forEach(btn=>btn.addEventListener('click',()=>{const x=items[Number(btn.dataset.i)];if(x&&x.code)location.href='/adresses/'+encodeURIComponent(x.code)+'/';}));
+  }
+  async function search(){
+    const q=input.value.trim();if(q.length<2){close();return;}
+    const id=++requestId;
+    try{const r=await fetch('/api/recherche-adresse/?external=0&q='+encodeURIComponent(q),{headers:{Accept:'application/json'}});const data=await r.json();if(id!==requestId)return;render((data.results||[]).filter(x=>x.source==='gbeleban').slice(0,10));}catch(e){close();}
+  }
+  input.addEventListener('input',()=>{clearTimeout(timer);timer=setTimeout(search,180);});
+  input.addEventListener('focus',()=>{if(input.value.trim().length>=2)search();});
+  document.addEventListener('click',e=>{if(e.target!==input&&!box.contains(e.target))close();});
+})();
+</script>
 {% endblock %}
