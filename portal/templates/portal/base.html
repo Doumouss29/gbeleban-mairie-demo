@@ -64,6 +64,16 @@
   <link rel="stylesheet" href="{% static 'portal/css/collection.css' %}">
   <link rel="stylesheet" href="{% static 'portal/css/enhancements.css' %}">
   <link rel="stylesheet" href="{% static 'portal/css/home-features.css' %}">
+  <style>
+    html,body{max-width:100%;overflow-x:hidden}img,svg,video{max-width:100%}
+    @media(max-width:700px){
+      .container{width:min(100% - 24px,1180px)!important}
+      .pagehead h1{font-size:clamp(24px,8vw,34px)!important}
+      .section{padding-left:0!important;padding-right:0!important}
+      table{font-size:12px}
+      .btn{max-width:100%;white-space:normal}
+    }
+  </style>
   {% block head %}{% endblock %}
 </head>
 <body>
@@ -128,7 +138,7 @@
     <a href="/gbeleban-en-carte/" class="{% if '/gbeleban-en-carte/' in request.path %}active{% endif %}">Gbéléban en carte</a>
     <a href="/projets/" class="{% if '/projets/' in request.path %}active{% endif %}">Projets</a>
     <a href="/actualites/" class="{% if '/actualites/' in request.path %}active{% endif %}">Actualités</a>
-    <a href="/pages/contact/" class="{% if request.path == '/pages/contact/' %}active{% endif %}">Contact</a>
+    <a href="/pages/contact/" class="{% if '/pages/contact/' in request.path %}active{% endif %}">Contact</a>
     {% if user.is_authenticated %}
       <a href="/mon-espace/" class="{% if '/mon-espace/' in request.path or '/urbanisme/' in request.path or '/dashboard/' in request.path or '/collecte-municipale/' in request.path %}active{% endif %}">👤 Mon espace Gbéléban</a>
     {% else %}
@@ -188,8 +198,8 @@
       setTimeout(function(){
         window.GbelebanAddressSearch.attachLeaflet(instance,{
           position:'topleft',
-          width:elId==='cadastre-map'?'400px':'420px',
-          placeholder:'Rechercher une adresse à Gbéléban ou OSM…',
+          width:elId==='cadastre-map'?'310px':'320px',
+          placeholder:'Rechercher une adresse ou un lieu…',
           includeUnpublished:elId==='addressingManagementMap'
         });
       },0);
