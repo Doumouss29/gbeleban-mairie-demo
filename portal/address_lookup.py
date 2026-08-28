@@ -18,22 +18,59 @@ def _normalize(value):
     return re.sub(r"[^a-z0-9]+", " ", text.lower()).strip()
 
 
+def _search_aliases(query):
+    """Retourne les variantes métier qui doivent produire les mêmes suggestions."""
+    normalized = _normalize(query)
+    aliases = [query]
+
+    mairie_terms = {
+        "mairie",
+        "la mairie",
+        "mairie de gbeleban",
+        "hotel de ville",
+        "l hotel de ville",
+        "hotel de ville de gbeleban",
+    }
+    if normalized in mairie_terms or "hotel de ville" in normalized or normalized.startswith("mairie"):
+        aliases.extend([
+            "mairie",
+            "Mairie",
+            "hôtel de ville",
+            "hotel de ville",
+            "Hôtel de ville",
+        ])
+
+    # Déduplique sans tenir compte des accents / majuscules.
+    unique = []
+    seen = set()
+    for value in aliases:
+        key = _normalize(value)
+        if key and key not in seen:
+            seen.add(key)
+            unique.append(value)
+    return unique
+
+
 def _internal_results(query, include_unpublished=False):
     qs = Parcel.objects.filter(source_layer=ADDRESS_LAYER)
     if not include_unpublished:
         qs = qs.filter(properties__STATUT_ADR="PUBLIEE")
 
-    qs = qs.filter(
-        Q(properties__CODE_ADRESSE__icontains=query)
-        | Q(properties__LIBELLE_ADR__icontains=query)
-        | Q(properties__CODE_VOIE__icontains=query)
-        | Q(properties__NOM_VOIE__icontains=query)
-        | Q(properties__NOM_OFFICIEL__icontains=query)
-        | Q(properties__AFFECTATION__icontains=query)
-        | Q(properties__GROUPE__icontains=query)
-        | Q(ilot__icontains=query)
-        | Q(lot__icontains=query)
-    ).order_by("properties__CODE_VOIE", "properties__NUM_ADRESSE")[:18]
+    search_q = Q()
+    for term in _search_aliases(query):
+        search_q |= (
+            Q(properties__CODE_ADRESSE__icontains=term)
+            | Q(properties__LIBELLE_ADR__icontains=term)
+            | Q(properties__CODE_VOIE__icontains=term)
+            | Q(properties__NOM_VOIE__icontains=term)
+            | Q(properties__NOM_OFFICIEL__icontains=term)
+            | Q(properties__AFFECTATION__icontains=term)
+            | Q(properties__GROUPE__icontains=term)
+            | Q(ilot__icontains=term)
+            | Q(lot__icontains=term)
+        )
+
+    qs = qs.filter(search_q).order_by("properties__CODE_VOIE", "properties__NUM_ADRESSE")[:18]
 
     results = []
     for parcel in qs:
@@ -69,8 +106,12 @@ def _internal_results(query, include_unpublished=False):
 
 
 def _osm_results(query):
+    # Pour OSM aussi, "hôtel de ville" et "mairie" doivent viser le même lieu.
+    normalized = _normalize(query)
+    osm_query = "mairie" if ("hotel de ville" in normalized or normalized.startswith("mairie")) else query
+
     params = urlencode({
-        "q": query,
+        "q": osm_query,
         "format": "jsonv2",
         "addressdetails": 1,
         "limit": 10,
@@ -106,10 +147,8 @@ def _osm_results(query):
         except (TypeError, ValueError):
             continue
 
-        label = item.get("display_name") or query
+        label = item.get("display_name") or osm_query
         first_name = _normalize(label.split(",", 1)[0])
-        # Nominatim peut renvoyer plusieurs objets administratifs pour une même ville.
-        # On fusionne les résultats de même nom situés pratiquement au même endroit.
         geo_key = (first_name, round(lat, 2), round(lon, 2))
         if geo_key in seen:
             continue
