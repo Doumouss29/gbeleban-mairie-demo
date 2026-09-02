@@ -17,6 +17,11 @@ class SiteSettingsAdmin(admin.ModelAdmin):
     fieldsets = (
         ("Identité de la commune", {"fields": ("municipality_name", "municipality_logo_upload", "municipality_logo_src", "national_arms_upload", "national_arms_src")}),
         ("Bannière d'accueil", {"fields": ("hero_title", "hero_text", "hero_image_upload", "hero_image_url")}),
+        ("Bulles de l'accueil", {"description": "Ces images sont affichées sur les cartes Nos projets, Gbéléban en carte et Adressage Gbéléban. Vous pouvez importer une image depuis votre ordinateur ou renseigner une URL.", "fields": (
+            "home_projects_image_upload", "home_projects_image_src",
+            "home_map_image_upload", "home_map_image_src",
+            "home_address_image_upload", "home_address_image_src",
+        )}),
         ("Le mot du maire", {"fields": ("mayor_name", "mayor_message", "mayor_hero_image_upload", "mayor_hero_image_url", "mayor_section_image_upload", "mayor_section_image_url")}),
         ("Coordonnées", {"fields": ("phone", "email", "address")}),
     )
