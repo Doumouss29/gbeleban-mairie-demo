@@ -50,25 +50,35 @@
   <div class="container home-feature-grid home-feature-grid-five">
     <a class="home-bubble home-bubble-project" href="/projets/">
       <div class="home-bubble-media">
-        {% with featured_project=projects.0 %}
-          {% if featured_project %}
-            {% with project_images=featured_project.gallery_images %}
-              {% if project_images %}<img src="{{ project_images.0 }}" alt="Projet municipal à Gbéléban">{% else %}<div class="home-project-fallback" aria-hidden="true"><span class="home-project-building">🏗️</span><span class="home-project-plan">▱</span></div>{% endif %}
-            {% endwith %}
-          {% else %}<div class="home-project-fallback" aria-hidden="true"><span class="home-project-building">🏗️</span><span class="home-project-plan">▱</span></div>{% endif %}
-        {% endwith %}
+        {% if site_settings and site_settings.home_projects_image_src %}
+          <img src="{{ site_settings.home_projects_image_src }}" alt="Projets municipaux de Gbéléban">
+        {% else %}
+          {% with featured_project=projects.0 %}
+            {% if featured_project %}
+              {% with project_images=featured_project.gallery_images %}
+                {% if project_images %}<img src="{{ project_images.0 }}" alt="Projet municipal à Gbéléban">{% else %}<div class="home-project-fallback" aria-hidden="true"><span class="home-project-building">🏗️</span><span class="home-project-plan">▱</span></div>{% endif %}
+              {% endwith %}
+            {% else %}<div class="home-project-fallback" aria-hidden="true"><span class="home-project-building">🏗️</span><span class="home-project-plan">▱</span></div>{% endif %}
+          {% endwith %}
+        {% endif %}
         <span class="home-bubble-badge">🏗️</span>
       </div>
       <div class="home-bubble-body"><span class="eyebrow green">ACTION MUNICIPALE</span><h2>Nos projets</h2><p>Réalisés, en cours et à venir.</p><span class="home-bubble-link">Découvrir →</span></div>
     </a>
 
     <a class="home-bubble home-bubble-map" href="/gbeleban-en-carte/">
-      <div class="home-bubble-media"><img src="{% static 'portal/img/home-map.svg' %}" alt="Vue de Gbéléban et cartographie du territoire"><span class="home-bubble-badge map-badge">🗺️</span></div>
+      <div class="home-bubble-media">
+        <img src="{% if site_settings and site_settings.home_map_image_src %}{{ site_settings.home_map_image_src }}{% else %}{% static 'portal/img/home-map.svg' %}{% endif %}" alt="Vue de Gbéléban et cartographie du territoire">
+        <span class="home-bubble-badge map-badge">🗺️</span>
+      </div>
       <div class="home-bubble-body"><span class="eyebrow green">WEB SIG CITOYEN</span><h2>Gbéléban en carte</h2><p>Équipements, services et points d’intérêt.</p><span class="home-bubble-link">Explorer →</span></div>
     </a>
 
     <a class="home-bubble home-bubble-address" href="/adresses/">
-      <div class="home-bubble-media"><img src="{% static 'portal/img/home-address-v2.svg' %}" alt="Adressage communal et repérage des rues à Gbéléban"><span class="home-bubble-badge address-badge">📍</span></div>
+      <div class="home-bubble-media">
+        <img src="{% if site_settings and site_settings.home_address_image_src %}{{ site_settings.home_address_image_src }}{% else %}{% static 'portal/img/home-address-v2.svg' %}{% endif %}" alt="Adressage communal et repérage des rues à Gbéléban">
+        <span class="home-bubble-badge address-badge">📍</span>
+      </div>
       <div class="home-bubble-body"><span class="eyebrow green">ADRESSAGE GBÉLÉBAN</span><h2>Trouver une adresse</h2><p>Rue, numéro, îlot, lot ou lieu de Gbéléban.</p><span class="home-bubble-link">Rechercher →</span></div>
     </a>
 
