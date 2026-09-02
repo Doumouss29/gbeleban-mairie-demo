@@ -5,6 +5,7 @@ from . import pdf_reports
 from . import public_map_views
 from . import parcel_registry_views
 from . import news_views
+from . import project_views
 from . import seo_views
 from . import addressing
 from . import addressing_delete
@@ -19,6 +20,7 @@ urlpatterns = [
     path("deconnexion/", LogoutView.as_view(), name="logout"),
     path("mon-espace/", views.my_space, name="my_space"),
     path("projets/", views.projects, name="projects"),
+    path("projets/<int:project_id>/", project_views.project_detail, name="project_detail"),
     path("actualites/", views.news, name="news"),
     path("actualites/<int:news_id>/", news_views.news_detail, name="news_detail"),
     path("pages/<slug:slug>/", views.page_detail, name="page_detail"),
