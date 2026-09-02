@@ -67,7 +67,7 @@ class ContactMessage(models.Model):
     email = models.EmailField("E-mail")
     phone = models.CharField("Téléphone", max_length=60, blank=True)
     subject = models.CharField("Objet", max_length=200)
-    message = models.TextField("Contenu")
+    message = models.TextField("Message")
     created_at = models.DateTimeField("Reçu le", auto_now_add=True)
     email_sent = models.BooleanField("E-mail envoyé", default=False)
     is_processed = models.BooleanField("Traité", default=False)
