@@ -17,6 +17,9 @@ class SiteSettings(models.Model):
     hero_image_url = models.TextField("Image de couverture (URL ou image importée)", blank=True)
     mayor_hero_image_url = models.TextField("Photo du maire - bloc d'accueil", blank=True)
     mayor_section_image_url = models.TextField("Photo du maire - section Le mot du Maire", blank=True)
+    home_projects_image_src = models.TextField("Image accueil - Nos projets", blank=True)
+    home_map_image_src = models.TextField("Image accueil - Gbéléban en carte", blank=True)
+    home_address_image_src = models.TextField("Image accueil - Adressage Gbéléban", blank=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
@@ -64,7 +67,7 @@ class ContactMessage(models.Model):
     email = models.EmailField("E-mail")
     phone = models.CharField("Téléphone", max_length=60, blank=True)
     subject = models.CharField("Objet", max_length=200)
-    message = models.TextField("Message")
+    message = models.TextField("Contenu")
     created_at = models.DateTimeField("Reçu le", auto_now_add=True)
     email_sent = models.BooleanField("E-mail envoyé", default=False)
     is_processed = models.BooleanField("Traité", default=False)
