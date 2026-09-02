@@ -22,6 +22,9 @@ class SiteSettingsAdminForm(forms.ModelForm):
     hero_image_upload = forms.ImageField(label="Importer une image de couverture", required=False)
     mayor_hero_image_upload = forms.ImageField(label="Importer la photo du maire - bloc d'accueil", required=False)
     mayor_section_image_upload = forms.ImageField(label="Importer la photo du maire - section Le mot du Maire", required=False)
+    home_projects_image_upload = forms.ImageField(label="Importer l'image - Nos projets", required=False)
+    home_map_image_upload = forms.ImageField(label="Importer l'image - Gbéléban en carte", required=False)
+    home_address_image_upload = forms.ImageField(label="Importer l'image - Adressage Gbéléban", required=False)
 
     class Meta:
         model = SiteSettings
@@ -32,6 +35,9 @@ class SiteSettingsAdminForm(forms.ModelForm):
             "hero_image_url": forms.TextInput(attrs={"placeholder": "URL ou laisser vide si vous importez une image"}),
             "mayor_hero_image_url": forms.TextInput(attrs={"placeholder": "URL ou laisser vide si vous importez une image"}),
             "mayor_section_image_url": forms.TextInput(attrs={"placeholder": "URL ou laisser vide si vous importez une image"}),
+            "home_projects_image_src": forms.TextInput(attrs={"placeholder": "URL ou laisser vide si vous importez une image"}),
+            "home_map_image_src": forms.TextInput(attrs={"placeholder": "URL ou laisser vide si vous importez une image"}),
+            "home_address_image_src": forms.TextInput(attrs={"placeholder": "URL ou laisser vide si vous importez une image"}),
         }
 
     def save(self, commit=True):
@@ -42,6 +48,9 @@ class SiteSettingsAdminForm(forms.ModelForm):
             "hero_image_upload": "hero_image_url",
             "mayor_hero_image_upload": "mayor_hero_image_url",
             "mayor_section_image_upload": "mayor_section_image_url",
+            "home_projects_image_upload": "home_projects_image_src",
+            "home_map_image_upload": "home_map_image_src",
+            "home_address_image_upload": "home_address_image_src",
         }
         for upload_field, model_field in mapping.items():
             uploaded = self.cleaned_data.get(upload_field)
