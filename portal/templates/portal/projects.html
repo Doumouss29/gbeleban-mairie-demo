@@ -1,1 +1,26 @@
-{% extends 'portal/base.html' %}{% block title %}Projets - Gbéléban{% endblock %}{% block content %}<section class="pagehead"><div class="container"><span class="eyebrow">ACTION MUNICIPALE</span><h1>Projets & réalisations</h1><p>Les projets réalisés, en cours et à venir de la Commune de Gbéléban.</p></div></section><section class="section"><div class="container cards">{% for p in projects %}<article class="card media-card">{% with images=p.gallery_images %}{% if images %}<div class="media-slider" data-slider><div class="media-track">{% for image in images %}<div class="media-slide"><img src="{{ image }}" alt="{{ p.title }}"></div>{% endfor %}</div>{% if images|length > 1 %}<button type="button" class="media-prev" aria-label="Image précédente">‹</button><button type="button" class="media-next" aria-label="Image suivante">›</button><div class="media-dots">{% for image in images %}<button type="button" class="media-dot{% if forloop.first %} active{% endif %}" data-index="{{ forloop.counter0 }}" aria-label="Image {{ forloop.counter }}"></button>{% endfor %}</div>{% endif %}</div>{% endif %}{% endwith %}<div class="media-card-body"><span class="status {{ p.status }}">{{ p.get_status_display }}</span><h3>{{ p.title }}</h3><small>{{ p.category }}</small><p>{{ p.description }}</p>{% if p.budget %}<b>{{ p.budget|floatformat:0 }} FCFA</b>{% endif %}{% if p.status == 'ongoing' %}<div class="progress"><i style="width:{{ p.progress }}%"></i></div><small>{{ p.progress }} %</small>{% endif %}</div></article>{% empty %}<p>Aucun projet publié.</p>{% endfor %}</div></section><script>document.querySelectorAll('[data-slider]').forEach(slider=>{const track=slider.querySelector('.media-track');const slides=[...slider.querySelectorAll('.media-slide')];if(slides.length<2)return;let index=0;const dots=[...slider.querySelectorAll('.media-dot')];function go(i){index=(i+slides.length)%slides.length;track.style.transform=`translateX(-${index*100}%)`;dots.forEach((d,j)=>d.classList.toggle('active',j===index));}slider.querySelector('.media-prev')?.addEventListener('click',()=>go(index-1));slider.querySelector('.media-next')?.addEventListener('click',()=>go(index+1));dots.forEach(d=>d.addEventListener('click',()=>go(Number(d.dataset.index))));});</script>{% endblock %}
+{% extends 'portal/base.html' %}
+{% block title %}Projets & réalisations - Gbéléban{% endblock %}
+{% block head %}
+<style>
+.project-list{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:24px}.project-preview{display:flex;flex-direction:column;min-width:0;overflow:hidden;border-radius:24px;background:#fff;border:1px solid #e7e8e3;box-shadow:0 10px 30px rgba(5,57,39,.07)}.project-preview-media{height:220px;background:#edf1ed;overflow:hidden}.project-preview-media img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .3s ease}.project-preview:hover .project-preview-media img{transform:scale(1.035)}.project-preview-body{display:flex;flex-direction:column;flex:1;padding:22px}.project-preview h2{font-size:23px;line-height:1.2;margin:10px 0;color:#173d2f}.project-preview p{color:#64706a;line-height:1.55;margin:0 0 18px;display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden}.project-meta{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.project-category{font-size:12px;color:#68746e}.project-preview-link{margin-top:auto;color:#ef7d00;font-weight:900}.project-fallback{height:100%;display:grid;place-items:center;font-size:52px;background:linear-gradient(145deg,#f8e3bf,#fff7ed 55%,#e8efe9)}
+@media(max-width:1000px){.project-list{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:650px){.project-list{grid-template-columns:1fr;gap:16px}.project-preview-media{height:190px}.project-preview-body{padding:18px}.project-preview h2{font-size:21px}}
+</style>
+{% endblock %}
+{% block content %}
+<section class="pagehead"><div class="container"><span class="eyebrow">ACTION MUNICIPALE</span><h1>Projets & réalisations</h1><p>Découvrez les projets réalisés, en cours et à venir de la Commune de Gbéléban.</p></div></section>
+<section class="section"><div class="container project-list">
+{% for p in projects %}
+<a class="project-preview" href="/projets/{{ p.id }}/">
+  {% with images=p.gallery_images %}<div class="project-preview-media">{% if images %}<img src="{{ images.0 }}" alt="{{ p.title }}">{% else %}<div class="project-fallback" aria-hidden="true">🏗️</div>{% endif %}</div>{% endwith %}
+  <div class="project-preview-body">
+    <div class="project-meta"><span class="status {{ p.status }}">{{ p.get_status_display }}</span>{% if p.category %}<span class="project-category">{{ p.category }}</span>{% endif %}</div>
+    <h2>{{ p.title }}</h2>
+    <p>{{ p.description|truncatechars:180 }}</p>
+    {% if p.status == 'ongoing' %}<div class="progress"><i style="width:{{ p.progress }}%"></i></div><small>{{ p.progress }} % d’avancement</small>{% endif %}
+    <span class="project-preview-link">Voir le projet →</span>
+  </div>
+</a>
+{% empty %}<p>Aucun projet publié.</p>{% endfor %}
+</div></section>
+{% endblock %}
