@@ -1,0 +1,41 @@
+{% extends 'portal/base.html' %}
+{% block title %}Gestion des actualités - Gbéléban{% endblock %}
+{% block content %}
+<section class="pagehead"><div class="container"><span class="eyebrow">GESTION DU PORTAIL</span><h1>{% if editing %}Modifier l’actualité{% else %}Créer une actualité{% endif %}</h1><p>Publiez une actualité directement depuis l’espace Gestion, sans passer par l’administration Django.</p></div></section>
+<section class="section"><div class="container management-content-grid">
+  <div class="card management-editor-card">
+    <form method="post" enctype="multipart/form-data" class="management-form">
+      {% csrf_token %}
+      {% if form.non_field_errors %}<div class="form-errors">{{ form.non_field_errors }}</div>{% endif %}
+      {% for field in form %}
+        <label class="management-field">
+          <span>{{ field.label }}</span>
+          {{ field }}
+          {% if field.help_text %}<small>{{ field.help_text }}</small>{% endif %}
+          {% for error in field.errors %}<small class="field-error">{{ error }}</small>{% endfor %}
+        </label>
+      {% endfor %}
+      <div class="management-form-actions">
+        {% if editing %}<a class="btn secondary" href="{% url 'management_news' %}">Annuler</a>{% endif %}
+        <button class="btn primary" type="submit">{% if editing %}Enregistrer les modifications{% else %}Publier l’actualité{% endif %}</button>
+      </div>
+    </form>
+  </div>
+
+  <div class="management-list-panel">
+    <div class="management-list-head"><h2>Actualités existantes</h2><a href="{% url 'news' %}" target="_blank">Voir le site →</a></div>
+    <div class="management-content-list">
+      {% for item in news_items %}
+      <article class="card management-content-row">
+        {% if item.gallery_images %}<img src="{{ item.gallery_images.0 }}" alt="">{% endif %}
+        <div class="management-content-info"><strong>{{ item.title }}</strong><small>{{ item.published_at|date:"d/m/Y" }} · {% if item.is_published %}Publiée{% else %}Brouillon{% endif %}</small></div>
+        <div class="management-row-actions"><a href="{% url 'management_news_edit' item.id %}">Modifier</a><form method="post" action="{% url 'management_news_delete' item.id %}" onsubmit="return confirm('Supprimer cette actualité ?');">{% csrf_token %}<button type="submit">Supprimer</button></form></div>
+      </article>
+      {% empty %}<div class="card empty-management">Aucune actualité.</div>{% endfor %}
+    </div>
+  </div>
+</div></section>
+<style>
+.management-content-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(340px,.8fr);gap:28px;align-items:start}.management-editor-card{padding:24px}.management-form{display:grid;gap:16px}.management-field{display:grid;gap:7px;font-weight:700}.management-field input[type=text],.management-field input[type=date],.management-field input[type=number],.management-field input[type=file],.management-field textarea,.management-field select{width:100%;padding:12px 13px;border:1px solid #d9dee7;border-radius:10px;font:inherit;background:#fff}.management-field textarea{resize:vertical}.management-field input[type=checkbox]{width:20px;height:20px}.field-error{color:#b42318}.management-form-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:8px}.management-list-head{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:12px}.management-content-list{display:grid;gap:10px}.management-content-row{padding:12px;display:grid;grid-template-columns:72px minmax(0,1fr) auto;gap:12px;align-items:center}.management-content-row img{width:72px;height:58px;object-fit:cover;border-radius:8px}.management-content-info{display:grid;gap:4px}.management-content-info small{color:#687386}.management-row-actions{display:flex;gap:8px;align-items:center}.management-row-actions a,.management-row-actions button{border:0;background:transparent;color:#0b6b3a;font-weight:700;padding:6px}.management-row-actions button{color:#b42318}.empty-management{padding:24px;color:#687386}@media(max-width:900px){.management-content-grid{grid-template-columns:1fr}.management-content-row{grid-template-columns:58px minmax(0,1fr)}.management-content-row img{width:58px;height:52px}.management-row-actions{grid-column:1/-1;justify-content:flex-end}.management-form-actions{flex-direction:column-reverse}.management-form-actions .btn{width:100%;text-align:center}}
+</style>
+{% endblock %}
