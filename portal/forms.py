@@ -99,6 +99,40 @@ class ProjectAdminForm(_ThreeImageAdminForm):
         }
 
 
+class NewsManagementForm(_ThreeImageAdminForm):
+    """Formulaire simplifié utilisé depuis /gestion/, sans passer par Django Admin."""
+
+    class Meta:
+        model = News
+        fields = ["title", "excerpt", "body", "published_at", "is_published"]
+        widgets = {
+            "title": forms.TextInput(attrs={"placeholder": "Titre de l'actualité"}),
+            "excerpt": forms.Textarea(attrs={"rows": 3, "placeholder": "Résumé court affiché dans les listes"}),
+            "body": forms.Textarea(attrs={"rows": 10, "placeholder": "Contenu complet de l'actualité"}),
+            "published_at": forms.DateInput(attrs={"type": "date"}),
+        }
+
+
+class ProjectManagementForm(_ThreeImageAdminForm):
+    """Formulaire simplifié de création et modification des projets municipaux."""
+
+    class Meta:
+        model = Project
+        fields = [
+            "title", "category", "description", "status", "progress", "budget",
+            "latitude", "longitude", "is_published",
+        ]
+        widgets = {
+            "title": forms.TextInput(attrs={"placeholder": "Nom du projet"}),
+            "category": forms.TextInput(attrs={"placeholder": "Ex. Voirie, Éducation, Santé"}),
+            "description": forms.Textarea(attrs={"rows": 10, "placeholder": "Présentation du projet"}),
+            "progress": forms.NumberInput(attrs={"min": 0, "max": 100}),
+            "budget": forms.NumberInput(attrs={"min": 0, "step": 1}),
+            "latitude": forms.NumberInput(attrs={"step": "0.0000001"}),
+            "longitude": forms.NumberInput(attrs={"step": "0.0000001"}),
+        }
+
+
 class GeoJSONImportForm(forms.Form):
     layer_name = forms.CharField(label="Nom de la couche", max_length=160)
     category = forms.CharField(label="Catégorie", max_length=100, required=False)
