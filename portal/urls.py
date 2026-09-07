@@ -11,6 +11,7 @@ from . import addressing
 from . import addressing_delete
 from . import addressing_enhancements
 from . import address_lookup
+from . import content_management
 
 urlpatterns = [
     path("robots.txt", seo_views.robots_txt, name="robots_txt"),
@@ -43,6 +44,12 @@ urlpatterns = [
     path("dashboard/", views.dashboard, name="dashboard"),
     path("dashboard/export-pdf/", pdf_reports.dashboard_pdf, name="dashboard_pdf"),
     path("gestion/", views.management_home, name="management_home"),
+    path("gestion/actualites/", content_management.news_management, name="management_news"),
+    path("gestion/actualites/<int:news_id>/modifier/", content_management.news_management, name="management_news_edit"),
+    path("gestion/actualites/<int:news_id>/supprimer/", content_management.news_delete, name="management_news_delete"),
+    path("gestion/projets/", content_management.project_management, name="management_projects"),
+    path("gestion/projets/<int:project_id>/modifier/", content_management.project_management, name="management_projects_edit"),
+    path("gestion/projets/<int:project_id>/supprimer/", content_management.project_delete, name="management_projects_delete"),
     path("gestion/sig/import/", views.import_geojson_view, name="import_geojson"),
     path("gestion/cadastre/import/", views.import_cadastre_view, name="import_cadastre"),
     path("gestion/adressage/", addressing_enhancements.addressing_management_v2, name="addressing_management"),
