@@ -27,16 +27,18 @@ const map=new maplibregl.Map({
   style:{
     version:8,
     sources:{
+      topo:{
+        type:'raster',
+        tiles:['https://services.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}'],
+        tileSize:256,
+        attribution:'Tiles © Esri'
+      },
       osm:{
         type:'raster',
-        tiles:[
-          'https://a.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png',
-          'https://b.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png',
-          'https://c.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png',
-          'https://d.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png'
-        ],
+        tiles:['https://tile.openstreetmap.org/{z}/{x}/{y}.png'],
         tileSize:256,
-        attribution:'© OpenStreetMap contributors © CARTO'
+        maxzoom:19,
+        attribution:'© OpenStreetMap contributors'
       },
       imagery:{
         type:'raster',
@@ -46,7 +48,8 @@ const map=new maplibregl.Map({
       }
     },
     layers:[
-      {id:'basemap-osm',type:'raster',source:'osm',layout:{visibility:'visible'}},
+      {id:'basemap-topo',type:'raster',source:'topo',layout:{visibility:'visible'}},
+      {id:'basemap-osm',type:'raster',source:'osm',layout:{visibility:'none'}},
       {id:'basemap-imagery',type:'raster',source:'imagery',layout:{visibility:'none'}}
     ]
   }
@@ -275,9 +278,10 @@ function setupBasemapSelector(){
   const select=document.getElementById('basemap-select');
   if(!select) return;
   select.addEventListener('change',()=>{
-    const imagery=select.value==='imagery';
-    if(map.getLayer('basemap-osm')) map.setLayoutProperty('basemap-osm','visibility',imagery?'none':'visible');
-    if(map.getLayer('basemap-imagery')) map.setLayoutProperty('basemap-imagery','visibility',imagery?'visible':'none');
+    const value=select.value;
+    if(map.getLayer('basemap-topo')) map.setLayoutProperty('basemap-topo','visibility',value==='topo'?'visible':'none');
+    if(map.getLayer('basemap-osm')) map.setLayoutProperty('basemap-osm','visibility',value==='osm'?'visible':'none');
+    if(map.getLayer('basemap-imagery')) map.setLayoutProperty('basemap-imagery','visibility',value==='imagery'?'visible':'none');
   });
 }
 
