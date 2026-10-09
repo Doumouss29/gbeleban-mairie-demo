@@ -66,12 +66,29 @@
   <link rel="stylesheet" href="{% static 'portal/css/home-features.css' %}">
   <style>
     html,body{max-width:100%;overflow-x:hidden}img,svg,video{max-width:100%}
+    .footer-powered{
+      margin-top:18px;
+      padding-top:12px;
+      border-top:1px solid rgba(255,255,255,.14);
+      text-align:center;
+      font-size:12px;
+      line-height:1.5;
+      letter-spacing:.02em;
+      color:rgba(255,255,255,.68);
+    }
+    .footer-powered a{
+      color:inherit;
+      text-decoration:none;
+      font-weight:600;
+    }
+    .footer-powered a:hover{color:#fff;text-decoration:underline}
     @media(max-width:700px){
       .container{width:min(100% - 24px,1180px)!important}
       .pagehead h1{font-size:clamp(24px,8vw,34px)!important}
       .section{padding-left:0!important;padding-right:0!important}
       table{font-size:12px}
       .btn{max-width:100%;white-space:normal}
+      .footer-powered{font-size:11px;margin-top:14px;padding-top:10px}
     }
   </style>
   {% block head %}{% endblock %}
@@ -138,7 +155,7 @@
     <a href="/gbeleban-en-carte/" class="{% if '/gbeleban-en-carte/' in request.path %}active{% endif %}">Gbéléban en carte</a>
     <a href="/projets/" class="{% if '/projets/' in request.path %}active{% endif %}">Projets</a>
     <a href="/actualites/" class="{% if '/actualites/' in request.path %}active{% endif %}">Actualités</a>
-    <a href="/pages/contact/" class="{% if '/pages/contact/' in request.path %}active{% endif %}">Contact</a>
+    <a href="/pages/contact/" class="{% if request.path == '/pages/contact/' %}active{% endif %}">Contact</a>
     {% if user.is_authenticated %}
       <a href="/mon-espace/" class="{% if '/mon-espace/' in request.path or '/urbanisme/' in request.path or '/dashboard/' in request.path or '/collecte-municipale/' in request.path %}active{% endif %}">👤 Mon espace Gbéléban</a>
     {% else %}
@@ -160,6 +177,9 @@
     <div><b>Mairie de Gbéléban</b><p>Portail numérique municipal — version de démonstration.</p></div>
     <div><a href="/admin/">Administration</a><br><a href="/gestion/">Gestion</a></div>
     <div><b>République de Côte d’Ivoire</b><div class="tricolor"><i></i><i></i><i></i></div></div>
+  </div>
+  <div class="container footer-powered">
+    Propulsé par <strong>LMurbs</strong> · <a href="tel:+2250711124359">+225 07 11 12 43 59</a>
   </div>
 </footer>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
