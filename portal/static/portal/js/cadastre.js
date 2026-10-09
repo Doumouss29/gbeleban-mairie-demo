@@ -1,12 +1,15 @@
-const osmBasemap=L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png',{
-  subdomains:'abcd',maxZoom:20,attribution:'© OpenStreetMap contributors © CARTO',updateWhenIdle:true,keepBuffer:2
+const topoBasemap=L.tileLayer('https://services.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}',{
+  maxNativeZoom:19,maxZoom:22,attribution:'Tiles © Esri',updateWhenIdle:true,keepBuffer:2
+});
+const osmBasemap=L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{
+  maxNativeZoom:19,maxZoom:22,attribution:'© OpenStreetMap contributors',updateWhenIdle:true,keepBuffer:2
 });
 const imageryBasemap=L.tileLayer('https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{
   maxZoom:22,attribution:'Tiles © Esri',updateWhenIdle:true,keepBuffer:2
 });
 const parcelRenderer=L.canvas({padding:.35,tolerance:8});
 const cmap=L.map('cadastre-map',{zoomControl:true,minZoom:12,maxZoom:22,preferCanvas:true,renderer:parcelRenderer,zoomAnimation:true,fadeAnimation:false}).setView([9.5846,-8.1318],16);
-osmBasemap.addTo(cmap);
+topoBasemap.addTo(cmap);
 
 const basemapControl=L.control({position:'topleft'});
 basemapControl.onAdd=function(){
