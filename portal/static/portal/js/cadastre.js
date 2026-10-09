@@ -1,5 +1,5 @@
-const osmBasemap=L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
-  subdomains:'abc',maxZoom:22,attribution:'© OpenStreetMap contributors',updateWhenIdle:true,keepBuffer:2
+const osmBasemap=L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png',{
+  subdomains:'abcd',maxZoom:20,attribution:'© OpenStreetMap contributors © CARTO',updateWhenIdle:true,keepBuffer:2
 });
 const imageryBasemap=L.tileLayer('https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{
   maxZoom:22,attribution:'Tiles © Esri',updateWhenIdle:true,keepBuffer:2
