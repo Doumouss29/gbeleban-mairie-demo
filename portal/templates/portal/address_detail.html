@@ -24,7 +24,7 @@
   const el=document.getElementById('address-map');
   if(!el||typeof L==='undefined'||!Number.isFinite(lat)||!Number.isFinite(lon))return;
   const map=L.map(el,{zoomControl:true}).setView([lat,lon],18);
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:20,attribution:'&copy; OpenStreetMap'}).addTo(map);
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png',{subdomains:'abcd',maxZoom:20,attribution:'&copy; OpenStreetMap contributors &copy; CARTO'}).addTo(map);
   L.marker([lat,lon]).addTo(map).bindPopup('{{ address.label|escapejs }}').openPopup();
   setTimeout(()=>map.invalidateSize(true),120);
   window.addEventListener('resize',()=>map.invalidateSize(false));
